@@ -92,7 +92,8 @@ def merge_log_file_lines(log_file_names: list[str]) -> Generator[dict[str, T], N
 def main(args: list[str]):
 
     fnames = args[1:]
-    table_output = True
+    table_output = False
+    textual_output = True
 
     # for development demo - eventually switch to argparse or click to get filenames
     if not fnames:
@@ -110,6 +111,26 @@ def main(args: list[str]):
         # present the table - using a rich Table, the columns will auto-size to content and terminal
         # width
         tbl.present()
+
+    if textual_output:
+        from textual.app import App, ComposeResult
+        from textual.widgets import DataTable
+
+        class TableApp(App):
+            def compose(self) -> ComposeResult:
+                yield DataTable()
+
+            def on_mount(self) -> None:
+                table = self.query_one(DataTable)
+                table.cursor_type = "row"
+                table.zebra_stripes = True
+                first_line = next(merged_lines)
+                table.add_columns(*first_line.keys())
+                table.add_row(*first_line.values())
+                table.add_rows(line.values() for line in merged_lines)
+
+        app = TableApp()
+        app.run()
 
 
 if __name__ == '__main__':
