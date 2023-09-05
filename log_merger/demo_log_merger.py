@@ -6,7 +6,7 @@ from timestamp_wrapper import TimestampedLineTransformer
 import littletable as lt
 
 
-fnames = ["../files/log1.txt", "../files/log2.txt", "../files/log3.txt"]
+fnames = ["../files/log1.txt", "../files/log3.txt"]
 
 
 def label(s, seq):
