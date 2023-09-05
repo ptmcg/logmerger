@@ -1,3 +1,4 @@
+from collections.abc import Generator
 from itertools import groupby
 from datetime import datetime
 from typing import Any, Iterable
@@ -39,7 +40,7 @@ class MultilineLogCollapser:
     def __init__(self):
         self._newlogline_detector = NewLogLineDetector()
 
-    def __call__(self, log_seq: Iterable[tuple[datetime, str]]):
+    def __call__(self, log_seq: Iterable[tuple[datetime, str]]) -> Generator[tuple[datetime, str], None, None]:
         for timestamp, lines in sorted(
                 ((a, list(b)) for a, b in groupby(log_seq, key=self._newlogline_detector)),
                 key=itemgetter(0)):
