@@ -50,13 +50,15 @@ def merge_log_file_lines(log_file_names: list[str]) -> Generator[dict[str, T], N
     #   do not start with a timestamp - tracebacks are a common example)
     # - labels each item the its source filename (so that after pulling an entry for the heap, we
     #   know which file it came from)
+    # (for background on why we must use map() instead of a generator expression,
+    # see https://chat.stackoverflow.com/transcript/message/56645472#56645472)
     log_file_line_iters = [
         (
             label(
                 fname,
-                list(
+                (
                     MultilineLogCollapser()(
-                        xformer(line.rstrip()) for line in open(fname)
+                        map(xformer, (line.rstrip() for line in open(fname)))
                     )
                 )
             )
