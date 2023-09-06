@@ -1,0 +1,10 @@
+Jul 14 08:00:02 host1 systemd[1]: rsyslog.service: Sent signal SIGHUP to main process 439 (rsyslogd) on client request.
+Jul 14 08:00:02 host1 systemd[1]: logrotate.service: Succeeded.
+Jul 14 08:00:02 host1 systemd[1]: Finished Rotate log files.
+Jul 14 08:00:02 host1 systemd[1]: man-db.service: Succeeded.
+Jul 14 08:00:13 host1 systemd[1]: Finished Daily man-db regeneration.
+Jul 14 08:00:13 host1 rsyslogd: [origin software="rsyslogd" swVersion="8.2102.0" x-pid="439" x-info="https://www.rsyslog.com"] rsyslogd was HUPed
+Jul 14 08:00:14 host1 CRON[32077]: (root) CMD (   cd / && run-parts --report /etc/cron.hourly)
+Jul 14 08:00:24 host1 rngd[525]: stats: bits received from HRNG source: 8220064
+Jul 14 08:00:25 host1 rngd[525]: stats: bits sent to kernel pool: 8154848
+Jul 14 08:00:25 host1 rngd[525]: stats: entropy added to kernel pool: 8154848

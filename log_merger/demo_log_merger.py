@@ -91,13 +91,16 @@ def merge_log_file_lines(log_file_names: list[str]) -> Generator[dict[str, T], N
 
 def main(args: list[str]):
 
+    # use argparse to get these
     fnames = args[1:]
-    table_output = False
-    textual_output = True
+    interactive = False
+
+    textual_output = interactive
+    table_output = not interactive
 
     # for development demo - eventually switch to argparse or click to get filenames
     if not fnames:
-        fnames = ["../files/log1.txt", "../files/log3.txt"]
+        fnames = ["../files/log1.txt", "../files/syslog1.txt", "../files/log2.txt"]
 
     # generate dicts, one per timestamp, with values for each log file for the respective
     # log line from that file at that timestamp, or "" if no log line at that timestamp
