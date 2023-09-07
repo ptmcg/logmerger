@@ -93,7 +93,7 @@ def main(args: list[str]):
 
     # use argparse to get these
     fnames = args[1:]
-    interactive = False
+    interactive = True
 
     textual_output = interactive
     table_output = not interactive
@@ -130,7 +130,16 @@ def main(args: list[str]):
                 first_line = next(merged_lines)
                 table.add_columns(*first_line.keys())
                 table.add_row(*first_line.values())
-                table.add_rows(line.values() for line in merged_lines)
+
+                def max_line_count(d):
+                    """
+                    The number of lines for this row is the maximum number of newlines
+                    in any value, plus 1.
+                    """
+                    return max(s.count("\n") for s in d.values()) + 1
+
+                for line in merged_lines:
+                    table.add_row(*line.values(), height=max_line_count(line))
 
         app = TableApp()
         app.run()
