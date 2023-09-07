@@ -121,7 +121,7 @@ def main(args: list[str]):
 
         class TableApp(App):
             def compose(self) -> ComposeResult:
-                yield DataTable()
+                yield DataTable(fixed_columns=1)
 
             def on_mount(self) -> None:
                 table = self.query_one(DataTable)
@@ -140,6 +140,15 @@ def main(args: list[str]):
 
                 for line in merged_lines:
                     table.add_row(*line.values(), height=max_line_count(line))
+
+            def on_resize(self) -> None:
+                table = self.query_one(DataTable)
+                screen_width = table.size.width
+                cols = list(table.columns.values())
+                data_width = screen_width - cols[0].width
+                num_log_columns = len(table.columns) - 1
+                for col in cols[1:]:
+                    col.width = data_width // num_log_columns
 
         app = TableApp()
         app.run()
