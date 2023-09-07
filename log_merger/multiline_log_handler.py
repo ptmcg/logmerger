@@ -3,6 +3,7 @@ from itertools import groupby
 from datetime import datetime
 from typing import Any, Iterable
 from operator import itemgetter
+import textwrap
 
 
 class NewLogLineDetector:
@@ -44,7 +45,7 @@ class MultilineLogCollapser:
         for timestamp, lines in sorted(
                 ((a, list(b)) for a, b in groupby(log_seq, key=self._newlogline_detector)),
                 key=itemgetter(0)):
-            yield timestamp, "\n".join(line[1] for line in lines)
+            yield timestamp, "\n".join(sum((textwrap.wrap(line[1], 72) for line in lines), []))
 
 
 if __name__ == '__main__':
