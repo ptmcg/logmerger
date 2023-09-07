@@ -38,7 +38,7 @@ def format_timestamp(dt: datetime) -> str:
     return dt.strftime("%Y-%m-%d %H:%M:%S.%f")[:23]
 
 
-def merge_log_file_lines(log_file_names: list[str]) -> Generator[dict[str, T], None, None]:
+def merge_log_file_lines(log_file_names: list[str], max_log_line_width: int = 80) -> Generator[dict[str, T], None, None]:
 
     # scan input files to determine timestamp format, and create appropriate transformer for each
     transformers = [TimestampedLineTransformer.make_transformer_from_file(fname) for fname in log_file_names]
@@ -57,7 +57,7 @@ def merge_log_file_lines(log_file_names: list[str]) -> Generator[dict[str, T], N
             label(
                 fname,
                 (
-                    MultilineLogCollapser()(
+                    MultilineLogCollapser(max_log_line_width)(
                         map(xformer, (line.rstrip() for line in open(fname)))
                     )
                 )
