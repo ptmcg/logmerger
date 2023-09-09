@@ -38,15 +38,14 @@ class MultilineLogCollapser:
 
     to two log entries.
     """
-    def __init__(self, max_log_line_width: int):
+    def __init__(self):
         self._newlogline_detector = NewLogLineDetector()
-        self._max_log_line_width = max_log_line_width
 
     def __call__(self, log_seq: Iterable[tuple[datetime, str]]) -> Generator[tuple[datetime, str], None, None]:
         for timestamp, lines in sorted(
                 ((a, list(b)) for a, b in groupby(log_seq, key=self._newlogline_detector)),
                 key=itemgetter(0)):
-            yield timestamp, "\n".join(sum((textwrap.wrap(line[1], self._max_log_line_width) for line in lines), []))
+            yield timestamp, "\n".join(line[1] for line in lines)
 
 
 if __name__ == '__main__':

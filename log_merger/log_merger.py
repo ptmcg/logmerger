@@ -1,14 +1,25 @@
+import argparse
 from collections.abc import Generator, Iterable
 from datetime import datetime
+import textwrap
 from typing import TypeVar
 
-from merging import Merger
-from multiline_log_handler import MultilineLogCollapser
-from timestamp_wrapper import TimestampedLineTransformer
 import littletable as lt
+
+from .merging import Merger
+from .multiline_log_handler import MultilineLogCollapser
+from .timestamp_wrapper import TimestampedLineTransformer
 
 
 T = TypeVar("T")
+
+
+def make_argument_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("files", nargs="+", help="log files to be merged")
+    parser.add_argument("--width", "-w", type=int, help="total screen width to use to show log files side-by-side", default=0)
+    parser.add_argument("--interactive", "-i", action="store_true", help="show output using interactive TUI browser")
+    return parser
 
 
 def label(s: str, seq: Iterable[T]) -> Generator[tuple[str, T], None, None]:
@@ -20,17 +31,6 @@ def label(s: str, seq: Iterable[T]) -> Generator[tuple[str, T], None, None]:
     yield from ((s, obj) for obj in seq)
 
 
-def clipper(n: int, seq: Iterable) -> Generator[int, None, None]:
-    """
-    clip an iterable to the first n items
-    """
-    for i, obj in enumerate(seq):
-        if i < n:
-            yield obj
-        else:
-            break
-
-
 def format_timestamp(dt: datetime) -> str:
     """
     format a datetime to microseconds, truncate to just millis
@@ -38,7 +38,7 @@ def format_timestamp(dt: datetime) -> str:
     return dt.strftime("%Y-%m-%d %H:%M:%S.%f")[:23]
 
 
-def merge_log_file_lines(log_file_names: list[str], max_log_line_width: int = 80) -> Generator[dict[str, T], None, None]:
+def merge_log_file_lines(log_file_names: list[str]) -> Generator[dict[str, T], None, None]:
 
     # scan input files to determine timestamp format, and create appropriate transformer for each
     transformers = [TimestampedLineTransformer.make_transformer_from_file(fname) for fname in log_file_names]
@@ -57,7 +57,7 @@ def merge_log_file_lines(log_file_names: list[str], max_log_line_width: int = 80
             label(
                 fname,
                 (
-                    MultilineLogCollapser(max_log_line_width)(
+                    MultilineLogCollapser()(
                         map(xformer, (line.rstrip() for line in open(fname)))
                     )
                 )
@@ -89,18 +89,18 @@ def merge_log_file_lines(log_file_names: list[str], max_log_line_width: int = 80
         yield line_dict
 
 
-def main(args: list[str]):
+def main():
 
-    # use argparse to get these
-    fnames = args[1:]
-    interactive = True
+    parser = make_argument_parser()
+    args_ns = parser.parse_args()
+
+    fnames = args_ns.files
+    interactive = args_ns.interactive
+    total_width = args_ns.width or len(fnames) * 70 + 25
+    width_per_file = (total_width - 25) // len(fnames)
 
     textual_output = interactive
     table_output = not interactive
-
-    # for development demo - eventually switch to argparse or click to get filenames
-    if not fnames:
-        fnames = ["../files/log1.txt", "../files/syslog1.txt", "../files/log2.txt"]
 
     # generate dicts, one per timestamp, with values for each log file for the respective
     # log line from that file at that timestamp, or "" if no log line at that timestamp
@@ -129,28 +129,24 @@ def main(args: list[str]):
                 table.zebra_stripes = True
                 col_names = tbl.info()["fields"]
                 table.add_columns(*col_names)
-                # can't use itemgetter here since filenames may contain "."s and itemgetter
-                # treats them specially
-                extract_values = lambda ns: vars(ns).values()
 
-                tbl_iter = iter(tbl)
-                first_line = next(tbl_iter)
-                table.add_row(*extract_values(first_line))
-
-                def max_line_count(d):
+                def max_line_count(sseq: list[str]):
                     """
                     The number of lines for this row is the maximum number of newlines
                     in any value, plus 1.
                     """
-                    return max(s.count("\n") for s in extract_values(d)) + 1
+                    return max(s.count("\n") for s in sseq) + 1
 
-                for line in tbl_iter:
-                    table.add_row(*extract_values(line), height=max_line_count(line))
-
+                for line in tbl:
+                    row_values = list(vars(line).values())
+                    if any(len(rv_line) > width_per_file for rv in row_values for rv_line in rv.splitlines()):
+                        row_values = ["\n".join(textwrap.wrap(v, width_per_file)) for v in vars(line).values()]
+                        table.add_row(*row_values, height=max_line_count(row_values))
+                    else:
+                        table.add_row(*row_values)
         app = TableApp()
         app.run()
 
 
 if __name__ == '__main__':
-    import sys
-    main(sys.argv)
+    main()
