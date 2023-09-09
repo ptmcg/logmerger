@@ -106,11 +106,11 @@ def main(args: list[str]):
     # log line from that file at that timestamp, or "" if no log line at that timestamp
     merged_lines = merge_log_file_lines(fnames)
 
-    if table_output:
-        # build a littletable Table for easy tabular output, and insert the dicts of merged lines
-        tbl = lt.Table()
-        tbl.insert_many(merged_lines)
+    # build a littletable Table for easy tabular output, and insert the dicts of merged lines
+    tbl = lt.Table()
+    tbl.insert_many(merged_lines)
 
+    if table_output:
         # present the table - using a rich Table, the columns will auto-size to content and terminal
         # width
         tbl.present()
@@ -127,19 +127,25 @@ def main(args: list[str]):
                 table = self.query_one(DataTable)
                 table.cursor_type = "row"
                 table.zebra_stripes = True
-                first_line = next(merged_lines)
-                table.add_columns(*first_line.keys())
-                table.add_row(*first_line.values())
+                col_names = tbl.info()["fields"]
+                table.add_columns(*col_names)
+                # can't use itemgetter here since filenames may contain "."s and itemgetter
+                # treats them specially
+                extract_values = lambda ns: vars(ns).values()
+
+                tbl_iter = iter(tbl)
+                first_line = next(tbl_iter)
+                table.add_row(*extract_values(first_line))
 
                 def max_line_count(d):
                     """
                     The number of lines for this row is the maximum number of newlines
                     in any value, plus 1.
                     """
-                    return max(s.count("\n") for s in d.values()) + 1
+                    return max(s.count("\n") for s in extract_values(d)) + 1
 
-                for line in merged_lines:
-                    table.add_row(*line.values(), height=max_line_count(line))
+                for line in tbl_iter:
+                    table.add_row(*extract_values(line), height=max_line_count(line))
 
         app = TableApp()
         app.run()
