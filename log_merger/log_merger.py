@@ -1,3 +1,11 @@
+#
+# log_merger.py
+#
+# Utility for viewing multiple log files in a side-by-side merged format.
+#
+# Copyright 2023, Paul McGuire
+#
+
 import argparse
 from collections.abc import Generator, Iterable
 from datetime import datetime
@@ -5,6 +13,8 @@ import textwrap
 from typing import TypeVar
 
 import littletable as lt
+from textual.binding import Binding
+from textual.widgets import Footer
 
 from .merging import Merger
 from .multiline_log_handler import MultilineLogCollapser
@@ -17,8 +27,18 @@ T = TypeVar("T")
 def make_argument_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("files", nargs="+", help="log files to be merged")
-    parser.add_argument("--width", "-w", type=int, help="total screen width to use to show log files side-by-side", default=0)
-    parser.add_argument("--interactive", "-i", action="store_true", help="show output using interactive TUI browser")
+    parser.add_argument(
+        "--interactive", "-i",
+        action="store_true",
+        help="show output using interactive TUI browser"
+    )
+    parser.add_argument(
+        "--width", "-w",
+        type=int,
+        help="total screen width to use for interactive mode (defaults to current screen width)",
+        default=0
+    )
+    parser.add_argument("--csv", "-csv", help="save merged logs to CSV file")
     return parser
 
 
@@ -96,11 +116,11 @@ def main():
 
     fnames = args_ns.files
     interactive = args_ns.interactive
-    total_width = args_ns.width or len(fnames) * 70 + 25
-    width_per_file = (total_width - 25) // len(fnames)
+    total_width = args_ns.width
 
     textual_output = interactive
     table_output = not interactive
+    save_to_csv = args_ns.csv
 
     # generate dicts, one per timestamp, with values for each log file for the respective
     # log line from that file at that timestamp, or "" if no log line at that timestamp
@@ -110,18 +130,26 @@ def main():
     tbl = lt.Table()
     tbl.insert_many(merged_lines)
 
-    if table_output:
+    if save_to_csv:
+        tbl.csv_export(args_ns.csv)
+
+    elif table_output:
         # present the table - using a rich Table, the columns will auto-size to content and terminal
         # width
         tbl.present()
 
-    if textual_output:
+    elif textual_output:
         from textual.app import App, ComposeResult
         from textual.widgets import DataTable
 
         class TableApp(App):
+            BINDINGS = [
+                Binding(key="q", action="quit", description="Quit"),
+            ]
+
             def compose(self) -> ComposeResult:
                 yield DataTable(fixed_columns=1)
+                yield Footer()
 
             def on_mount(self) -> None:
                 table = self.query_one(DataTable)
@@ -129,6 +157,10 @@ def main():
                 table.zebra_stripes = True
                 col_names = tbl.info()["fields"]
                 table.add_columns(*col_names)
+
+                screen_width = total_width or app.size.width
+                # guesstimate how much width each file will require
+                width_per_file = int((screen_width - 25) * 0.95 // len(fnames))
 
                 def max_line_count(sseq: list[str]):
                     """
@@ -138,12 +170,16 @@ def main():
                     return max(s.count("\n") for s in sseq) + 1
 
                 for line in tbl:
-                    row_values = list(vars(line).values())
-                    if any(len(rv_line) > width_per_file for rv in row_values for rv_line in rv.splitlines()):
-                        row_values = ["\n".join(textwrap.wrap(v, width_per_file)) for v in vars(line).values()]
+                    raw_row_values = list(vars(line).values())
+                    if any(len(rv_line) > width_per_file for rv in raw_row_values for rv_line in rv.splitlines()):
+                        row_values = []
+                        for v in vars(line).values():
+                            vlines = ("\n".join(textwrap.wrap(rvl, width_per_file)) for rvl in v.splitlines())
+                            row_values.append("\n".join(vlines))
                         table.add_row(*row_values, height=max_line_count(row_values))
                     else:
-                        table.add_row(*row_values)
+                        table.add_row(*raw_row_values, height=max_line_count(raw_row_values))
+
         app = TableApp()
         app.run()
 
