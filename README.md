@@ -64,6 +64,8 @@ Shows the following merged display:
 Using the `-i` interactive option will display the merged log in an interactive terminal-based browser
 (enabled using the [textual](https://textual.textualize.io) Python library).
 
+![Image](static/log1_log2_merged_tui_lr.jpg)
+
 ## Command line arguments
 
 `log_merger -h` will show the following help:
@@ -85,7 +87,7 @@ options:
 ## Merging
 
 Log files get merged by interleaving log lines from each based on timestamps in each log line. `log_merger` tries to 
-use different timestamp formats until it finds a matching format. The supported formats are:
+use different timestamp formats until it finds a matching format for each input file. The supported formats are:
 
 | format                    | description                                                                                         |
 |---------------------------|-----------------------------------------------------------------------------------------------------|
@@ -95,5 +97,5 @@ use different timestamp formats until it finds a matching format. The supported 
 | `Jan  1 HH:MM:SS`         | month/day + time (timestamp in syslog files); year is inferred from the create date of the log file |
 
 
-Untimestamped log lines that contain multiple lines (such as a traceback) got combined with the previous timestamped
+Untimestamped log lines that contain multiple lines (such as a traceback) get combined with the previous timestamped
 line (see in the example above).
