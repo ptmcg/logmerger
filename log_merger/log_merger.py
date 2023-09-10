@@ -173,7 +173,7 @@ def main():
                     raw_row_values = list(vars(line).values())
                     if any(len(rv_line) > width_per_file for rv in raw_row_values for rv_line in rv.splitlines()):
                         row_values = []
-                        for v in vars(line).values():
+                        for v in raw_row_values:
                             vlines = ("\n".join(textwrap.wrap(rvl, width_per_file)) for rvl in v.splitlines())
                             row_values.append("\n".join(vlines))
                         table.add_row(*row_values, height=max_line_count(row_values))
