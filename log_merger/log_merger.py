@@ -92,7 +92,6 @@ def merge_log_file_lines(log_file_names: list[str]) -> Generator[dict[str, T], N
 
     # build and yield a dict for each timestamp
     for timestamp, items in merger:
-        items = list(items)
 
         # initialize the entry for this timestamp with empty strings for each given file
         line_dict = {
@@ -147,15 +146,27 @@ def display_merged_lines_interactively(
 
             line_ns: types.SimpleNamespace
             for line_ns in merged_log_lines:
-                raw_row_values = list(vars(line_ns).values())
-                if any(len(rv_line) > width_per_file for rv in raw_row_values for rv_line in rv.splitlines()):
-                    row_values = []
-                    for v in raw_row_values:
-                        vlines = ("\n".join(textwrap.wrap(rvl, width_per_file)) for rvl in v.splitlines())
-                        row_values.append("\n".join(vlines))
-                    display_table.add_row(*row_values, height=max_line_count(row_values))
+                row_values = list(vars(line_ns).values())
+                # see if any text wrapping is required for this line
+                # - check each cell to see if any line in the cell exceeds width_per_file
+                # - if not, just add this row to the display_table
+                if any(len(rv_line) > width_per_file
+                       for rv in row_values
+                       for rv_line in rv.splitlines()):
+                    # wrap individual cells (except never wrap the timestamp)
+                    wrapped_row_values = [row_values[0]]
+                    for cell_value in row_values[1:]:
+                        if "\n" in cell_value or len(cell_value) > width_per_file:
+                            cell_lines = (
+                                "\n".join(textwrap.wrap(rvl, width_per_file))
+                                for rvl in cell_value.splitlines()
+                            )
+                            wrapped_row_values.append("\n".join(cell_lines))
+                        else:
+                            wrapped_row_values.append(cell_value)
+                    display_table.add_row(*wrapped_row_values, height=max_line_count(wrapped_row_values))
                 else:
-                    display_table.add_row(*raw_row_values, height=max_line_count(raw_row_values))
+                    display_table.add_row(*row_values, height=max_line_count(row_values))
 
     app = TableApp()
     app.run()
