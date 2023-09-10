@@ -10,6 +10,7 @@ import argparse
 from collections.abc import Generator, Iterable
 from datetime import datetime
 import textwrap
+import types
 from typing import TypeVar
 
 import littletable as lt
@@ -109,6 +110,57 @@ def merge_log_file_lines(log_file_names: list[str]) -> Generator[dict[str, T], N
         yield line_dict
 
 
+def display_merged_lines_interactively(
+        merged_log_lines: lt.Table,
+        display_width: int,
+        log_file_names: list[str],
+):
+    from textual.app import App, ComposeResult
+    from textual.widgets import DataTable
+
+    class TableApp(App):
+        BINDINGS = [
+            Binding(key="q", action="quit", description="Quit"),
+        ]
+
+        def compose(self) -> ComposeResult:
+            yield DataTable(fixed_columns=1)
+            yield Footer()
+
+        def on_mount(self) -> None:
+            display_table = self.query_one(DataTable)
+            display_table.cursor_type = "row"
+            display_table.zebra_stripes = True
+            col_names = merged_log_lines.info()["fields"]
+            display_table.add_columns(*col_names)
+
+            screen_width = display_width or app.size.width
+            # guesstimate how much width each file will require
+            width_per_file = int((screen_width - 25) * 0.95 // len(log_file_names))
+
+            def max_line_count(sseq: list[str]):
+                """
+                The number of lines for this row is the maximum number of newlines
+                in any value, plus 1.
+                """
+                return max(s.count("\n") for s in sseq) + 1
+
+            line_ns: types.SimpleNamespace
+            for line_ns in merged_log_lines:
+                raw_row_values = list(vars(line_ns).values())
+                if any(len(rv_line) > width_per_file for rv in raw_row_values for rv_line in rv.splitlines()):
+                    row_values = []
+                    for v in raw_row_values:
+                        vlines = ("\n".join(textwrap.wrap(rvl, width_per_file)) for rvl in v.splitlines())
+                        row_values.append("\n".join(vlines))
+                    display_table.add_row(*row_values, height=max_line_count(row_values))
+                else:
+                    display_table.add_row(*raw_row_values, height=max_line_count(raw_row_values))
+
+    app = TableApp()
+    app.run()
+
+
 def main():
 
     parser = make_argument_parser()
@@ -127,61 +179,19 @@ def main():
     merged_lines = merge_log_file_lines(fnames)
 
     # build a littletable Table for easy tabular output, and insert the dicts of merged lines
-    tbl = lt.Table()
-    tbl.insert_many(merged_lines)
+    merged_lines_table = lt.Table()
+    merged_lines_table.insert_many(merged_lines)
 
     if save_to_csv:
-        tbl.csv_export(args_ns.csv)
+        merged_lines_table.csv_export(args_ns.csv)
 
     elif table_output:
         # present the table - using a rich Table, the columns will auto-size to content and terminal
         # width
-        tbl.present()
+        merged_lines_table.present()
 
     elif textual_output:
-        from textual.app import App, ComposeResult
-        from textual.widgets import DataTable
-
-        class TableApp(App):
-            BINDINGS = [
-                Binding(key="q", action="quit", description="Quit"),
-            ]
-
-            def compose(self) -> ComposeResult:
-                yield DataTable(fixed_columns=1)
-                yield Footer()
-
-            def on_mount(self) -> None:
-                table = self.query_one(DataTable)
-                table.cursor_type = "row"
-                table.zebra_stripes = True
-                col_names = tbl.info()["fields"]
-                table.add_columns(*col_names)
-
-                screen_width = total_width or app.size.width
-                # guesstimate how much width each file will require
-                width_per_file = int((screen_width - 25) * 0.95 // len(fnames))
-
-                def max_line_count(sseq: list[str]):
-                    """
-                    The number of lines for this row is the maximum number of newlines
-                    in any value, plus 1.
-                    """
-                    return max(s.count("\n") for s in sseq) + 1
-
-                for line in tbl:
-                    raw_row_values = list(vars(line).values())
-                    if any(len(rv_line) > width_per_file for rv in raw_row_values for rv_line in rv.splitlines()):
-                        row_values = []
-                        for v in raw_row_values:
-                            vlines = ("\n".join(textwrap.wrap(rvl, width_per_file)) for rvl in v.splitlines())
-                            row_values.append("\n".join(vlines))
-                        table.add_row(*row_values, height=max_line_count(row_values))
-                    else:
-                        table.add_row(*raw_row_values, height=max_line_count(raw_row_values))
-
-        app = TableApp()
-        app.run()
+        display_merged_lines_interactively(merged_lines_table, total_width, fnames)
 
 
 if __name__ == '__main__':
