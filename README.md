@@ -82,6 +82,7 @@ options:
   --width WIDTH, -w WIDTH
                         total screen width to use for interactive mode (defaults to current screen width)
   --csv CSV, -csv CSV   save merged logs to CSV file
+  --encoding ENCODING   encoding to use when reading log files (defaults to the system default encoding)
 ```
 
 ## Merging
