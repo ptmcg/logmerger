@@ -10,6 +10,7 @@ import argparse
 import sys
 from collections.abc import Generator, Iterable
 from datetime import datetime
+import itertools
 import textwrap
 import types
 from typing import TypeVar
@@ -19,6 +20,7 @@ from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.widgets import DataTable, Footer
 
+from .file_reading import FileReader
 from .merging import Merger
 from .multiline_log_handler import MultilineLogCollapser
 from .timestamp_wrapper import TimestampedLineTransformer
@@ -166,7 +168,10 @@ class LogMergerApplication:
     def merge_log_file_lines(self) -> Generator[dict[str, T], None, None]:
 
         # scan input files to determine timestamp format, and create appropriate transformer for each
-        transformers = [TimestampedLineTransformer.make_transformer_from_file(fname) for fname in self.fnames]
+        readers = [FileReader.get_reader(fname, self.encoding) for fname in self.fnames]
+        peek_iters, readers = zip(*[itertools.tee(rdr) for rdr in readers])
+        transformers = [TimestampedLineTransformer.make_transformer_from_sample_line(next(peek_iter))
+                        for peek_iter in peek_iters]
 
         # build iterators over each file that:
         # - transform each line into a (datetime, str) tuple (where the str is everything after the
@@ -183,11 +188,11 @@ class LogMergerApplication:
                     fname,
                     (
                         MultilineLogCollapser()(
-                            map(xformer, (line.rstrip() for line in open(fname, encoding=self.encoding)))
+                            map(xformer, map(str.rstrip, reader))
                         )
                     )
                 )
-            ) for fname, xformer in zip(self.fnames, transformers)
+            ) for fname, xformer, reader in zip(self.fnames, transformers, readers)
         ]
 
         # use the Merger class which internally uses a heap to pull values in timestamp order from

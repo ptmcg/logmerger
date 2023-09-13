@@ -5,10 +5,11 @@ from datetime import datetime
 from pathlib import Path
 import re
 
-from typing import TypeVar
+from typing import Callable, TypeVar, Union
 
 
 T = TypeVar("T")
+TimestampFormatter = Union[str | Callable[[str], datetime]]
 
 
 class TimestampedLineTransformer:
@@ -41,10 +42,15 @@ class TimestampedLineTransformer:
                 return subcls()
         raise ValueError(f"no match for any timestamp pattern in {s!r}")
 
-    def __init__(self, pattern: str, strptime_format: str):
+    def __init__(self, pattern: str, strptime_formatter: TimestampFormatter):
         self._re_pattern_match = re.compile(pattern).match
         self.pattern: str = pattern
-        self.strptime_format: str = strptime_format
+
+        if isinstance(strptime_formatter, str):
+            self.str_to_time = lambda s: datetime.strptime(s, strptime_formatter)
+        else:
+            self.str_to_time = strptime_formatter
+
         self.file_info: Path = None
         self.file_stat: os.stat_result = None
 
@@ -57,7 +63,7 @@ class TimestampedLineTransformer:
         if m:
             # create (datetime, str) tuple - clip leading datetime string from
             # the log string, so that it doesn't duplicate when presented
-            return datetime.strptime(m[1], self.strptime_format), obj[m.span()[1]:]
+            return self.str_to_time(m[1]), obj[m.span()[1]:]
         else:
             # no leading timestamp, just return None and the original string
             return None, obj
@@ -110,6 +116,30 @@ class BDHMS(TimestampedLineTransformer):
         if dt is not None:
             dt = dt.replace(year=date_year)
         return dt, obj
+
+
+class SecondsSinceEpoch(TimestampedLineTransformer):
+    # log files with timestamp "YYYY-MM-DD HH:MM:SS"
+    pattern = r"(\d{10})\s"
+
+    def __init__(self):
+        super().__init__(self.pattern, lambda s: datetime.fromtimestamp(int(s)))
+
+
+class MilliSecondsSinceEpoch(TimestampedLineTransformer):
+    # log files with timestamp "YYYY-MM-DD HH:MM:SS"
+    pattern = r"(\d{13})\s"
+
+    def __init__(self):
+        super().__init__(self.pattern, lambda s: datetime.fromtimestamp(int(s) / 1000))
+
+
+class FloatSecondsSinceEpoch(TimestampedLineTransformer):
+    # log files with timestamp "1694561169.550987" or "1694561169.550"
+    pattern = r"(\d{10}.\d{3}(\d{3})?)\s"
+
+    def __init__(self):
+        super().__init__(self.pattern, lambda s: datetime.fromtimestamp(float(s)))
 
 
 if __name__ == '__main__':
