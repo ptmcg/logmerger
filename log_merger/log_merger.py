@@ -11,16 +11,12 @@ import sys
 from collections.abc import Generator, Iterable
 from datetime import datetime
 import itertools
-import textwrap
-import types
 from typing import TypeVar
 
 import littletable as lt
-from textual.app import App, ComposeResult
-from textual.binding import Binding
-from textual.widgets import DataTable, Footer
 
 from .file_reading import FileReader
+from .interactive_viewing import InteractiveLogMergeViewerApp
 from .merging import Merger
 from .multiline_log_handler import MultilineLogCollapser
 from .timestamp_wrapper import TimestampedLineTransformer
@@ -43,6 +39,7 @@ def make_argument_parser():
         help="total screen width to use for interactive mode (defaults to current screen width)",
         default=0
     )
+    parser.add_argument("--line_numbers", "-ln", action="store_true", help="add line number column")
     parser.add_argument("--csv", "-csv", help="save merged logs to CSV file")
     parser.add_argument(
         "--encoding",
@@ -59,76 +56,6 @@ def label(s: str, seq: Iterable[T]) -> Generator[tuple[str, T], None, None]:
     which iterator a particular item came from)
     """
     yield from ((s, obj) for obj in seq)
-
-
-def format_timestamp(dt: datetime) -> str:
-    """
-    format a datetime to microseconds, truncate to just millis
-    """
-    return dt.strftime("%Y-%m-%d %H:%M:%S.%f")[:23]
-
-
-class InteractiveLogMergeViewerApp(App):
-
-    BINDINGS = [
-        Binding(key="q", action="quit", description="Quit"),
-    ]
-
-    def config(
-            self,
-            log_file_names: list[str],
-            merged_log_lines_table: lt.Table,
-            display_width: int,
-    ):
-        self.log_file_names = log_file_names  # noqa
-        self.merged_log_lines_table = merged_log_lines_table  # noqa
-        self.display_width = display_width  # noqa
-
-    def compose(self) -> ComposeResult:
-        yield DataTable(fixed_columns=1)
-        yield Footer()
-
-    def on_mount(self) -> None:
-        display_table = self.query_one(DataTable)
-        display_table.cursor_type = "row"
-        display_table.zebra_stripes = True
-        col_names = self.merged_log_lines_table.info()["fields"]
-        display_table.add_columns(*col_names)
-
-        screen_width = self.display_width or self.size.width
-        # guesstimate how much width each file will require
-        width_per_file = int((screen_width - 25) * 0.95 // len(self.log_file_names))
-
-        def max_line_count(sseq: list[str]):
-            """
-            The number of lines for this row is the maximum number of newlines
-            in any value, plus 1.
-            """
-            return max(s.count("\n") for s in sseq) + 1
-
-        line_ns: types.SimpleNamespace
-        for line_ns in self.merged_log_lines_table:
-            row_values = list(vars(line_ns).values())
-            # see if any text wrapping is required for this line
-            # - check each cell to see if any line in the cell exceeds width_per_file
-            # - if not, just add this row to the display_table
-            if any(len(rv_line) > width_per_file
-                   for rv in row_values
-                   for rv_line in rv.splitlines()):
-                # wrap individual cells (except never wrap the timestamp)
-                wrapped_row_values = [row_values[0]]
-                for cell_value in row_values[1:]:
-                    if "\n" in cell_value or len(cell_value) > width_per_file:
-                        cell_lines = (
-                            "\n".join(textwrap.wrap(rvl, width_per_file))
-                            for rvl in cell_value.splitlines()
-                        )
-                        wrapped_row_values.append("\n".join(cell_lines))
-                    else:
-                        wrapped_row_values.append(cell_value)
-                display_table.add_row(*wrapped_row_values, height=max_line_count(wrapped_row_values))
-            else:
-                display_table.add_row(*row_values, height=max_line_count(row_values))
 
 
 class LogMergerApplication:
@@ -199,12 +126,17 @@ class LogMergerApplication:
         # all the iterators, and then uses groupby to group them by common timestamp
         merger = Merger(log_file_line_iters, key_function=lambda log_data: log_data[1][0])
 
+        if self.config.line_numbers:
+            initialize_row_dict = lambda n, ts: {"line": str(n), "timestamp": ts.strftime("%Y-%m-%d %H:%M:%S.%f")[:23]}
+        else:
+            initialize_row_dict = lambda n, ts: {"timestamp": ts.strftime("%Y-%m-%d %H:%M:%S.%f")[:23]}
+
         # build and yield a dict for each timestamp
-        for timestamp, items in merger:
+        for line_number, (timestamp, items) in enumerate(merger, start=1):
 
             # initialize the entry for this timestamp with empty strings for each given file
             line_dict = {
-                "timestamp": format_timestamp(timestamp),
+                **initialize_row_dict(line_number, timestamp),
                 **{}.fromkeys(self.fnames, ""),
             }
 
@@ -223,7 +155,7 @@ class LogMergerApplication:
     ):
 
         app = InteractiveLogMergeViewerApp()
-        app.config(self.fnames, merged_log_lines, self.total_width)
+        app.config(self.fnames, merged_log_lines, self.total_width, self.config.line_numbers)
         app.run()
 
 

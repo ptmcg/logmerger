@@ -2,6 +2,7 @@
 
 ### Added
 
+- `--line_numbers` command line option to show line numbers in the merged output
 - `--encoding` command line argument to override system default encoding when reading files
 - support for direct merging of gzip-encoded files (such as `z.log.gz`)
 - support for timestamps that are seconds (int or float) or milliseconds since epoch

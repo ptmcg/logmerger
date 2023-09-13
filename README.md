@@ -71,7 +71,7 @@ Using the `-i` interactive option will display the merged log in an interactive 
 `log_merger -h` will show the following help:
 
 ```
-usage: log_merger.py [-h] [--interactive] [--width WIDTH] [--csv CSV] files [files ...]
+usage: log_merger.py [-h] [--interactive] [--width WIDTH] [--line_numbers] [--csv CSV] [--encoding ENCODING] files [files ...]
 
 positional arguments:
   files                 log files to be merged
@@ -81,6 +81,7 @@ options:
   --interactive, -i     show output using interactive TUI browser
   --width WIDTH, -w WIDTH
                         total screen width to use for interactive mode (defaults to current screen width)
+  --line_numbers, -ln   add line number column
   --csv CSV, -csv CSV   save merged logs to CSV file
   --encoding ENCODING   encoding to use when reading log files (defaults to the system default encoding)
 ```

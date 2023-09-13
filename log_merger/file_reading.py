@@ -55,7 +55,6 @@ class TextFileReader(FileReader):
 
 
 class GzipFileReader(FileReader):
-
     @classmethod
     def _can_read(cls, fname: str) -> bool:
         return fname.endswith(".gz")
