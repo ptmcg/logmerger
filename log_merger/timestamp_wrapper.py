@@ -136,7 +136,7 @@ class MilliSecondsSinceEpoch(TimestampedLineTransformer):
 
 class FloatSecondsSinceEpoch(TimestampedLineTransformer):
     # log files with timestamp "1694561169.550987" or "1694561169.550"
-    pattern = r"(\d{10}.\d{3}(\d{3})?)\s"
+    pattern = r"(\d{10}.\d+)\s"
 
     def __init__(self):
         super().__init__(self.pattern, lambda s: datetime.fromtimestamp(float(s)))
