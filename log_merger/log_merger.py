@@ -26,13 +26,24 @@ T = TypeVar("T")
 
 
 def make_argument_parser():
-    parser = argparse.ArgumentParser()
+    epilog_notes = """
+    Start and end timestamps to clip the given files to a particular time window can be 
+    given in `YYYY-MM-DD HH:MM:SS.SSS` format, with trailing milliseconds and seconds
+    optional, and "," permissible for the decimal point. A "T" can be included between
+    the date and time to simplify entering the timestamp on a command line 
+    (otherwise would require enclosing in quotes because of the intervening space). These
+    command line values do not need to match the timestamp formats in the log files.
+    """
+
+    parser = argparse.ArgumentParser(epilog=epilog_notes)
     parser.add_argument("files", nargs="+", help="log files to be merged")
     parser.add_argument(
         "--interactive", "-i",
         action="store_true",
         help="show output using interactive TUI browser"
     )
+    parser.add_argument('--start', '-s', required=False, help="start time to select time window for merging logs")
+    parser.add_argument('--end', '-e', required=False, help="end time to select time window for merging logs")
     parser.add_argument(
         "--width", "-w",
         type=int,
@@ -42,11 +53,23 @@ def make_argument_parser():
     parser.add_argument("--line_numbers", "-ln", action="store_true", help="add line number column")
     parser.add_argument("--csv", "-csv", help="save merged logs to CSV file")
     parser.add_argument(
-        "--encoding",
+        "--encoding", "-enc",
         type=str,
-        default=sys.getdefaultencoding(),
+        default=sys.getfilesystemencoding(),
         help="encoding to use when reading log files (defaults to the system default encoding)")
+
     return parser
+
+
+def parse_time_using(ts_str, formats):
+    if not isinstance(formats, (list, tuple)):
+        formats = [formats]
+    for fmt in formats:
+        try:
+            return datetime.strptime(ts_str, fmt)
+        except ValueError:
+            pass
+    raise ValueError('no matching format for input string {!r}'.format(ts_str))
 
 
 def label(s: str, seq: Iterable[T]) -> Generator[tuple[str, T], None, None]:
@@ -64,6 +87,31 @@ class LogMergerApplication:
 
         self.fnames = config.files
         self.total_width = config.width
+
+        valid_formats = [
+            "%Y-%m-%d %H:%M:%S.%f",
+            "%Y-%m-%d %H:%M:%S,%f",
+            "%Y-%m-%d %H:%M:%S",
+            "%Y-%m-%d %H:%M",
+            "%Y-%m-%dT%H:%M:%S.%f",
+            "%Y-%m-%dT%H:%M:%S,%f",
+            "%Y-%m-%dT%H:%M:%S",
+            "%Y-%m-%dT%H:%M",
+        ]
+        if config.start is None:
+            self.start_time = datetime.min
+        else:
+            self.start_time = parse_time_using(config.start, valid_formats)
+
+        if config.end is None:
+            self.end_time = datetime.max
+        else:
+            self.end_time = parse_time_using(config.end, valid_formats)
+
+        if self.end_time <= self.start_time:
+            raise ValueError("invalid start/end times - start must be before end")
+
+        self.time_clip = lambda ts_log: self.start_time <= ts_log[0] <= self.end_time
 
         self.interactive = config.interactive
         self.textual_output = self.interactive
@@ -113,9 +161,10 @@ class LogMergerApplication:
             (
                 label(
                     fname,
-                    (
-                        MultilineLogCollapser()(
-                            map(xformer, map(str.rstrip, reader))
+                    filter(self.time_clip, (
+                            MultilineLogCollapser()(
+                                map(xformer, map(str.rstrip, reader))
+                            )
                         )
                     )
                 )

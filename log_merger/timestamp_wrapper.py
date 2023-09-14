@@ -96,6 +96,33 @@ class YMDHMS(TimestampedLineTransformer):
         super().__init__(self.pattern, self.strptime_format)
 
 
+class YMDTHMScommaF(TimestampedLineTransformer):
+    # log files with timestamp "YYYY-MM-DDTHH:MM:SS,SSS"
+    pattern = r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3})\s"
+    strptime_format = "%Y-%m-%dT%H:%M:%S,%f"
+
+    def __init__(self):
+        super().__init__(self.pattern, self.strptime_format)
+
+
+class YMDTHMSdotF(TimestampedLineTransformer):
+    # log files with timestamp "YYYY-MM-DDTHH:MM:SS.SSS"
+    pattern = r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3})\s"
+    strptime_format = "%Y-%m-%dT%H:%M:%S.%f"
+
+    def __init__(self):
+        super().__init__(self.pattern, self.strptime_format)
+
+
+class YMDTHMS(TimestampedLineTransformer):
+    # log files with timestamp "YYYY-MM-DDTHH:MM:SS"
+    pattern = r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})\s"
+    strptime_format = "%Y-%m-%d %H:%M:%S"
+
+    def __init__(self):
+        super().__init__(self.pattern, self.strptime_format)
+
+
 class BDHMS(TimestampedLineTransformer):
     # syslog files with timestamp "mon day hh:mm:ss"
     # (note, year is omitted so let's guess from the log file's create date)

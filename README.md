@@ -71,7 +71,10 @@ Using the `-i` interactive option will display the merged log in an interactive 
 `log_merger -h` will show the following help:
 
 ```
-usage: log_merger.py [-h] [--interactive] [--width WIDTH] [--line_numbers] [--csv CSV] [--encoding ENCODING] files [files ...]
+usage: log_merger.py [-h] [--interactive] [--start START] [--end END]
+                     [--width WIDTH] [--line_numbers] [--csv CSV]
+                     [--encoding ENCODING]
+                     files [files ...]
 
 positional arguments:
   files                 log files to be merged
@@ -79,11 +82,24 @@ positional arguments:
 options:
   -h, --help            show this help message and exit
   --interactive, -i     show output using interactive TUI browser
+  --start START, -s START
+                        start time to select time window for merging logs
+  --end END, -e END     end time to select time window for merging logs
   --width WIDTH, -w WIDTH
-                        total screen width to use for interactive mode (defaults to current screen width)
+                        total screen width to use for interactive mode (defaults to
+                        current screen width)
   --line_numbers, -ln   add line number column
   --csv CSV, -csv CSV   save merged logs to CSV file
-  --encoding ENCODING   encoding to use when reading log files (defaults to the system default encoding)
+  --encoding ENCODING, -enc ENCODING
+                        encoding to use when reading log files (defaults to the
+                        system default encoding)
+
+Start and end timestamps to clip the given files to a particular time window can be
+given in `YYYY-MM-DD HH:MM:SS.SSS` format, with trailing milliseconds and seconds
+optional, and "," permissible for the decimal point. A "T" can be included between
+the date and time to simplify entering the timestamp on a command line (otherwise
+would require enclosing in quotes because of the intervening space). These command
+line values do not need to match the timestamp formats in the log files.
 ```
 
 ## Merging
@@ -96,6 +112,9 @@ use different timestamp formats until it finds a matching format for each input 
 | `YYYY-MM-DD HH:MM:SS,SSS` | date+time to milliseconds, with ',' decimal (default for Python's `asctime` log marker)             |
 | `YYYY-MM-DD HH:MM:SS.SSS` | date+time to milliseconds, with '.' decimal                                                         |
 | `YYYY-MM-DD HH:MM:SS`     | date+time to seconds                                                                                |
+| `YYYY-MM-DDTHH:MM:SS,SSS` | date+T+time to milliseconds, with ',' decimal                                                       |
+| `YYYY-MM-DDTHH:MM:SS.SSS` | date+T+time to milliseconds, with '.' decimal                                                       |
+| `YYYY-MM-DDTHH:MM:SS`     | date+T+time to seconds                                                                              |
 | `Jan  1 HH:MM:SS`         | month/day + time (timestamp in syslog files); year is inferred from the create date of the log file |
 
 
