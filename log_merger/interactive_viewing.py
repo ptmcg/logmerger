@@ -20,9 +20,9 @@ class InteractiveLogMergeViewerApp(App):
     def config(
             self,
             log_file_names: list[str],
-            merged_log_lines_table: lt.Table,
             display_width: int,
             show_line_numbers: bool,
+            merged_log_lines_table: lt.Table,
     ):
         self.log_file_names = log_file_names  # noqa
         self.merged_log_lines_table = merged_log_lines_table  # noqa
@@ -75,11 +75,13 @@ class InteractiveLogMergeViewerApp(App):
                     else:
                         wrapped_row_values.append(cell_value)
                 display_table.add_row(
-                    Text(wrapped_row_values[0], justify="right") if self.show_line_numbers else wrapped_row_values[0],
+                    Text(wrapped_row_values[0], justify="right")
+                    if self.show_line_numbers else wrapped_row_values[0],
                     *wrapped_row_values[1:],
                     height=max_line_count(wrapped_row_values))
             else:
                 display_table.add_row(
-                    Text(row_values[0], justify="right") if self.show_line_numbers else row_values[0],
+                    Text(row_values[0], justify="right")
+                    if self.show_line_numbers else row_values[0],
                     *row_values[1:],
                     height=max_line_count(row_values))

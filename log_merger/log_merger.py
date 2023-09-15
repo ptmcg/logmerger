@@ -123,7 +123,7 @@ class LogMergerApplication:
     def run(self):
         # generate dicts, one per timestamp, with values for each log file for the respective
         # log line from that file at that timestamp, or "" if no log line at that timestamp
-        merged_lines = self.merge_log_file_lines()
+        merged_lines = self._merge_log_file_lines()
 
         # build a littletable Table for easy tabular output, and insert the dicts of merged lines
         merged_lines_table = lt.Table()
@@ -138,9 +138,9 @@ class LogMergerApplication:
             merged_lines_table.present()
 
         elif self.textual_output:
-            self.display_merged_lines_interactively(merged_lines_table)
+            self._display_merged_lines_interactively(merged_lines_table)
 
-    def merge_log_file_lines(self) -> Generator[dict[str, T], None, None]:
+    def _merge_log_file_lines(self) -> Generator[dict[str, T], None, None]:
 
         # scan input files to determine timestamp format, and create appropriate transformer for each
         readers = [FileReader.get_reader(fname, self.encoding) for fname in self.fnames]
@@ -198,13 +198,13 @@ class LogMergerApplication:
             # yield the populated dict
             yield line_dict
 
-    def display_merged_lines_interactively(
+    def _display_merged_lines_interactively(
             self,
             merged_log_lines: lt.Table,
     ):
 
         app = InteractiveLogMergeViewerApp()
-        app.config(self.fnames, merged_log_lines, self.total_width, self.config.line_numbers)
+        app.config(self.fnames, self.total_width, self.config.line_numbers, merged_log_lines)
         app.run()
 
 
