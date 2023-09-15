@@ -6,7 +6,7 @@
 - `--encoding` command line argument to override system default encoding when reading files
 - `--start` and `--end` command line arguments to specify start and end timestamps to select a
   specific time window from the merged logs; values may be an absolute timestamp in various 
-  formats, or relative times such as "-5m" for "5 minutes ago"
+  formats, or relative times such as "5m" for "5 minutes ago"
 - support for direct merging of gzip-encoded files (such as `z.log.gz`)
 - support for log timestamps with delimiting "T" between date and time
 - support for log timestamps that are seconds (int or float) or milliseconds since epoch

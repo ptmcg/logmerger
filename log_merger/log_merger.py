@@ -35,8 +35,8 @@ def make_argument_parser():
     (otherwise would require enclosing in quotes because of the intervening space). These
     command line values do not need to match the timestamp formats in the log files.
 
-    These values may also be given as relative times, such as "-15m" for "15 minutes ago".
-    Valid units are "s", "m", "h", and "d".
+    These values may also be given as relative times, such as "15m" for "15 minutes ago".
+    Valid units are "s", "m", "h", and "d" for seconds, minutes, hours, or days.
     """
 
     parser = argparse.ArgumentParser(epilog=epilog_notes)
@@ -77,7 +77,7 @@ def parse_time_using(ts_str: str, formats: str | list[str]) -> datetime:
 
 
 def parse_relative_time(ts_str: str) -> datetime:
-    parts = re.match(r"-(\d+)([smhd])\w*$", ts_str, flags=re.IGNORECASE)
+    parts = re.match(r"(\d+)([smhd])$", ts_str, flags=re.IGNORECASE)
     if parts:
         qty, unit = parts.groups()
         seconds = int(qty)
@@ -120,7 +120,7 @@ class LogMergerApplication:
         if config.start is None:
             self.start_time = datetime.min
         else:
-            if config.start.startswith("-"):
+            if config.start.endswith(tuple("smhd")):
                 self.start_time = parse_relative_time(config.start)
             else:
                 self.start_time = parse_time_using(config.start, valid_formats)
@@ -128,7 +128,7 @@ class LogMergerApplication:
         if config.end is None:
             self.end_time = datetime.max
         else:
-            if config.end.startswith("-"):
+            if config.end.endswith(tuple("smhd")):
                 self.end_time = parse_relative_time(config.end)
             else:
                 self.end_time = parse_time_using(config.end, valid_formats)
