@@ -7,10 +7,11 @@
 #
 
 import argparse
-import sys
 from collections.abc import Generator, Iterable
-from datetime import datetime
+from datetime import datetime, timedelta
 import itertools
+import re
+import sys
 from typing import TypeVar
 
 import littletable as lt
@@ -33,6 +34,9 @@ def make_argument_parser():
     the date and time to simplify entering the timestamp on a command line 
     (otherwise would require enclosing in quotes because of the intervening space). These
     command line values do not need to match the timestamp formats in the log files.
+
+    These values may also be given as relative times, such as "-15m" for "15 minutes ago".
+    Valid units are "s", "m", "h", and "d".
     """
 
     parser = argparse.ArgumentParser(epilog=epilog_notes)
@@ -61,7 +65,7 @@ def make_argument_parser():
     return parser
 
 
-def parse_time_using(ts_str, formats):
+def parse_time_using(ts_str: str, formats: str | list[str]) -> datetime:
     if not isinstance(formats, (list, tuple)):
         formats = [formats]
     for fmt in formats:
@@ -69,7 +73,21 @@ def parse_time_using(ts_str, formats):
             return datetime.strptime(ts_str, fmt)
         except ValueError:
             pass
-    raise ValueError('no matching format for input string {!r}'.format(ts_str))
+    raise ValueError(f"no matching format for input string {ts_str!r}")
+
+
+def parse_relative_time(ts_str: str) -> datetime:
+    parts = re.match(r"-(\d+)([smhd])\w*$", ts_str, flags=re.IGNORECASE)
+    if parts:
+        qty, unit = parts.groups()
+        seconds = int(qty)
+        now = datetime.now()
+        for unit_type, mult in [("s", 1), ("m", 60), ("h", 60), ("d", 24)]:
+            seconds *= mult
+            if unit == unit_type:
+                return now - timedelta(seconds=seconds)
+
+    raise ValueError(f"invalid relative time string {ts_str!r}")
 
 
 def label(s: str, seq: Iterable[T]) -> Generator[tuple[str, T], None, None]:
@@ -97,16 +115,23 @@ class LogMergerApplication:
             "%Y-%m-%dT%H:%M:%S,%f",
             "%Y-%m-%dT%H:%M:%S",
             "%Y-%m-%dT%H:%M",
+            "%Y-%m-%d",
         ]
         if config.start is None:
             self.start_time = datetime.min
         else:
-            self.start_time = parse_time_using(config.start, valid_formats)
+            if config.start.startswith("-"):
+                self.start_time = parse_relative_time(config.start)
+            else:
+                self.start_time = parse_time_using(config.start, valid_formats)
 
         if config.end is None:
             self.end_time = datetime.max
         else:
-            self.end_time = parse_time_using(config.end, valid_formats)
+            if config.end.startswith("-"):
+                self.end_time = parse_relative_time(config.end)
+            else:
+                self.end_time = parse_time_using(config.end, valid_formats)
 
         if self.end_time <= self.start_time:
             raise ValueError("invalid start/end times - start must be before end")

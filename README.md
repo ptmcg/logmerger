@@ -100,6 +100,9 @@ optional, and "," permissible for the decimal point. A "T" can be included betwe
 the date and time to simplify entering the timestamp on a command line (otherwise
 would require enclosing in quotes because of the intervening space). These command
 line values do not need to match the timestamp formats in the log files.
+
+These values may also be given as relative times, such as "-15m" for "15 minutes ago".
+Valid units are "s", "m", "h", and "d".
 ```
 
 ## Merging
