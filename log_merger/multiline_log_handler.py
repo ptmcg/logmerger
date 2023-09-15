@@ -1,9 +1,35 @@
-from collections.abc import Generator
-from itertools import groupby
+from collections.abc import Generator, Callable, Iterable
+from itertools import groupby, islice
 from datetime import datetime
-from typing import Any, Iterable
+from typing import Any, Optional
 from operator import itemgetter
-import textwrap
+
+
+class WindowedSort:
+    def __init__(self, window: int, seq: Iterable, *, key: Optional[Callable] = None):
+        self.seq = seq
+        self.key_function = key
+
+        self.seq_iter = iter(seq)
+        self.lookahead_buffer = list(islice(self.seq_iter, window))
+        self.lookahead_buffer.sort(key=self.key_function)
+        self.seq_consumed = len(self.lookahead_buffer) < window
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if not self.seq_consumed:
+            try:
+                self.lookahead_buffer.append(next(self.seq_iter))
+                self.lookahead_buffer.sort(key=self.key_function)
+            except StopIteration:
+                self.seq_consumed = True
+
+        if self.lookahead_buffer:
+            return self.lookahead_buffer.pop(0)
+        else:
+            raise StopIteration()
 
 
 class NewLogLineDetector:
@@ -42,9 +68,11 @@ class MultilineLogCollapser:
         self._newlogline_detector = NewLogLineDetector()
 
     def __call__(self, log_seq: Iterable[tuple[datetime, str]]) -> Generator[tuple[datetime, str], None, None]:
-        for timestamp, lines in sorted(
-                ((a, list(b)) for a, b in groupby(log_seq, key=self._newlogline_detector)),
-                key=itemgetter(0)):
+        for timestamp, lines in WindowedSort(
+                window=60,
+                seq=((a, list(b)) for a, b in groupby(log_seq, key=self._newlogline_detector)),
+                key=itemgetter(0)
+        ):
             yield timestamp, "\n".join(line[1] for line in lines)
 
 
