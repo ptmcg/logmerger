@@ -1,5 +1,4 @@
 from datetime import datetime
-from itertools import count, islice
 import textwrap
 import types
 
