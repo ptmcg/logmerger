@@ -1,6 +1,9 @@
 ## [0.3.0] - Under development
 
 ### Added
+- "l" key binding - Go to line number
+- "t" key binding - Go to timestamp
+- strip escape sequences from log file lines, for consistent text alignment in columns
 
 
 ## [0.2.0] - 2023-09-15
