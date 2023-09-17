@@ -1,0 +1,4 @@
+[38;5;117m[1689339790.262003500|INFO](process_name) [0mSomething interesting happened!
+[1;31m[1689339790.108488351|ERROR](process_name) [0mSomething bad happened!
+[38;5;117m[1689339790.000|INFO](process_name) [0mSomething interesting happened!
+[38;5;117m[1689339788.000|INFO](process_name) [0mSomething interesting happened!

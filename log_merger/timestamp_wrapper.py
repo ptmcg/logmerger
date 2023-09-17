@@ -20,19 +20,28 @@ class TimestampedLineTransformer:
     (timestamp, rest of the line) tuples.
     """
     pattern = ""
+    match_group = 2
+    sub_repl = ""
+    strptime_format = ""
     match = lambda s: False
+
+    custom_transformers = []
 
     def __init_subclass__(cls):
         cls.match = re.compile(cls.pattern).match
 
-    @classmethod
-    def make_transformer_from_file(cls, file_ref) -> TimestampedLineTransformer:
+    @staticmethod
+    def _get_first_line_of_file(cls, file_ref):
         if isinstance(file_ref, (str, Path)):
             with open(file_ref) as log_file:
                 first_line = log_file.readline()
         else:
             first_line = file_ref.readline()
+        return first_line
 
+    @classmethod
+    def make_transformer_from_file(cls, file_ref) -> TimestampedLineTransformer:
+        first_line = cls._get_first_line_of_file(file_ref)
         xformer = cls.make_transformer_from_sample_line(first_line)
         xformer.add_file_info(Path(file_ref))
         return xformer
@@ -44,8 +53,62 @@ class TimestampedLineTransformer:
                 return subcls()
         raise ValueError(f"no match for any timestamp pattern in {s!r}")
 
+    @classmethod
+    def make_custom_transformers(cls, custom_timestamp: str) -> type:
+        """
+        Given an input string template with ... placeholder for the timestamp format,
+        create TimestampedLineTransformer subclasses that match the template and
+        preserve leading text if desired.
+
+        String templates are regular expressions, with the exception that in place of
+        the regex for the actual timestamp, the template should contain "(...)". This
+        function will use the existing subclasses of TimestampedLineTransformer to
+        capture timestamp format regex and their corresponding strptime strings.
+
+        The template will have the form of:
+
+            ((...)x)
+        or
+            (leading)((...)x)
+        where `x` can be any trailing space or delimiter that follows the timestamp, and
+        `leading` can be a regex fragment for any leading text that comes before the timestamp.
+        The template performs 3 functions:
+        - (...) will create a capture group containing the actual timestamp value
+        - ((...)x) will define a capture graup for text that will be removed from the log line
+          before adding it to the table (so that timestamps do not get duplicated in the
+          timestamp column _and_ in the log text itself
+        - (leading) defines a capture group that comes before the timestamp, and which should
+          be preserved in the presented log line
+
+        Here are some example log lines and suggested format templates:
+
+            Log line                                  Template
+            INFO - 2022-01-01 12:34:56 log message    (\w+ - )((...) )
+            [INFO] 2022-01-01 12:34:56 log message    (\[\w+\] )((...) )
+            [2022-01-01 12:34:56|INFO] log message    (\[)((...)|)
+
+        """
+        has_initial_content = "..." not in custom_timestamp[:custom_timestamp.find(")")]
+        for subcls in TimestampedLineTransformer.__subclasses__():
+            if subcls in TimestampedLineTransformer.custom_transformers:
+                continue
+
+            custom_timestamp_pattern = custom_timestamp.replace("...", subcls.timestamp_pattern)
+            class_properties = {
+                "pattern": custom_timestamp_pattern,
+                "timestamp_pattern": subcls.pattern,
+                "match_group": 3 if has_initial_content else 2,
+                "sub_repl": r"\1" if has_initial_content else "",
+                "strptime_format": subcls.strptime_format,
+            }
+
+            TimestampedLineTransformer.custom_transformers.append(
+                type(f"Custom{subcls.__name__}", (subcls, TimestampedLineTransformer,), class_properties)
+            )
+
     def __init__(self, pattern: str, strptime_formatter: TimestampFormatter):
         self._re_pattern_match = re.compile(pattern).match
+        self._re_pattern_sub = re.compile(pattern).sub
         self.pattern: str = pattern
 
         if isinstance(strptime_formatter, str):
@@ -65,7 +128,8 @@ class TimestampedLineTransformer:
         if m:
             # create (datetime, str) tuple - clip leading datetime string from
             # the log string, so that it doesn't duplicate when presented
-            ret = self.str_to_time(m[1]), obj[m.span()[1]:]
+            trimmed_obj = self._re_pattern_sub(self.sub_repl, obj)
+            ret = self.str_to_time(m[self.match_group]), trimmed_obj
         else:
             # no leading timestamp, just return None and the original string
             ret = None, obj
@@ -77,7 +141,8 @@ class TimestampedLineTransformer:
 
 class YMDHMScommaF(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DD HH:MM:SS,SSS"
-    pattern = r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3})\s"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}"
+    pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = "%Y-%m-%d %H:%M:%S,%f"
 
     def __init__(self):
@@ -86,7 +151,8 @@ class YMDHMScommaF(TimestampedLineTransformer):
 
 class YMDHMSdotF(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DD HH:MM:SS.SSS"
-    pattern = r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3})\s"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}"
+    pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = "%Y-%m-%d %H:%M:%S.%f"
 
     def __init__(self):
@@ -95,7 +161,8 @@ class YMDHMSdotF(TimestampedLineTransformer):
 
 class YMDHMS(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DD HH:MM:SS"
-    pattern = r"(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\s"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}"
+    pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = "%Y-%m-%d %H:%M:%S"
 
     def __init__(self):
@@ -104,7 +171,8 @@ class YMDHMS(TimestampedLineTransformer):
 
 class YMDTHMScommaF(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DDTHH:MM:SS,SSS"
-    pattern = r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3})\s"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3}"
+    pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = "%Y-%m-%dT%H:%M:%S,%f"
 
     def __init__(self):
@@ -113,7 +181,8 @@ class YMDTHMScommaF(TimestampedLineTransformer):
 
 class YMDTHMSdotF(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DDTHH:MM:SS.SSS"
-    pattern = r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3})\s"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}"
+    pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = "%Y-%m-%dT%H:%M:%S.%f"
 
     def __init__(self):
@@ -122,7 +191,8 @@ class YMDTHMSdotF(TimestampedLineTransformer):
 
 class YMDTHMS(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DDTHH:MM:SS"
-    pattern = r"(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2})\s"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}"
+    pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = "%Y-%m-%d %H:%M:%S"
 
     def __init__(self):
@@ -132,7 +202,8 @@ class YMDTHMS(TimestampedLineTransformer):
 class BDHMS(TimestampedLineTransformer):
     # syslog files with timestamp "mon day hh:mm:ss"
     # (note, year is omitted so let's guess from the log file's create date)
-    pattern = r"([JFMASOND][a-z]{2}\s(\s|\d)\d \d{2}:\d{2}:\d{2})\s"
+    timestamp_pattern = r"[JFMASOND][a-z]{2}\s(\s|\d)\d \d{2}:\d{2}:\d{2}"
+    pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = "%b %d %H:%M:%S"
 
     def __init__(self):
@@ -151,17 +222,10 @@ class BDHMS(TimestampedLineTransformer):
         return dt, obj
 
 
-class SecondsSinceEpoch(TimestampedLineTransformer):
-    # log files with timestamp "YYYY-MM-DD HH:MM:SS"
-    pattern = r"(\d{10})\s"
-
-    def __init__(self):
-        super().__init__(self.pattern, lambda s: datetime.fromtimestamp(int(s)))
-
-
 class MilliSecondsSinceEpoch(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DD HH:MM:SS"
-    pattern = r"(\d{13})\s"
+    timestamp_pattern = r"\d{13}"
+    pattern = fr"(({timestamp_pattern})\s)"
 
     def __init__(self):
         super().__init__(self.pattern, lambda s: datetime.fromtimestamp(int(s) / 1000))
@@ -169,10 +233,20 @@ class MilliSecondsSinceEpoch(TimestampedLineTransformer):
 
 class FloatSecondsSinceEpoch(TimestampedLineTransformer):
     # log files with timestamp "1694561169.550987" or "1694561169.550"
-    pattern = r"(\d{10}.\d+)\s"
+    timestamp_pattern = r"\d{10}\.\d+"
+    pattern = fr"(({timestamp_pattern})\s)"
 
     def __init__(self):
         super().__init__(self.pattern, lambda s: datetime.fromtimestamp(float(s)))
+
+
+class SecondsSinceEpoch(TimestampedLineTransformer):
+    # log files with timestamp "YYYY-MM-DD HH:MM:SS"
+    timestamp_pattern = r"\d{10}"
+    pattern = fr"(({timestamp_pattern})\s)"
+
+    def __init__(self):
+        super().__init__(self.pattern, lambda s: datetime.fromtimestamp(int(s)))
 
 
 if __name__ == '__main__':

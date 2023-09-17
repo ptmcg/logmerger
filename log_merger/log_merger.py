@@ -61,6 +61,7 @@ def make_argument_parser():
         type=str,
         default=sys.getfilesystemencoding(),
         help="encoding to use when reading log files (defaults to the system default encoding)")
+    parser.add_argument("--timestamp_format", help="custom timestamp format")
 
     return parser
 
@@ -115,6 +116,11 @@ def label(s: str, seq: Iterable[T]) -> Generator[tuple[str, T], None, None]:
 class LogMergerApplication:
     def __init__(self, config: argparse.Namespace):
         self.config = config
+
+        if config.timestamp_format:
+            if "(...)" not in config.timestamp_format:
+                raise ValueError("custom timestamp format must contain '...' placeholder")
+            TimestampedLineTransformer.make_custom_transformers(config.timestamp_format)
 
         self.fnames = config.files
         self.total_width = config.width
