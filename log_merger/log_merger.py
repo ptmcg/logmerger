@@ -65,6 +65,19 @@ def make_argument_parser():
     return parser
 
 
+VALID_INPUT_TIME_FORMATS = [
+    "%Y-%m-%d %H:%M:%S.%f",
+    "%Y-%m-%d %H:%M:%S,%f",
+    "%Y-%m-%d %H:%M:%S",
+    "%Y-%m-%d %H:%M",
+    "%Y-%m-%dT%H:%M:%S.%f",
+    "%Y-%m-%dT%H:%M:%S,%f",
+    "%Y-%m-%dT%H:%M:%S",
+    "%Y-%m-%dT%H:%M",
+    "%Y-%m-%d",
+]
+
+
 def parse_time_using(ts_str: str, formats: str | list[str]) -> datetime:
     if not isinstance(formats, (list, tuple)):
         formats = [formats]
@@ -106,24 +119,13 @@ class LogMergerApplication:
         self.fnames = config.files
         self.total_width = config.width
 
-        valid_formats = [
-            "%Y-%m-%d %H:%M:%S.%f",
-            "%Y-%m-%d %H:%M:%S,%f",
-            "%Y-%m-%d %H:%M:%S",
-            "%Y-%m-%d %H:%M",
-            "%Y-%m-%dT%H:%M:%S.%f",
-            "%Y-%m-%dT%H:%M:%S,%f",
-            "%Y-%m-%dT%H:%M:%S",
-            "%Y-%m-%dT%H:%M",
-            "%Y-%m-%d",
-        ]
         if config.start is None:
             self.start_time = datetime.min
         else:
             if config.start.endswith(tuple("smhd")):
                 self.start_time = parse_relative_time(config.start)
             else:
-                self.start_time = parse_time_using(config.start, valid_formats)
+                self.start_time = parse_time_using(config.start, VALID_INPUT_TIME_FORMATS)
 
         if config.end is None:
             self.end_time = datetime.max
@@ -131,7 +133,7 @@ class LogMergerApplication:
             if config.end.endswith(tuple("smhd")):
                 self.end_time = parse_relative_time(config.end)
             else:
-                self.end_time = parse_time_using(config.end, valid_formats)
+                self.end_time = parse_time_using(config.end, VALID_INPUT_TIME_FORMATS)
 
         if self.end_time <= self.start_time:
             raise ValueError("invalid start/end times - start must be before end")

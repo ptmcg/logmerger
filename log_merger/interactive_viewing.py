@@ -1,3 +1,4 @@
+from datetime import datetime
 import textwrap
 import types
 
@@ -8,8 +9,35 @@ from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
-from textual.validation import Validator, Integer, Function
+from textual.validation import Function, Integer, Validator, ValidationResult
 from textual.widgets import Button, DataTable, Footer, Input, Label
+
+
+class TimestampValidator(Validator):
+    @staticmethod
+    def convert_time_str(s: str) -> datetime:
+        from .log_merger import VALID_INPUT_TIME_FORMATS, parse_time_using
+        return parse_time_using(s, VALID_INPUT_TIME_FORMATS)
+
+    def __init__(self, min_time=None, max_time=None):
+        super().__init__("Invalid timestamp")
+        self.min_time = self.convert_time_str(min_time) if min_time else datetime.min
+        self.max_time = self.convert_time_str(max_time) if max_time else datetime.max
+
+    def validate(self, value: str) -> ValidationResult:
+        try:
+            ts = self.convert_time_str(value)
+            if not self.min_time <= ts <= self.max_time:
+                message = {
+                    (True, True): f"value must be between {self.min_time} and {self.max_time}",
+                    (True, False): f"value must be greater than {self.min_time}",
+                    (False, True): f"value must be less than {self.max_time}",
+                }[self.min_time != datetime.min, self.max_time != datetime.max]
+                raise ValueError(message)
+        except ValueError as ve:
+            return self.failure(str(ve).capitalize())
+        else:
+            return self.success()
 
 
 class ModalInputDialog(ModalScreen[str]):
@@ -121,6 +149,7 @@ class InteractiveLogMergeViewerApp(App):
     BINDINGS = [
         Binding(key="q", action="quit", description="Quit"),
         Binding(key="l", action="goto_line", description="Go to line"),
+        Binding(key="t", action="goto_timestamp", description="Go to timestamp"),
     ]
 
     def __init__(self, *args, **kwargs):
@@ -129,6 +158,7 @@ class InteractiveLogMergeViewerApp(App):
         self.merged_log_lines_table: lt.Table = None
         self.display_width: int = 0
         self.show_line_numbers: bool = False
+        self.current_goto_timestamp_string: str = ""
 
     def config(
             self,
@@ -215,3 +245,27 @@ class InteractiveLogMergeViewerApp(App):
 
         dt_widget: DataTable = self.query_one(DataTable)
         dt_widget.move_cursor(row=line, animate=False)
+
+    def action_goto_timestamp(self):
+        self.app.push_screen(
+            ModalInputDialog(
+                "Go to timestamp:",
+                initial=self.current_goto_timestamp_string,
+                validator=TimestampValidator()
+            ),
+            self.move_to_timestamp
+        )
+
+    def move_to_timestamp(self, timestamp_str: str):
+        self.current_goto_timestamp_string = timestamp_str
+
+        # normalize input string to timestamps in merged log lines table
+        ts = TimestampValidator.convert_time_str(timestamp_str)
+        timestamp_str = ts.strftime("%Y-%m-%d %H:%M:%S.%f")[:23]
+
+        for i, row in enumerate(self.merged_log_lines_table, start=1):
+            if row.timestamp >= timestamp_str:
+                self.move_to_line(str(i))
+                break
+        else:
+            self.move_to_line(str(len(self.merged_log_lines_table)))
