@@ -1,144 +1,15 @@
-from datetime import datetime
 import textwrap
 import types
 
 import littletable as lt
 from rich.text import Text
-from textual import on
 from textual.app import App, ComposeResult
 from textual.binding import Binding
-from textual.containers import Horizontal, Vertical
-from textual.screen import ModalScreen
-from textual.validation import Function, Integer, Validator, ValidationResult
-from textual.widgets import Button, DataTable, Footer, Input, Label
+from textual.validation import Integer
+from textual.widgets import DataTable, Footer
 
-
-class TimestampValidator(Validator):
-    @staticmethod
-    def convert_time_str(s: str) -> datetime:
-        from .log_merger import VALID_INPUT_TIME_FORMATS, parse_time_using
-        return parse_time_using(s, VALID_INPUT_TIME_FORMATS)
-
-    def __init__(self, min_time=None, max_time=None):
-        super().__init__("Invalid timestamp")
-        self.min_time = self.convert_time_str(min_time) if min_time else datetime.min
-        self.max_time = self.convert_time_str(max_time) if max_time else datetime.max
-
-    def validate(self, value: str) -> ValidationResult:
-        try:
-            ts = self.convert_time_str(value)
-            if not self.min_time <= ts <= self.max_time:
-                message = {
-                    (True, True): f"value must be between {self.min_time} and {self.max_time}",
-                    (True, False): f"value must be greater than {self.min_time}",
-                    (False, True): f"value must be less than {self.max_time}",
-                }[self.min_time != datetime.min, self.max_time != datetime.max]
-                raise ValueError(message)
-        except ValueError as ve:
-            return self.failure(str(ve).capitalize())
-        else:
-            return self.success()
-
-
-class ModalInputDialog(ModalScreen[str]):
-    """
-    A modal dialog for getting a single input from the user.
-    (cribbed from https://github.com/Textualize/frogmouth/blob/main/frogmouth/dialogs/input_dialog.py)
-    """
-
-    DEFAULT_CSS = """
-    ModalInputDialog {
-        align: center middle;
-    }
-
-    ModalInputDialog > Vertical {
-        background: $panel;
-        height: auto;
-        width: auto;
-        border: thick $primary;
-    }
-
-    ModalInputDialog > Vertical > * {
-        width: auto;
-        height: auto;
-    }
-
-    ModalInputDialog Input {
-        width: 40;
-        margin: 1;
-    }
-
-    ModalInputDialog Label {
-        margin-left: 2;
-    }
-
-    ModalInputDialog Button {
-        margin-right: 1;
-    }
-
-    ModalInputDialog #buttons {
-        width: 100%;
-        align-horizontal: right;
-        padding-right: 1;
-    }
-    """
-    """The default styling for the input dialog."""
-
-    BINDINGS = [
-        Binding("escape", "app.pop_screen", "", show=False),
-    ]
-    """Bindings for the dialog."""
-
-    def __init__(
-            self,
-            prompt: str,
-            initial: str | None = None,
-            validator: Validator = None
-    ) -> None:
-        """Initialise the input dialog.
-
-        Args:
-            prompt: The prompt for the input.
-            initial: The initial value for the input.
-        """
-        super().__init__()
-        self._prompt = prompt
-        """The prompt to display for the input."""
-        self._initial = initial
-        """The initial value to use for the input."""
-        self._validator = validator or Function(function=lambda s: True)
-
-    def compose(self) -> ComposeResult:
-        """Compose the child widgets."""
-        with Vertical():
-            with Vertical(id="input"):
-                yield Label(self._prompt)
-                yield Input(
-                    self._initial or "",
-                    validators=[self._validator],
-                )
-            with Horizontal(id="buttons"):
-                yield Button("OK", id="ok", variant="primary")
-                yield Button("Cancel", id="cancel")
-
-    def on_mount(self) -> None:
-        """Set up the dialog once the DOM is ready."""
-        self.query_one(Input).focus()
-
-    @on(Button.Pressed, "#cancel")
-    def cancel_input(self) -> None:
-        """Cancel the input operation."""
-        self.dismiss()
-
-    @on(Input.Submitted)
-    @on(Button.Pressed, "#ok")
-    def accept_input(self) -> None:
-        """Accept and return the input."""
-        if ((value := self.query_one(Input).value.strip())
-                and self._validator.validate(value).is_valid):
-            self.dismiss(value)
-        else:
-            self.dismiss()
+from .tui.dialogs import ModalInputDialog
+from .tui.validators import TimestampValidator
 
 
 class InteractiveLogMergeViewerApp(App):
@@ -158,7 +29,7 @@ class InteractiveLogMergeViewerApp(App):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.log_file_names: list[str] = []
-        self.merged_log_lines_table: lt.Table = None
+        self.merged_log_lines_table: lt.Table = None  # noqa
         self.display_width: int = 0
         self.show_line_numbers: bool = False
         self.current_search_string: str = ""
