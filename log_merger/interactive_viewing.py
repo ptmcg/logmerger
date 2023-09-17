@@ -19,36 +19,36 @@ class ModalInputDialog(ModalScreen[str]):
     """
 
     DEFAULT_CSS = """
-    InputDialog {
+    ModalInputDialog {
         align: center middle;
     }
 
-    InputDialog > Vertical {
+    ModalInputDialog > Vertical {
         background: $panel;
         height: auto;
         width: auto;
         border: thick $primary;
     }
 
-    InputDialog > Vertical > * {
+    ModalInputDialog > Vertical > * {
         width: auto;
         height: auto;
     }
 
-    InputDialog Input {
+    ModalInputDialog Input {
         width: 40;
         margin: 1;
     }
 
-    InputDialog Label {
+    ModalInputDialog Label {
         margin-left: 2;
     }
 
-    InputDialog Button {
+    ModalInputDialog Button {
         margin-right: 1;
     }
 
-    InputDialog #buttons {
+    ModalInputDialog #buttons {
         width: 100%;
         align-horizontal: right;
         padding-right: 1;
