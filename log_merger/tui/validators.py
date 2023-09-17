@@ -1,16 +1,13 @@
+from collections.abc import Callable
 from datetime import datetime
 
 from textual.validation import Validator, ValidationResult
 
 
 class TimestampValidator(Validator):
-    @staticmethod
-    def convert_time_str(s: str) -> datetime:
-        from ..log_merger import VALID_INPUT_TIME_FORMATS, parse_time_using
-        return parse_time_using(s, VALID_INPUT_TIME_FORMATS)
-
-    def __init__(self, min_time=None, max_time=None):
+    def __init__(self, *, timestamp_parser: Callable[[str], datetime], min_time=None, max_time=None):
         super().__init__("Invalid timestamp")
+        self.convert_time_str = timestamp_parser
         self.min_time = self.convert_time_str(min_time) if min_time else datetime.min
         self.max_time = self.convert_time_str(max_time) if max_time else datetime.max
 

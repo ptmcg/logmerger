@@ -1,3 +1,4 @@
+from functools import partial
 import textwrap
 import types
 
@@ -27,6 +28,8 @@ class InteractiveLogMergeViewerApp(App):
     ]
 
     def __init__(self, *args, **kwargs):
+        from .log_merger import parse_time_using, VALID_INPUT_TIME_FORMATS
+
         super().__init__(*args, **kwargs)
         self.log_file_names: list[str] = []
         self.merged_log_lines_table: lt.Table = None  # noqa
@@ -34,6 +37,9 @@ class InteractiveLogMergeViewerApp(App):
         self.show_line_numbers: bool = False
         self.current_search_string: str = ""
         self.current_goto_timestamp_string: str = ""
+        self.timestamp_validator = TimestampValidator(
+            timestamp_parser=partial(parse_time_using, formats=VALID_INPUT_TIME_FORMATS),
+        )
 
     def config(
             self,
@@ -189,7 +195,7 @@ class InteractiveLogMergeViewerApp(App):
             ModalInputDialog(
                 "Go to timestamp:",
                 initial=self.current_goto_timestamp_string,
-                validator=TimestampValidator()
+                validator=self.timestamp_validator,
             ),
             self.move_cursor_to_timestamp
         )
@@ -198,7 +204,7 @@ class InteractiveLogMergeViewerApp(App):
         self.current_goto_timestamp_string = timestamp_str
 
         # normalize input string to timestamps in merged log lines table
-        ts = TimestampValidator.convert_time_str(timestamp_str)
+        ts = self.timestamp_validator.convert_time_str(timestamp_str)
         timestamp_str = ts.strftime("%Y-%m-%d %H:%M:%S.%f")[:23]
 
         line_for_timestamp = next(
