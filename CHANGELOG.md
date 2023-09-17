@@ -1,8 +1,9 @@
 ## [0.3.0] - Under development
 
 ### Added
-- "l" key binding - Go to line number
-- "t" key binding - Go to timestamp
+- `"f"`, `"n"`, `"p"` key bindings - Find/Next/Prev (case-insensitive text search)
+- `"l"` key binding - Go to line number
+- `"t"` key binding - Go to timestamp
 - strip escape sequences from log file lines, for consistent text alignment in columns
 
 

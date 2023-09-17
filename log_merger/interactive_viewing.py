@@ -1,4 +1,5 @@
 from datetime import datetime
+from itertools import count, islice
 import textwrap
 import types
 
@@ -148,6 +149,9 @@ class InteractiveLogMergeViewerApp(App):
 
     BINDINGS = [
         Binding(key="q", action="quit", description="Quit"),
+        Binding(key="f", action="find", description="Find"),
+        Binding(key="n", action="find_next", description="Next"),
+        Binding(key="p", action="find_prev", description="Prev"),
         Binding(key="l", action="goto_line", description="Go to line"),
         Binding(key="t", action="goto_timestamp", description="Go to timestamp"),
     ]
@@ -158,6 +162,7 @@ class InteractiveLogMergeViewerApp(App):
         self.merged_log_lines_table: lt.Table = None
         self.display_width: int = 0
         self.show_line_numbers: bool = False
+        self.current_search_string: str = ""
         self.current_goto_timestamp_string: str = ""
 
     def config(
@@ -232,19 +237,82 @@ class InteractiveLogMergeViewerApp(App):
                     *row_values[1:],
                     height=max_line_count(row_values))
 
+    #
+    # methods to support go to find/next/prev search functions
+    #
+
+    def action_find(self):
+        self.app.push_screen(
+            ModalInputDialog(
+                "Find:",
+                initial=self.current_search_string,
+            ),
+            self.save_search_string_and_move_to_next
+        )
+
+    def action_find_next(self):
+        self.move_to_next_search_line()
+
+    def action_find_prev(self):
+        self.move_to_prev_search_line()
+
+    def get_current_cursor_line(self) -> int:
+        dt: DataTable = self.query_one(DataTable)
+        return dt.cursor_row
+
+    def save_search_string_and_move_to_next(self, search_str):
+        if not search_str:
+            return
+
+        self.current_search_string = search_str
+        self.move_to_next_search_line()
+
+    def _move_to_relative_search_line(self, move_delta: int, limit: int):
+        search_string = self.current_search_string.lower()
+
+        cur_line_number = self.get_current_cursor_line() + move_delta
+        while cur_line_number != limit:
+            row = self.merged_log_lines_table[cur_line_number]
+
+            # see if any log line at this row contains the search string
+            if any(
+                    search_string in getattr(row, fname).lower()
+                    for fname in self.log_file_names
+            ):
+                self.move_cursor_to_line_number(str(cur_line_number + 1))
+                break
+
+            # move on to the next line
+            cur_line_number += move_delta
+        else:
+            self.bell()
+
+    def move_to_next_search_line(self):
+        self._move_to_relative_search_line(1, len(self.merged_log_lines_table))
+
+    def move_to_prev_search_line(self):
+        self._move_to_relative_search_line(-1, -1)
+
+    #
     # methods to support go to line function
+    #
+
     def action_goto_line(self):
         self.app.push_screen(
             ModalInputDialog("Go to line:", validator=Integer(minimum=1)),
-            self.move_to_line
+            self.move_cursor_to_line_number
         )
 
-    def move_to_line(self, line_str):
+    def move_cursor_to_line_number(self, line_number_str):
         # convert 1-based line number to 0-based
-        line = int(line_str) - 1
+        line_number = int(line_number_str) - 1
 
         dt_widget: DataTable = self.query_one(DataTable)
-        dt_widget.move_cursor(row=line, animate=False)
+        dt_widget.move_cursor(row=line_number, animate=False)
+
+    #
+    # methods to support go to timestamp function
+    #
 
     def action_goto_timestamp(self):
         self.app.push_screen(
@@ -253,19 +321,21 @@ class InteractiveLogMergeViewerApp(App):
                 initial=self.current_goto_timestamp_string,
                 validator=TimestampValidator()
             ),
-            self.move_to_timestamp
+            self.move_cursor_to_timestamp
         )
 
-    def move_to_timestamp(self, timestamp_str: str):
+    def move_cursor_to_timestamp(self, timestamp_str: str):
         self.current_goto_timestamp_string = timestamp_str
 
         # normalize input string to timestamps in merged log lines table
         ts = TimestampValidator.convert_time_str(timestamp_str)
         timestamp_str = ts.strftime("%Y-%m-%d %H:%M:%S.%f")[:23]
 
-        for i, row in enumerate(self.merged_log_lines_table, start=1):
-            if row.timestamp >= timestamp_str:
-                self.move_to_line(str(i))
-                break
-        else:
-            self.move_to_line(str(len(self.merged_log_lines_table)))
+        line_for_timestamp = next(
+            (
+                i for i, row in enumerate(self.merged_log_lines_table, start=1)
+                if row.timestamp >= timestamp_str
+            ),
+            len(self.merged_log_lines_table)
+        )
+        self.move_cursor_to_line_number(str(line_for_timestamp))
