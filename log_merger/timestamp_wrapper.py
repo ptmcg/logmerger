@@ -2,14 +2,16 @@ from __future__ import annotations
 
 import os
 from datetime import datetime
+from functools import partial
 from pathlib import Path
 import re
-
 from typing import Callable, TypeVar, Union
 
 
 T = TypeVar("T")
 TimestampFormatter = Union[str | Callable[[str], datetime]]
+
+strip_escape_sequences = partial(re.compile("\x1b" + r"\[\d+(;\d+)*m").sub, "")
 
 
 class TimestampedLineTransformer:
@@ -63,10 +65,14 @@ class TimestampedLineTransformer:
         if m:
             # create (datetime, str) tuple - clip leading datetime string from
             # the log string, so that it doesn't duplicate when presented
-            return self.str_to_time(m[1]), obj[m.span()[1]:]
+            ret = self.str_to_time(m[1]), obj[m.span()[1]:]
         else:
             # no leading timestamp, just return None and the original string
-            return None, obj
+            ret = None, obj
+
+        # remove escape sequences, which throw off the tabularization of output
+        # (consider replacing with rich tags)
+        return ret[0], strip_escape_sequences(ret[1])
 
 
 class YMDHMScommaF(TimestampedLineTransformer):

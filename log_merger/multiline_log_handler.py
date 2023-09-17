@@ -39,7 +39,7 @@ class NewLogLineDetector:
     have a timestamp.
     """
     def __init__(self):
-        self._cur_dt = None
+        self._cur_dt = datetime.min
 
     def __call__(self, line_obj: tuple[datetime, Any]) -> datetime:
         dt, *_ = line_obj

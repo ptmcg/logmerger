@@ -201,9 +201,14 @@ class LogMergerApplication:
         merger = Merger(log_file_line_iters, key_function=lambda log_data: log_data[1][0])
 
         if self.config.line_numbers:
-            initialize_row_dict = lambda n, ts: {"line": str(n), "timestamp": ts.strftime("%Y-%m-%d %H:%M:%S.%f")[:23]}
+            initialize_row_dict = lambda n, ts: {
+                "line": str(n),
+                "timestamp": ts.strftime("%Y-%m-%d %H:%M:%S.%f")[:23] if ts > datetime.min else ""
+            }
         else:
-            initialize_row_dict = lambda n, ts: {"timestamp": ts.strftime("%Y-%m-%d %H:%M:%S.%f")[:23]}
+            initialize_row_dict = lambda n, ts: {
+                "timestamp": ts.strftime("%Y-%m-%d %H:%M:%S.%f")[:23] if ts > datetime.min else ""
+            }
 
         # build and yield a dict for each timestamp
         for line_number, (timestamp, items) in enumerate(merger, start=1):

@@ -1,3 +1,4 @@
+from datetime import datetime
 import textwrap
 import types
 
@@ -17,6 +18,13 @@ class InteractiveLogMergeViewerApp(App):
         Binding(key="q", action="quit", description="Quit"),
     ]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.log_file_names: list[str] = []
+        self.merged_log_lines_table: lt.Table = None
+        self.display_width: int = 0
+        self.show_line_numbers: bool = False
+
     def config(
             self,
             log_file_names: list[str],
@@ -24,10 +32,10 @@ class InteractiveLogMergeViewerApp(App):
             show_line_numbers: bool,
             merged_log_lines_table: lt.Table,
     ):
-        self.log_file_names = log_file_names  # noqa
-        self.merged_log_lines_table = merged_log_lines_table  # noqa
-        self.display_width = display_width  # noqa
-        self.show_line_numbers = show_line_numbers  # noqa
+        self.log_file_names = log_file_names
+        self.merged_log_lines_table = merged_log_lines_table
+        self.display_width = display_width
+        self.show_line_numbers = show_line_numbers
 
     def compose(self) -> ComposeResult:
         yield DataTable()
@@ -45,7 +53,10 @@ class InteractiveLogMergeViewerApp(App):
 
         screen_width = self.display_width or self.size.width
         # guesstimate how much width each file will require
-        width_per_file = int((screen_width - 25) * 0.94 // len(self.log_file_names))
+        timestamp_allowance = 25
+        line_number_allowance = 8 if self.show_line_numbers else 0
+        screen_width_for_files = screen_width - timestamp_allowance - line_number_allowance
+        width_per_file = int(screen_width_for_files * 0.9 // len(self.log_file_names))
 
         def max_line_count(sseq: list[str]):
             """
