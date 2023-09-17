@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import string
 from datetime import datetime
 from functools import partial
 from pathlib import Path
@@ -26,6 +27,7 @@ class TimestampedLineTransformer:
     match = lambda s: False
 
     custom_transformers = []
+    custom_transformer_suffixes = iter(string.ascii_uppercase)
 
     def __init_subclass__(cls):
         cls.match = re.compile(cls.pattern).match
@@ -54,7 +56,7 @@ class TimestampedLineTransformer:
         raise ValueError(f"no match for any timestamp pattern in {s!r}")
 
     @classmethod
-    def make_custom_transformers(cls, custom_timestamp: str) -> type:
+    def make_custom_transformers(cls, custom_timestamp: str) -> None:
         """
         Given an input string template with ... placeholder for the timestamp format,
         create TimestampedLineTransformer subclasses that match the template and
@@ -88,6 +90,11 @@ class TimestampedLineTransformer:
             [2022-01-01 12:34:56|INFO] log message    (\[)((...)|)
 
         """
+
+        # template must include "(...)" placeholder somewhere
+        if "(...)" not in custom_timestamp:
+            raise ValueError(f"custom timestamp format '{custom_timestamp}' must contain '(...)' placeholder")
+
         has_initial_content = "..." not in custom_timestamp[:custom_timestamp.find(")")]
         for subcls in TimestampedLineTransformer.__subclasses__():
             if subcls in TimestampedLineTransformer.custom_transformers:
@@ -102,8 +109,13 @@ class TimestampedLineTransformer:
                 "strptime_format": subcls.strptime_format,
             }
 
+            name_suffix = next(cls.custom_transformer_suffixes)
             TimestampedLineTransformer.custom_transformers.append(
-                type(f"Custom{subcls.__name__}", (subcls, TimestampedLineTransformer,), class_properties)
+                type(
+                    f"Custom{subcls.__name__}_{name_suffix}",
+                    (subcls, TimestampedLineTransformer,),
+                    class_properties
+                )
             )
 
     def __init__(self, pattern: str, strptime_formatter: TimestampFormatter):
@@ -222,15 +234,6 @@ class BDHMS(TimestampedLineTransformer):
         return dt, obj
 
 
-class MilliSecondsSinceEpoch(TimestampedLineTransformer):
-    # log files with timestamp "YYYY-MM-DD HH:MM:SS"
-    timestamp_pattern = r"\d{13}"
-    pattern = fr"(({timestamp_pattern})\s)"
-
-    def __init__(self):
-        super().__init__(self.pattern, lambda s: datetime.fromtimestamp(int(s) / 1000))
-
-
 class FloatSecondsSinceEpoch(TimestampedLineTransformer):
     # log files with timestamp "1694561169.550987" or "1694561169.550"
     timestamp_pattern = r"\d{10}\.\d+"
@@ -240,8 +243,17 @@ class FloatSecondsSinceEpoch(TimestampedLineTransformer):
         super().__init__(self.pattern, lambda s: datetime.fromtimestamp(float(s)))
 
 
+class MilliSecondsSinceEpoch(TimestampedLineTransformer):
+    # log files with 13-digit timestamp "1694561169550"
+    timestamp_pattern = r"\d{13}"
+    pattern = fr"(({timestamp_pattern})\s)"
+
+    def __init__(self):
+        super().__init__(self.pattern, lambda s: datetime.fromtimestamp(int(s) / 1000))
+
+
 class SecondsSinceEpoch(TimestampedLineTransformer):
-    # log files with timestamp "YYYY-MM-DD HH:MM:SS"
+    # log files with 10-digit timestamp "1694561169"
     timestamp_pattern = r"\d{10}"
     pattern = fr"(({timestamp_pattern})\s)"
 

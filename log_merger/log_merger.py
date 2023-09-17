@@ -61,7 +61,11 @@ def make_argument_parser():
         type=str,
         default=sys.getfilesystemencoding(),
         help="encoding to use when reading log files (defaults to the system default encoding)")
-    parser.add_argument("--timestamp_format", help="custom timestamp format")
+    parser.add_argument("--timestamp_format",
+                        dest="timestamp_formats",
+                        nargs="*",
+                        action="append",
+                        help="custom timestamp format")
 
     return parser
 
@@ -117,18 +121,18 @@ class LogMergerApplication:
     def __init__(self, config: argparse.Namespace):
         self.config = config
 
-        if config.timestamp_format:
-            if "(...)" not in config.timestamp_format:
-                raise ValueError("custom timestamp format must contain '...' placeholder")
-            TimestampedLineTransformer.make_custom_transformers(config.timestamp_format)
+        if config.timestamp_formats:
+            formats = sum(config.timestamp_formats, [])
+            for ts_format in formats:
+                TimestampedLineTransformer.make_custom_transformers(ts_format)
 
-        self.fnames = config.files
+        self.file_names = config.files
         self.total_width = config.width
 
         if config.start is None:
             self.start_time = datetime.min
         else:
-            if config.start.endswith(tuple("smhd")):
+            if config.start.endswith(("s", "m", "h", "d")):
                 self.start_time = parse_relative_time(config.start)
             else:
                 self.start_time = parse_time_using(config.start, VALID_INPUT_TIME_FORMATS)
@@ -176,7 +180,7 @@ class LogMergerApplication:
     def _merge_log_file_lines(self) -> Generator[dict[str, T], None, None]:
 
         # scan input files to determine timestamp format, and create appropriate transformer for each
-        readers = [FileReader.get_reader(fname, self.encoding) for fname in self.fnames]
+        readers = [FileReader.get_reader(fname, self.encoding) for fname in self.file_names]
         peek_iters, readers = zip(*[itertools.tee(rdr) for rdr in readers])
         transformers = [TimestampedLineTransformer.make_transformer_from_sample_line(next(peek_iter))
                         for peek_iter in peek_iters]
@@ -201,7 +205,7 @@ class LogMergerApplication:
                         )
                     )
                 )
-            ) for fname, xformer, reader in zip(self.fnames, transformers, readers)
+            ) for fname, xformer, reader in zip(self.file_names, transformers, readers)
         ]
 
         # use the Merger class which internally uses a heap to pull values in timestamp order from
@@ -224,7 +228,7 @@ class LogMergerApplication:
             # initialize the entry for this timestamp with empty strings for each given file
             line_dict = {
                 **initialize_row_dict(line_number, timestamp),
-                **{}.fromkeys(self.fnames, ""),
+                **{}.fromkeys(self.file_names, ""),
             }
 
             # copy from the group each file's respective logging for this timestamp, and
@@ -242,7 +246,12 @@ class LogMergerApplication:
     ):
 
         app = InteractiveLogMergeViewerApp()
-        app.config(self.fnames, self.total_width, self.config.line_numbers, merged_log_lines)
+        app.config(
+            log_file_names=self.file_names,
+            display_width=self.total_width,
+            show_line_numbers=self.config.line_numbers,
+            merged_log_lines_table=merged_log_lines,
+        )
         app.run()
 
 

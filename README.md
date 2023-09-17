@@ -93,7 +93,7 @@ options:
   --encoding ENCODING, -enc ENCODING
                         encoding to use when reading log files (defaults to the
                         system default encoding)
-  --timestamp_format TIMESTAMP_FORMAT
+  --timestamp_format [TIMESTAMP_FORMATS ...]
                         custom timestamp format (regex-derived timestamp template)
 
 Start and end timestamps to clip the given files to a particular time window can be

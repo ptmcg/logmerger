@@ -43,6 +43,7 @@ class InteractiveLogMergeViewerApp(App):
 
     def config(
             self,
+            *,
             log_file_names: list[str],
             display_width: int,
             show_line_numbers: bool,
