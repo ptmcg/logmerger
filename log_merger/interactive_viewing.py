@@ -17,6 +17,7 @@ class InteractiveLogMergeViewerApp(App):
     """
     Class to display merged results using textual TUI.
     """
+    TITLE = "log_merger"
 
     BINDINGS = [
         Binding(key="q", action="quit", description="Quit"),
@@ -25,7 +26,7 @@ class InteractiveLogMergeViewerApp(App):
         Binding(key="p", action="find_prev", description="Prev"),
         Binding(key="l", action="goto_line", description="Go to line"),
         Binding(key="t", action="goto_timestamp", description="Go to timestamp"),
-        Binding(key="h", action="help_about", description="Help/About")
+        Binding(key="h", action="help_about", description="Help/About"),
     ]
 
     def __init__(self, *args, **kwargs):
@@ -217,6 +218,10 @@ class InteractiveLogMergeViewerApp(App):
             len(self.merged_log_lines_table)
         )
         self.move_cursor_to_line_number(str(line_for_timestamp))
+
+    #
+    # methods to support help/about
+    #
 
     def action_help_about(self):
         from .about import text
