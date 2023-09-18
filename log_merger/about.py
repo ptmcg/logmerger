@@ -32,7 +32,7 @@ The interactive mode of log_merger defines several keystroke navigation commands
 |  P  | Move back to previous instance of the current search string                                                                |
 |  L  | Prompt for line number to move cursor to (if line number > total number of merged lines, advances to end)                  |
 |  T  | Prompt for timestamp to move cursor to (if no log message at the exact timestamp, will move to first line after timestamp) |
-|  H  | Display this helpful text.                                                                                                 |
+|  H  | Display this helpful text                                                                                                  |
 |  Q  | Quit                                                                                                                       |
 
 
