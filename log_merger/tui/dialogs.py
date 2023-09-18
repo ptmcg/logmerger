@@ -101,8 +101,8 @@ class ModalInputDialog(ModalScreen[str]):
     @on(Button.Pressed, "#ok")
     def accept_input(self) -> None:
         """Accept and return the input."""
-        if ((value := self.query_one(Input).value.strip())
-                and self._validator.validate(value).is_valid):
+        value = self.query_one(Input).value.strip()
+        if value and self._validator.validate(value).is_valid:
             self.dismiss(value)
         else:
             self.dismiss()
@@ -135,7 +135,7 @@ class ModalAboutDialog(ModalScreen[type(None)]):
     }
 
     ModalAboutDialog Button {
-        margin-right: 1;
+        margin-top: 1;
     }
 
     ModalAboutDialog #buttons {
@@ -165,11 +165,10 @@ class ModalAboutDialog(ModalScreen[type(None)]):
     def compose(self) -> ComposeResult:
         """Compose the child widgets."""
         with Vertical():
-            with Vertical():
-                yield MarkdownViewer(
-                    self.content,
-                    show_table_of_contents=False,
-                )
+            yield MarkdownViewer(
+                self.content,
+                show_table_of_contents=False,
+            )
             with Horizontal(id="buttons"):
                 yield Button("OK", id="ok", variant="primary")
 
