@@ -4,7 +4,7 @@ from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
 from textual.validation import Function, Validator
-from textual.widgets import Button, Input, Label
+from textual.widgets import Button, Input, Label, MarkdownViewer
 
 
 class ModalInputDialog(ModalScreen[str]):
@@ -106,3 +106,77 @@ class ModalInputDialog(ModalScreen[str]):
             self.dismiss(value)
         else:
             self.dismiss()
+
+
+class ModalAboutDialog(ModalScreen[type(None)]):
+    DEFAULT_CSS = """
+    ModalAboutDialog {
+        align: center middle;
+        width: 80%;
+        height: 80%;
+    }
+
+    ModalAboutDialog > Vertical {
+        background: $panel;
+        height: auto;
+        width: auto;
+        border: thick $primary;
+    }
+
+    ModalAboutDialog > Vertical > * {
+        width: auto;
+        height: auto;
+    }
+
+    ModalAboutDialog MarkdownViewer {
+        align-horizontal: center;
+        height: 24;
+        width: 72;
+    }
+
+    ModalAboutDialog Button {
+        margin-right: 1;
+    }
+
+    ModalAboutDialog #buttons {
+        width: 100%;
+        align-horizontal: center;
+    }
+    """
+    """The default styling for the input dialog."""
+
+    BINDINGS = [
+        Binding("escape", "app.pop_screen", "", show=False),
+    ]
+    """Bindings for the dialog."""
+
+    def __init__(
+            self,
+            content: str,
+    ) -> None:
+        """Initialise the input dialog.
+
+        Args:
+            content: The Markdown content.
+        """
+        super().__init__()
+        self.content = content
+
+    def compose(self) -> ComposeResult:
+        """Compose the child widgets."""
+        with Vertical():
+            with Vertical():
+                yield MarkdownViewer(
+                    self.content,
+                    show_table_of_contents=False,
+                )
+            with Horizontal(id="buttons"):
+                yield Button("OK", id="ok", variant="primary")
+
+    def on_mount(self) -> None:
+        """Set up the dialog once the DOM is ready."""
+        self.query_one(Button).focus()
+
+    @on(Button.Pressed, "#ok")
+    def ok_clicked(self) -> None:
+        self.dismiss()

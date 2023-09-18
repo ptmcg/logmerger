@@ -5,6 +5,7 @@
 - `"f"`, `"n"`, `"p"` key bindings - Find/Next/Prev (case-insensitive text search)
 - `"l"` key binding - Go to line number
 - `"t"` key binding - Go to timestamp
+- `"h"` key binding - Show help/about info
 - `--timestamp_format` command line option to define a custom timestamp format template,
   for parsing log files with formats that do not begin with a leading timestamp
 - strip escape sequences from log file lines, for consistent text alignment in columns

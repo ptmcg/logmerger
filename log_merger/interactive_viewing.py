@@ -9,7 +9,7 @@ from textual.binding import Binding
 from textual.validation import Integer
 from textual.widgets import DataTable, Footer
 
-from .tui.dialogs import ModalInputDialog
+from .tui.dialogs import ModalInputDialog, ModalAboutDialog
 from .tui.validators import TimestampValidator
 
 
@@ -25,6 +25,7 @@ class InteractiveLogMergeViewerApp(App):
         Binding(key="p", action="find_prev", description="Prev"),
         Binding(key="l", action="goto_line", description="Go to line"),
         Binding(key="t", action="goto_timestamp", description="Go to timestamp"),
+        Binding(key="h", action="help_about", description="Help/About")
     ]
 
     def __init__(self, *args, **kwargs):
@@ -216,3 +217,10 @@ class InteractiveLogMergeViewerApp(App):
             len(self.merged_log_lines_table)
         )
         self.move_cursor_to_line_number(str(line_for_timestamp))
+
+    def action_help_about(self):
+        from .about import text
+
+        self.app.push_screen(
+            ModalAboutDialog(content=text)
+        )
