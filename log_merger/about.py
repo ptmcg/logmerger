@@ -1,31 +1,54 @@
 text = """\
 # log_merger
 
-The log_merger provides a view of one or more log files, merged by timestamps found in those files.
+The log_merger provides a view of one or more log files, merged by timestamps found in those files. It is helpful
+when analyzing interactions between separate programs by viewing their individual log files side-by-side, in
+timestamp order.
+
+In practice, log files often use various formats for their log timestamps. log_merger looks for several 
+standard timestamp formats, at the start of each line of the log file:
+
+| Format                  | Description                                                                    |
+|-------------------------|--------------------------------------------------------------------------------|
+| YYYY-MM-DD HH:MM:SS,SSS | date and time with milliseconds (, decimal) (defaut Python asctime log format) |
+| YYYY-MM-DD HH:MM:SS.SSS | date and time with milliseconds (. decimal)                                    |
+| YYYY-MM-DD HH:MM:SS     | date and time                                                                  |
+| 0000000000.000000       | float seconds since epoch                                                      |
+| 0000000000000           | milliseconds since epoch                                                       |
+| 0000000000              | integer seconds since epoch                                                    |
+| Jan 01 00:00:00         | month, day, and time (syslog) (year is taken from the log file create date)    |
+
+For log files that do not have the timestamp at the start of the line, you can define a custom format using
+the command line option `--timestamp_format`.  See `Custom timestamp formats` below.
 
 ## Interactive functions
+
+The interactive mode of log_merger defines several keystroke navigation commands:
 
 | Key | Function                                                                                                                   |
 |:---:|----------------------------------------------------------------------------------------------------------------------------|
 |  F  | Prompt for search string and advance to first line containing that string (case-insensitive)                               |
-|  N  | Advance to next instance of search string                                                                                  |
-|  P  | Move back to previous instance of search string                                                                            |
-|  L  | Prompt for line number to move cursor to                                                                                   |
+|  N  | Advance to next instance of the current search string                                                                      |
+|  P  | Move back to previous instance of the current search string                                                                |
+|  L  | Prompt for line number to move cursor to (if line number > total number of merged lines, advances to end)                  |
 |  T  | Prompt for timestamp to move cursor to (if no log message at the exact timestamp, will move to first line after timestamp) |
+|  H  | Display this helpful text.                                                                                                 |
 |  Q  | Quit                                                                                                                       |
 
 
 ## Command line options
 
-| Option              | Description                                    |
-|---------------------|------------------------------------------------|
-| --width, -w         | total display width - if greater than the screen width, will display with a horizontal scrollbar                            |
-| --line_numbers, -ln | display with a leading line number column      |
-| --start, -s         | start time for merging logs                    |
-| --end, -e           | end time for merging logs                      |
-| --interactive, -i   | display in interactive mode                    |
-| --csv               | output merged logs as CSV                      |
-| --timestamp_format  | define a custom format for log file timestamps |
+The command to run log_merger accepts several options:
+
+| Option              | Description                                                                                      |
+|---------------------|--------------------------------------------------------------------------------------------------|
+| --width, -w         | total display width - if greater than the screen width, will display with a horizontal scrollbar |
+| --line_numbers, -ln | display with a leading line number column                                                        |
+| --start, -s         | start time for merging logs                                                                      |
+| --end, -e           | end time for merging logs                                                                        |
+| --interactive, -i   | display in interactive mode                                                                      |
+| --csv               | output merged logs as CSV                                                                        |
+| --timestamp_format  | define one or more custom formats for log file timestamps                                        |
 
 
 ## Usage tips
@@ -49,21 +72,6 @@ get recorded out of time order. log_merger uses a rolling window sort to reorder
 into proper ascending time order.
 
 ### Custom timestamp formats
-
-log_merger defines a number of standard timestamp formats, which it looks for at the start of each line:
-
-| Format                  | Description                                                                    |
-|-------------------------|--------------------------------------------------------------------------------|
-| YYYY-MM-DD HH:MM:SS,SSS | date and time with milliseconds (, decimal) (defaut Python asctime log format) |
-| YYYY-MM-DD HH:MM:SS.SSS | date and time with milliseconds (. decimal)                                    |
-| YYYY-MM-DD HH:MM:SS     | date and time                                                                  |
-| 0000000000.000000       | float seconds since epoch                                                      |
-| 0000000000000           | milliseconds since epoch                                                       |
-| 0000000000              | integer seconds since epoch                                                    |
-| Jan 01 00:00:00         | month, day, and time (syslog) (year is taken from the log file create date)    |
-
-For log files that do not have the timestamp at the start of the line, you can define a custom format using
-one or more command line options `--timestamp_format`.
 
 Custom timestamp formats are defined using regular expressions,
 with the exception that in place of
@@ -106,4 +114,4 @@ by Paul McGuire, 2023
 MIT License
 
 GitHub: `https://github.com/ptmcg/log_merger`
-"""
+"""  # noqa
