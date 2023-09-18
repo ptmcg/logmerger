@@ -57,7 +57,7 @@ class TimestampedLineTransformer:
 
     @classmethod
     def make_custom_transformers(cls, custom_timestamp: str) -> None:
-        """
+        r"""
         Given an input string template with ... placeholder for the timestamp format,
         create TimestampedLineTransformer subclasses that match the template and
         preserve leading text if desired.
