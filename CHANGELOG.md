@@ -2,7 +2,7 @@
 
 ### Fixed
 
-- changed relative imports to absolute imports to support pipx-ability
+- fixed setup.cfg to find all sub-packages
 
 
 ## [0.3.0] - 2023-09-18
