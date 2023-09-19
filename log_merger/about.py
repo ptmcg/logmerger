@@ -1,11 +1,11 @@
-text = """\
+text = r"""
 # log_merger
 
-The log_merger provides a view of one or more log files, merged by timestamps found in those files. It is helpful
+The `log_merger` utility provides a view of one or more log files, merged by timestamps found in those files. It is helpful
 when analyzing interactions between separate programs by viewing their individual log files side-by-side, in
 timestamp order.
 
-In practice, log files often use various formats for their log timestamps. log_merger looks for several 
+In practice, log files often use various formats for their log timestamps. `log_merger` looks for several 
 standard timestamp formats, at the start of each line of the log file:
 
 | Format                  | Description                                                                    |
@@ -23,7 +23,7 @@ the command line option `--timestamp_format`.  See `Custom timestamp formats` be
 
 ## Interactive functions
 
-The interactive mode of log_merger defines several keystroke navigation commands:
+The interactive mode of `log_merger` defines several keystroke navigation commands:
 
 | Key | Function                                                                                                                   |
 |:---:|----------------------------------------------------------------------------------------------------------------------------|
@@ -38,7 +38,7 @@ The interactive mode of log_merger defines several keystroke navigation commands
 
 ## Command line options
 
-The command to run log_merger accepts several options:
+The command to run `log_merger` accepts several options:
 
 | Option              | Description                                                                                      |
 |---------------------|--------------------------------------------------------------------------------------------------|
@@ -53,22 +53,22 @@ The command to run log_merger accepts several options:
 
 ## Usage tips
 
-### Use log_merger with a single log file
+### Use `log_merger` with a single log file
 
-You can use log_merger even with just a single log file to make use of log_merger's interactive viewing or
-CSV formatting. log_merger normalizes timestamps to a standard `YYYY-MM-DD HH:MM:SS.SSS` format, making logs
+You can use `log_merger` even with just a single log file to make use of `log_merger`'s interactive viewing or
+CSV formatting. `log_merger` normalizes timestamps to a standard `YYYY-MM-DD HH:MM:SS.SSS` format, making logs
 that use seconds-since-epoch timestamps more human-readable.
 
 ### Multi-line logs
 
 Some logs may contain messages that extend beyond a single line, or are followed by untimestamped lines
-(such as JSON data or and exception with traceback). log_merger detects these lines and groups them with the
+(such as JSON data or and exception with traceback). `log_merger` detects these lines and groups them with the
 previous timestamped line.
 
 ### Out-of-sequence log lines
 
 For the most part, log lines are written in ascending time order. But on occasion, some log messages may
-get recorded out of time order. log_merger uses a rolling window sort to reorder out-of-sequence log lines
+get recorded out of time order. `log_merger` uses a rolling window sort to reorder out-of-sequence log lines
 into proper ascending time order.
 
 ### Custom timestamp formats
@@ -79,20 +79,20 @@ the regex pattern for the actual timestamp, the template should contain `(...)`.
 
 The template will have the form of:
 
-    ((...)x)
+    ((...)trailing)
 
 or
 
-    (leading)((...)x)
+    (leading)((...)trailing)
 
-where `x` can be any trailing spaces or delimiter that follows the timestamp, and
+where `trailing` can be any trailing spaces or delimiter that follows the timestamp, and
 `leading` can be a regex fragment for any leading text that comes before the timestamp.
 
 The template performs 3 functions:
 - `(...)` will create a capture group containing the actual timestamp value
-- `((...)x)` will define a capture group for text that will be removed from the log line
-  before adding it to the table (so that timestamps do not get duplicated in the
-  timestamp column _and_ in the log text itself
+- `((...)trailing)` will define a capture group for text that will be removed from the log line
+  before adding it to the table (so that timestamps and trailing delimiters do not get duplicated in the
+  timestamp column _and_ in the log text itself)
 - `(leading)` defines a capture group that comes before the timestamp, and which should
   be preserved in the presented log line
 
