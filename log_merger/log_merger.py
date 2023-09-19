@@ -16,11 +16,11 @@ from typing import TypeVar
 
 import littletable as lt
 
-from .file_reading import FileReader
-from .interactive_viewing import InteractiveLogMergeViewerApp
-from .merging import Merger
-from .multiline_log_handler import MultilineLogCollapser
-from .timestamp_wrapper import TimestampedLineTransformer
+from log_merger.file_reading import FileReader
+from log_merger.interactive_viewing import InteractiveLogMergeViewerApp
+from log_merger.merging import Merger
+from log_merger.multiline_log_handler import MultilineLogCollapser
+from log_merger.timestamp_wrapper import TimestampedLineTransformer
 
 
 T = TypeVar("T")

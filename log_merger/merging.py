@@ -1,4 +1,3 @@
-from collections.abc import Sequence
 import heapq
 import itertools
 from typing import TypeVar, Callable, Any

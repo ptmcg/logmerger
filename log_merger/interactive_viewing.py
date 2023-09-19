@@ -9,8 +9,8 @@ from textual.binding import Binding
 from textual.validation import Integer
 from textual.widgets import DataTable, Footer
 
-from .tui.dialogs import ModalInputDialog, ModalAboutDialog
-from .tui.validators import TimestampValidator
+from log_merger.tui.dialogs import ModalInputDialog, ModalAboutDialog
+from log_merger.tui.validators import TimestampValidator
 
 
 class InteractiveLogMergeViewerApp(App):
@@ -30,7 +30,7 @@ class InteractiveLogMergeViewerApp(App):
     ]
 
     def __init__(self, *args, **kwargs):
-        from .log_merger import parse_time_using, VALID_INPUT_TIME_FORMATS
+        from log_merger.log_merger import parse_time_using, VALID_INPUT_TIME_FORMATS
 
         super().__init__(*args, **kwargs)
         self.log_file_names: list[str] = []
@@ -224,7 +224,7 @@ class InteractiveLogMergeViewerApp(App):
     #
 
     def action_help_about(self):
-        from .about import text
+        from log_merger.about import text
 
         self.app.push_screen(
             ModalAboutDialog(content=text)

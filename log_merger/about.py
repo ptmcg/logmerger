@@ -107,7 +107,7 @@ Here are some example log lines and suggested format templates:
 
 ## About log_merger
 
-log_merger version 0.3.0
+log_merger version 0.3.1
 
 by Paul McGuire, 2023
 
