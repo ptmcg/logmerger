@@ -71,10 +71,10 @@ Using the `-i` interactive option will display the merged log in an interactive 
 `log_merger -h` will show the following help:
 
 ```
-usage: log_merger.py [-h] [--interactive] [--start START] [--end END]
-                     [--width WIDTH] [--line_numbers] [--csv CSV]
-                     [--encoding ENCODING]
-                     files [files ...]
+usage: log_merger [-h] [--interactive] [--start START] [--end END]
+                  [--width WIDTH] [--line_numbers] [--csv CSV]
+                  [--encoding ENCODING]
+                  files [files ...]
 
 positional arguments:
   files                 log files to be merged

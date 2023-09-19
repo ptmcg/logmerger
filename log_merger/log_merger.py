@@ -39,7 +39,7 @@ def make_argument_parser():
     Valid units are "s", "m", "h", and "d" for seconds, minutes, hours, or days.
     """
 
-    parser = argparse.ArgumentParser(epilog=epilog_notes)
+    parser = argparse.ArgumentParser(prog="log_merger", epilog=epilog_notes)
     parser.add_argument("files", nargs="+", help="log files to be merged")
     parser.add_argument(
         "--interactive", "-i",
