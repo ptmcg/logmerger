@@ -70,8 +70,8 @@ class InteractiveLogMergeViewerApp(App):
         display_table.fixed_columns = fixed_cols
         display_table.add_columns(*col_names)
 
+        # guesstimate how much width to allocate to each file
         screen_width = self.display_width or self.size.width
-        # guesstimate how much width each file will require
         timestamp_allowance = 25
         line_number_allowance = 8 if self.show_line_numbers else 0
         screen_width_for_files = screen_width - timestamp_allowance - line_number_allowance
@@ -87,6 +87,7 @@ class InteractiveLogMergeViewerApp(App):
         line_ns: types.SimpleNamespace
         for line_ns in self.merged_log_lines_table:
             row_values = list(vars(line_ns).values())
+
             # see if any text wrapping is required for this line
             # - check each cell to see if any line in the cell exceeds width_per_file
             # - if not, just add this row to the display_table
@@ -104,17 +105,15 @@ class InteractiveLogMergeViewerApp(App):
                         wrapped_row_values.append("\n".join(cell_lines))
                     else:
                         wrapped_row_values.append(cell_value)
-                display_table.add_row(
-                    Text(wrapped_row_values[0], justify="right")
-                    if self.show_line_numbers else wrapped_row_values[0],
-                    *wrapped_row_values[1:],
-                    height=max_line_count(wrapped_row_values))
             else:
-                display_table.add_row(
-                    Text(row_values[0], justify="right")
-                    if self.show_line_numbers else row_values[0],
-                    *row_values[1:],
-                    height=max_line_count(row_values))
+                # no need to wrap any values in this row
+                wrapped_row_values = row_values
+
+            display_table.add_row(
+                Text(wrapped_row_values[0], justify="right")
+                if self.show_line_numbers else wrapped_row_values[0],
+                *wrapped_row_values[1:],
+                height=max_line_count(wrapped_row_values))
 
     #
     # methods to support go to find/next/prev search functions
