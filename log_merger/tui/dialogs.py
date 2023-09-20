@@ -143,10 +143,11 @@ class ModalAboutDialog(ModalScreen[type(None)]):
         align-horizontal: center;
     }
     """
-    """The default styling for the input dialog."""
+    """The default styling for the about dialog."""
 
     BINDINGS = [
         Binding("escape", "app.pop_screen", "", show=False),
+        Binding("enter", "app.pop_screen", "", show=False),
     ]
     """Bindings for the dialog."""
 
@@ -174,7 +175,7 @@ class ModalAboutDialog(ModalScreen[type(None)]):
 
     def on_mount(self) -> None:
         """Set up the dialog once the DOM is ready."""
-        self.query_one(Button).focus()
+        self.query_one(MarkdownViewer).focus()
 
     @on(Button.Pressed, "#ok")
     def ok_clicked(self) -> None:
