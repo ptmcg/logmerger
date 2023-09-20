@@ -1,8 +1,8 @@
 text = r"""
 # log_merger
 
-The `log_merger` utility provides a view of one or more log files, merged by timestamps found in those files. It is helpful
-when analyzing interactions between separate programs by viewing their individual log files side-by-side, in
+The `log_merger` utility provides a view of one or more log files, merged by timestamps found in those files. It is 
+helpful when analyzing interactions between separate programs by viewing their individual log files side-by-side, in
 timestamp order.
 
 In practice, log files often use various formats for their log timestamps. `log_merger` looks for several 
@@ -38,7 +38,7 @@ The interactive mode of `log_merger` defines several keystroke navigation comman
 
 ## Command line options
 
-The command to run `log_merger` accepts several options:
+The command to run `log_merger` accepts several options, followed by one or more file names:
 
 | Option              | Description                                                                                      |
 |---------------------|--------------------------------------------------------------------------------------------------|
@@ -59,10 +59,16 @@ You can use `log_merger` even with just a single log file to make use of `log_me
 CSV formatting. `log_merger` normalizes timestamps to a standard `YYYY-MM-DD HH:MM:SS.SSS` format, making logs
 that use seconds-since-epoch timestamps more human-readable.
 
+### File types
+
+`log_merger` accepts text files, and can also read directly from `.gz` gzip'ped files (such as those gzip'ped
+by logrotate).
+
+
 ### Multi-line logs
 
 Some logs may contain messages that extend beyond a single line, or are followed by untimestamped lines
-(such as JSON data or and exception with traceback). `log_merger` detects these lines and groups them with the
+(such as JSON data or an exception with traceback). `log_merger` detects these lines and groups them with the
 previous timestamped line.
 
 ### Out-of-sequence log lines
