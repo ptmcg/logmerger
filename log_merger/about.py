@@ -64,7 +64,8 @@ that use seconds-since-epoch timestamps more human-readable.
 ### Supported file types
 
 `log_merger` accepts text files, and can also read directly from `.gz` gzip'ped files (such as those gzip'ped
-by logrotate).
+by logrotate). Packet captures with a `.pcap` file extension, created using `tcpdump` or `Wireshark`, can also be
+merged.
 
 
 ### Multi-line logs
@@ -79,6 +80,13 @@ previous timestamped line.
 For the most part, log lines are written in ascending time order. But on occasion, some log messages may
 get recorded out of time order. `log_merger` uses a rolling window sort to reorder out-of-sequence log lines
 into proper ascending time order.
+
+
+### Merging logs sourced from different computers
+
+Be aware that system clocks between different computers will rarely be in synch, even for those maintaining
+their clocks using NTP.
+
 
 ### Custom timestamp formats
 
