@@ -1,5 +1,8 @@
 ## [0.4.0] - In development
 
+- more natural user interaction with text in the Help/About dialog (page up/down/home/end)
+- Python 3.12 compatibility
+
 
 ## [0.3.1] - 2023-09-18
 
