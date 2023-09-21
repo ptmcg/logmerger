@@ -21,6 +21,7 @@ class InteractiveLogMergeViewerApp(App):
 
     BINDINGS = [
         Binding(key="q", action="quit", description="Quit"),
+        Binding(key="ctrl+d", action="toggle_dark", description="Toggle Dark Mode"),
         Binding(key="f", action="find", description="Find"),
         Binding(key="n", action="find_next", description="Next"),
         Binding(key="p", action="find_prev", description="Prev"),

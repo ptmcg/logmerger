@@ -27,6 +27,7 @@ The interactive mode of `log_merger` defines several keystroke navigation comman
 
 | Key | Function                                                                                                                   |
 |:---:|----------------------------------------------------------------------------------------------------------------------------|
+| ^D  | Toggle dark/light mode                                                                                                     |
 |  F  | Prompt for search string and advance to first line containing that string (case-insensitive)                               |
 |  N  | Advance to next instance of the current search string                                                                      |
 |  P  | Move back to previous instance of the current search string                                                                |
@@ -59,7 +60,8 @@ You can use `log_merger` even with just a single log file to make use of `log_me
 CSV formatting. `log_merger` normalizes timestamps to a standard `YYYY-MM-DD HH:MM:SS.SSS` format, making logs
 that use seconds-since-epoch timestamps more human-readable.
 
-### File types
+
+### Supported file types
 
 `log_merger` accepts text files, and can also read directly from `.gz` gzip'ped files (such as those gzip'ped
 by logrotate).
@@ -70,6 +72,7 @@ by logrotate).
 Some logs may contain messages that extend beyond a single line, or are followed by untimestamped lines
 (such as JSON data or an exception with traceback). `log_merger` detects these lines and groups them with the
 previous timestamped line.
+
 
 ### Out-of-sequence log lines
 

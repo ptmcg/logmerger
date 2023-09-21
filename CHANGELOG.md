@@ -1,5 +1,6 @@
 ## [0.4.0] - In development
 
+- `ctrl-d` to toggle light/dark mode
 - more natural user interaction with text in the Help/About dialog (page up/down/home/end)
 - Python 3.12 compatibility
 
