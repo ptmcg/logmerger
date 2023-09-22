@@ -1,6 +1,8 @@
-## [0.4.0] - In development
+## [0.4.0] - 2023-09-22
 
-- merging .pcap files (such as those created using tcpdump or Wireshark)
+### Added
+
+- (experimental) merging `.pcap` files (such as those created using tcpdump or Wireshark)
 - `ctrl-d` to toggle light/dark mode
 - more natural user interaction with text in the Help/About dialog (page up/down/home/end)
 - Python 3.12 compatibility
@@ -10,7 +12,7 @@
 
 ### Fixed
 
-- fixed setup.cfg to find all sub-packages
+- fixed `setup.cfg` to find all sub-packages
 
 
 ## [0.3.0] - 2023-09-18
@@ -50,7 +52,7 @@
 - Interactive browser will use the screen width by default, or accept a command-line argument.
 
 
-[0.4.0]: https://github.com/ptmcg/log_merger/compare/v0.3.1...main
+[0.4.0]: https://github.com/ptmcg/log_merger/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/ptmcg/log_merger/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/ptmcg/log_merger/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/ptmcg/log_merger/compare/v0.1.0...v0.2.0
