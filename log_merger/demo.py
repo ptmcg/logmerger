@@ -15,7 +15,7 @@ logfile_1 = """\
  2023-07-14 08:00:14 DEBUG  Performing database backup
  2023-07-14 08:00:16 WARN   Invalid input received: missing required field
  2023-07-14 08:00:19 ERROR  Failed to connect to remote server
- 2023-07-14 08:00:22 INFO   Sending email notification
+ 2023-07-14 08:00:26 INFO   Sending email notification (out of sequence time)
  2023-07-14 08:00:25 WARN   Slow response time detected
  2023-07-14 08:00:27 INFO   Data synchronization completed
  2023-07-14 08:00:30 DEBUG  Executing scheduled task
@@ -38,7 +38,7 @@ ValueError("shouldn't have done that")
 2023-07-14 08:00:14 DEBUG  Performing database backup
 2023-07-14 08:00:16 WARN   Invalid input received: missing required field
 2023-07-14 08:00:19 ERROR  Failed to connect to remote server
-2023-07-14 08:00:22 INFO   Sending email notification
+2023-07-14 08:00:26 INFO   Sending email notification (out of sequence time)
 2023-07-14 08:00:25 WARN   Slow response time detected
 2023-07-14 08:00:27 INFO   Data synchronization completed
 2023-07-14 08:00:30 DEBUG  Executing scheduled task
