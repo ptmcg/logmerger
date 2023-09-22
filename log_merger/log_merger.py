@@ -40,7 +40,7 @@ def make_argument_parser():
     """
 
     parser = argparse.ArgumentParser(prog="log_merger", epilog=epilog_notes)
-    parser.add_argument("files", nargs="+", help="log files to be merged")
+    parser.add_argument("files", nargs="*", help="log files to be merged")
     parser.add_argument(
         "--interactive", "-i",
         action="store_true",
@@ -66,6 +66,8 @@ def make_argument_parser():
                         nargs="*",
                         action="append",
                         help="custom timestamp format")
+
+    parser.add_argument("--demo", action="store_true", help="Run interactive demo")
 
     return parser
 
@@ -259,6 +261,16 @@ def main():
 
     parser = make_argument_parser()
     args_ns = parser.parse_args()
+
+    if args_ns.demo:
+        # put pretend file names in to run demo
+        args_ns.files = ["logfile_1.demo", "logfile_2.demo"]
+    else:
+        # special logic for fnames - can only be empty if running demo
+        if not args_ns.files:
+            parser.print_usage()
+            print("One or more log files required")
+            exit(1)
 
     app = LogMergerApplication(args_ns)
     app.run()

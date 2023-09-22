@@ -3,6 +3,7 @@
 ### Added
 
 - (experimental) merging `.pcap` files (such as those created using tcpdump or Wireshark)
+- `--demo` command line option to run simple demo
 - `ctrl-d` to toggle light/dark mode
 - more natural user interaction with text in the Help/About dialog (page up/down/home/end)
 - Python 3.12 compatibility

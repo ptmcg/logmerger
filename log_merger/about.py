@@ -50,6 +50,7 @@ The command to run `log_merger` accepts several options, followed by one or more
 | --interactive, -i   | display in interactive mode                                                                      |
 | --csv               | output merged logs as CSV                                                                        |
 | --timestamp_format  | define one or more custom formats for log file timestamps                                        |
+| --demo              | run log_merger with simulated log file content (in either text or interactive modes)             |
 
 
 ## Usage tips

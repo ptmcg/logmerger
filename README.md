@@ -74,7 +74,7 @@ Using the `-i` interactive option will display the merged log in an interactive 
 usage: log_merger [-h] [--interactive] [--start START] [--end END]
                   [--width WIDTH] [--line_numbers] [--csv CSV]
                   [--encoding ENCODING]
-                  files [files ...]
+                  [files ...]
 
 positional arguments:
   files                 log files to be merged
@@ -95,7 +95,8 @@ options:
                         system default encoding)
   --timestamp_format [TIMESTAMP_FORMATS ...]
                         custom timestamp format (regex-derived timestamp template)
-
+  --demo                Run interactive demo
+  
 Start and end timestamps to clip the given files to a particular time window can be
 given in `YYYY-MM-DD HH:MM:SS.SSS` format, with trailing milliseconds and seconds
 optional, and "," permissible for the decimal point. A "T" can be included between

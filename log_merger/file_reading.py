@@ -54,6 +54,24 @@ class TextFileReader(FileReader):
         self._close_obj.close()
 
 
+class InternalDemoReader(FileReader):
+    @classmethod
+    def _can_read(cls, fname: str) -> bool:
+        return fname.endswith(".demo")
+
+    def __init__(self, fname: str, encoding: str):
+        import log_merger.demo as demo_files
+
+        super().__init__(fname, encoding)
+        self._close_obj = None
+        var_name = fname.partition(".")[0]
+        body = getattr(demo_files, var_name)
+        self._iter = iter(body.splitlines())
+
+    def _close_reader(self):
+        pass
+
+
 class GzipFileReader(FileReader):
     @classmethod
     def _can_read(cls, fname: str) -> bool:
