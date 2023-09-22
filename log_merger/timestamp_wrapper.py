@@ -120,7 +120,7 @@ class TimestampedLineTransformer:
 
     def __init__(self, pattern: str, strptime_formatter: TimestampFormatter):
         self._re_pattern_match = re.compile(pattern).match
-        self._re_pattern_sub = re.compile(pattern).sub
+        self._re_pattern_sub = partial(re.compile(pattern).sub, count=1)
         self.pattern: str = pattern
 
         if isinstance(strptime_formatter, str):
