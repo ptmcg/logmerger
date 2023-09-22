@@ -133,8 +133,8 @@ class PcapFileReader(FileReader):
         try:
             import pyshark
         except ImportError:
-            print("pyshark not installed, cannot merge PCAP contents")
-            raise
+            print("cannot merge PCAP contents; install PCAP support using `pip install log_merger[pcap]`")
+            exit(1)
 
         super().__init__(fname, encoding)
         self._close_obj = pyshark.FileCapture(fname, keep_packets=False)
