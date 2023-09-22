@@ -120,7 +120,7 @@ Here are some example log lines and suggested format templates:
 |---------------------------------------------|--------------------|
 | INFO - 2022-01-01 12:34:56 log message      | (\w+ - )((...) )   |
 | [INFO] 2022-01-01 12:34:56 log message      | (\[\w+\] )((...) ) |
-| [2022-01-01 12:34:56&#124;INFO] log message | (\[)((...)&#124;)  |
+| [2022-01-01 12:34:56&#124;INFO] log message | (\[)((...)\&#124;)  |
 
 
 ## About log_merger
