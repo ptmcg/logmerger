@@ -6,6 +6,7 @@
 - `--demo` command line option to run simple demo
 - `ctrl-d` to toggle light/dark mode
 - more natural user interaction with text in the Help/About dialog (page up/down/home/end)
+- README.md for the sample `files` directory
 - Python 3.12 compatibility
 
 
