@@ -1,0 +1,33 @@
+2023-09-21 08:06:07,378 INFO Serving at ('127.0.0.1', 8881)
+2023-09-21 08:06:15,215 INFO Connected from ('127.0.0.1', 53871)
+2023-09-21 08:06:15,216 INFO Recv: (0) 'A few lines of text'
+2023-09-21 08:06:16,659 INFO Echo: 'txet fo senil wef A'
+2023-09-21 08:06:18,101 INFO Recv: (1) 'including non-ASCII characters: €£'
+2023-09-21 08:06:18,803 INFO Echo: '£€ :sretcarahc IICSA-non gnidulcni'
+2023-09-21 08:06:19,659 INFO Recv: (2) 'to test the operation'
+2023-09-21 08:06:20,921 INFO Echo: 'noitarepo eht tset ot'
+2023-09-21 08:06:22,997 INFO Recv: (3) 'of both server'
+2023-09-21 08:06:23,605 INFO Echo: 'revres htob fo'
+2023-09-21 08:06:23,754 INFO Recv: (4) 'and client.'
+2023-09-21 08:06:24,495 INFO Echo: '.tneilc dna'
+2023-09-21 08:06:24,845 INFO Disconnected from ('127.0.0.1', 53871)
+2023-09-21 08:06:26,462 INFO Connected from ('127.0.0.1', 53872)
+2023-09-21 08:06:26,463 INFO Recv: (5) 'A few lines of text'
+2023-09-21 08:06:26,764 INFO Echo: 'txet fo senil wef A'
+2023-09-21 08:06:27,470 INFO Recv: (6) 'including non-ASCII characters: €£'
+2023-09-21 08:06:28,852 INFO Echo: '£€ :sretcarahc IICSA-non gnidulcni'
+2023-09-21 08:06:29,949 INFO Recv: (7) 'to test the operation'
+2023-09-21 08:06:31,565 INFO Echo: 'noitarepo eht tset ot'
+2023-09-21 08:06:31,801 INFO Recv: (8) 'of both server'
+2023-09-21 08:06:34,475 INFO Echo: 'revres htob fo'
+2023-09-21 08:06:35,428 INFO Recv: (9) 'and client.'
+2023-09-21 08:06:36,509 INFO Echo: '.tneilc dna'
+2023-09-21 08:06:38,602 INFO Disconnected from ('127.0.0.1', 53872)
+2023-09-21 08:06:40,049 INFO Connected from ('127.0.0.1', 53873)
+2023-09-21 08:06:40,050 INFO Recv: (10) 'A few lines of text'
+2023-09-21 08:06:41,745 INFO Echo: 'txet fo senil wef A'
+2023-09-21 08:06:43,646 INFO Recv: (11) 'including non-ASCII characters: €£'
+2023-09-21 08:06:45,750 INFO Echo: '£€ :sretcarahc IICSA-non gnidulcni'
+2023-09-21 08:06:45,750 INFO Disconnected from ('127.0.0.1', 53873)
+2023-09-21 08:06:47,881 INFO Connected from ('127.0.0.1', 53874)
+2023-09-21 08:06:47,882 INFO Disconnected from ('127.0.0.1', 53874)

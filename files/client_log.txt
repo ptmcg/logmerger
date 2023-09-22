@@ -1,0 +1,42 @@
+2023-09-21 08:06:15,215 INFO Connected to server localhost:8881
+2023-09-21 08:06:15,215 INFO SENT 'A few lines of text' (19)
+2023-09-21 08:06:16,659 INFO RCVD b'txet fo senil wef A' (19)
+2023-09-21 08:06:18,101 INFO SENT 'including non-ASCII characters: €£' (37)
+2023-09-21 08:06:18,803 INFO RCVD b'\xa3\xc2\xac\x82\xe2 :sretcarahc IICSA-non gnidulcni' (37)
+2023-09-21 08:06:19,659 INFO SENT 'to test the operation' (21)
+2023-09-21 08:06:20,921 INFO RCVD b'noitarepo eht tset ot' (21)
+2023-09-21 08:06:22,997 INFO SENT 'of both server' (14)
+2023-09-21 08:06:23,605 INFO RCVD b'revres htob fo' (14)
+2023-09-21 08:06:23,754 INFO SENT 'and client.' (11)
+2023-09-21 08:06:24,495 INFO RCVD b'.tneilc dna' (11)
+Disconnected from server
+2023-09-21 08:06:26,462 INFO Connected to server localhost:8881
+2023-09-21 08:06:26,463 INFO SENT 'A few lines of text' (19)
+2023-09-21 08:06:26,764 INFO RCVD b'txet fo senil wef A' (19)
+2023-09-21 08:06:27,470 INFO SENT 'including non-ASCII characters: €£' (37)
+2023-09-21 08:06:28,852 INFO RCVD b'\xa3\xc2\xac\x82\xe2 :sretcarahc IICSA-non gnidulcni' (37)
+2023-09-21 08:06:29,949 INFO SENT 'to test the operation' (21)
+2023-09-21 08:06:31,565 INFO RCVD b'noitarepo eht tset ot' (21)
+2023-09-21 08:06:31,801 INFO SENT 'of both server' (14)
+2023-09-21 08:06:34,475 INFO RCVD b'revres htob fo' (14)
+2023-09-21 08:06:35,428 INFO SENT 'and client.' (11)
+2023-09-21 08:06:36,509 INFO RCVD b'.tneilc dna' (11)
+Disconnected from server
+2023-09-21 08:06:40,049 INFO Connected to server localhost:8881
+2023-09-21 08:06:40,049 INFO SENT 'A few lines of text' (19)
+2023-09-21 08:06:41,745 INFO RCVD b'txet fo senil wef A' (19)
+2023-09-21 08:06:43,646 INFO SENT 'including non-ASCII characters: €£' (37)
+2023-09-21 08:06:45,750 INFO RCVD b'\xa3\xc2\xac\x82\xe2 :sretcarahc IICSA-non gnidulcni' (37)
+2023-09-21 08:06:46,728 INFO SENT 'to test the operation' (21)
+Traceback (most recent call last):
+  File "C:\Users\ptmcg\dev\log_merger\working\pcap_demo\tcpclient.py", line 31, in <module>
+    response, address = sock.recvfrom(1024)  # buffer size: 1024
+                        ^^^^^^^^^^^^^^^^^^^
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+2023-09-21 08:06:47,881 INFO Connected to server localhost:8881
+2023-09-21 08:06:47,881 INFO SENT 'A few lines of text' (19)
+Traceback (most recent call last):
+  File "C:\Users\ptmcg\dev\log_merger\working\pcap_demo\tcpclient.py", line 31, in <module>
+    response, address = sock.recvfrom(1024)  # buffer size: 1024
+                        ^^^^^^^^^^^^^^^^^^^
+ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host
