@@ -8,17 +8,17 @@ These files all cover roughly the same time span but with varying timestamp form
 number and combination to compare results with different timestamp formats. You can pass `log3.txt.gz` directly to
 `log_merger`, and its contents will be unpacked internally.
 
-| file          | description                                                                                                           |
-|---------------|-----------------------------------------------------------------------------------------------------------------------|
-| `log1.txt`    | plaintext log file using `2023-07-14 08:00:01` timestamps                                                             |
-| `log2.txt`    | plaintext log file using `2023-07-14 08:00:01` timestamps                                                             |
-| `log3.txt`    | plaintext log file using `2023-07-14 08:00:01,000` timestamps                                                         |
-| `log3.txt.gz` | gzip'ed copy of `log3.txt`                                                                                            |
-| `log4.txt`    | plaintext log file using `1689339601` (integer seconds since epoch) timestamps                                        |
-| `log5.txt`    | plaintext log file using `1689339601.000` (float seconds since epoch) timestamps                                      |
-| `log6.txt`    | plaintext log file using `1689339601000` (integer milliseconds since epoch) timestamps                                |
-| `log7.txt`    | plaintext log file using `[1689339790.262003500`&#124;`INFO](process_name)` timestamps with embedded escape sequences |
-| `syslog1.txt` | plaintext Ubuntu syslog file using `2023-07-14 08:00:01` timestamps                                                   |
+| file          | description                                                                                                                  |
+|---------------|------------------------------------------------------------------------------------------------------------------------------|
+| `log1.txt`    | plaintext log file using `2023-07-14 08:00:01` format timestamps                                                             |
+| `log2.txt`    | plaintext log file using `2023-07-14 08:00:01` format timestamps                                                             |
+| `log3.txt`    | plaintext log file using `2023-07-14 08:00:01,000` format timestamps                                                         |
+| `log3.txt.gz` | gzip'ed copy of `log3.txt`                                                                                                   |
+| `log4.txt`    | plaintext log file using `1689339601` (integer seconds since epoch) format timestamps                                        |
+| `log5.txt`    | plaintext log file using `1689339601.000` (float seconds since epoch) format timestamps                                      |
+| `log6.txt`    | plaintext log file using `1689339601000` (integer milliseconds since epoch) format timestamps                                |
+| `log7.txt`    | plaintext log file using `[1689339790.262003500`&#124;`INFO](process_name)` format timestamps with embedded escape sequences |
+| `syslog1.txt` | plaintext Ubuntu syslog file using `Jul 14 08:00:02` format timestamps                                                       |
 
 NOTE: Using the custom timestamp format in `log7.txt` will require adding this command-line 
 option: `--timestamp_format '(.*m\[)((...)\|)'`.
