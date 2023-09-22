@@ -118,9 +118,9 @@ Here are some example log lines and suggested format templates:
 
 | Log line                                    | Template           |
 |---------------------------------------------|--------------------|
-| INFO - 2022-01-01 12:34:56 log message      | (\w+ - )((...) )   |
-| [INFO] 2022-01-01 12:34:56 log message      | (\[\w+\] )((...) ) |
-| [2022-01-01 12:34:56&#124;INFO] log message | (\[)((...)\&#124;)  |
+| INFO - 2022-01-01 12:34:56 log message      | (&#92;w+ - )((...) )   |
+| [INFO] 2022-01-01 12:34:56 log message      | (&#92;[&#92;w+&#92;] )((...) ) |
+| [2022-01-01 12:34:56&#124;INFO] log message | (&#92;[)((...)&#92;&#124;)  |
 
 
 ## About log_merger
