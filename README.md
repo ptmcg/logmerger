@@ -108,20 +108,35 @@ These values may also be given as relative times, such as "15m" for "15 minutes 
 Valid units are "s", "m", "h", and "d".
 ```
 
+
+## Supported file types
+
+Log data is usually extracted from text log files, but can also be extracted
+from other log related files
+
+| type                                                                               |                            |
+|------------------------------------------------------------------------------------|----------------------------|
+| text log files                                                                     | any file name ending       |
+| text log files that have been gzip compressed (such as those created by logrotate) | filename ending in `.gz`   |
+| packet capture files (experimental)                                                | filename ending in `.pcap` |
+
+
 ## Merging
 
 Log files get merged by interleaving log lines from each based on timestamps in each log line. `log_merger` tries to 
 use different timestamp formats until it finds a matching format for each input file. The supported formats are:
 
-| format                    | description                                                                                         |
-|---------------------------|-----------------------------------------------------------------------------------------------------|
-| `YYYY-MM-DD HH:MM:SS,SSS` | date+time to milliseconds, with ',' decimal (default for Python's `asctime` log marker)             |
-| `YYYY-MM-DD HH:MM:SS.SSS` | date+time to milliseconds, with '.' decimal                                                         |
-| `YYYY-MM-DD HH:MM:SS`     | date+time to seconds                                                                                |
-| `YYYY-MM-DDTHH:MM:SS,SSS` | date+T+time to milliseconds, with ',' decimal                                                       |
-| `YYYY-MM-DDTHH:MM:SS.SSS` | date+T+time to milliseconds, with '.' decimal                                                       |
-| `YYYY-MM-DDTHH:MM:SS`     | date+T+time to seconds                                                                              |
-| `Jan  1 HH:MM:SS`         | month/day + time (timestamp in syslog files); year is inferred from the create date of the log file |
+| format                       | description                                                                                         |
+|------------------------------|-----------------------------------------------------------------------------------------------------|
+| `YYYY-MM-DD HH:MM:SS,SSS`    | date+time to milliseconds, with ',' decimal (default for Python's `asctime` log marker)             |
+| `YYYY-MM-DD HH:MM:SS.SSS`    | date+time to milliseconds, with '.' decimal                                                         |
+| `YYYY-MM-DD HH:MM:SS`        | date+time to seconds                                                                                |
+| `YYYY-MM-DDTHH:MM:SS,SSS`    | date+T+time to milliseconds, with ',' decimal                                                       |
+| `YYYY-MM-DDTHH:MM:SS.SSS`    | date+T+time to milliseconds, with '.' decimal                                                       |
+| `YYYY-MM-DDTHH:MM:SS`        | date+T+time to seconds                                                                              |
+| `Jan DD HH:MM:SS`            | month/day + time (timestamp in syslog files); year is inferred from the create date of the log file |
+| `DD/Jan/YYYY HH:MM:SS`       | day/month/year + time                                                                               |
+| `DD/Jan/YYYY:HH:MM:SS ±ZZZZ` | day/month/year + time + timezone offset                                                             |
 
 
 Untimestamped log lines that contain multiple lines (such as a traceback) get combined with the previous timestamped
