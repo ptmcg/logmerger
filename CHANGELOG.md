@@ -3,6 +3,7 @@
 ### Added
 
 - timestamp formats for common web server logs
+- one-space indentation for continuation lines in multiline logs
 
 
 ## [0.4.0] - 2023-09-22

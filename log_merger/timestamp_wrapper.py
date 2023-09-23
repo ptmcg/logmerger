@@ -144,7 +144,7 @@ class TimestampedLineTransformer:
             ret = self.str_to_time(m[self.timestamp_match_group]), trimmed_obj
         else:
             # no leading timestamp, just return None and the original string
-            ret = None, obj
+            ret = None, f" {obj}"
 
         # remove escape sequences, which throw off the tabularization of output
         # (consider replacing with rich tags)
