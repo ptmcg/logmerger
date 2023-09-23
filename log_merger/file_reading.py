@@ -140,14 +140,14 @@ class PcapFileReader(FileReader):
         self._close_obj = pyshark.FileCapture(fname, keep_packets=False)
         self._iter = (self.format_packet(pkt) for pkt in self._close_obj if "IP" in pkt)
 
-    def _close_reader(self):
+    def _close_reader(self) -> None:
         self._close_obj.close()
 
-    def format_packet(self, pkt, extractor=operator.itemgetter("timestamp", "message")):
+    def format_packet(self, pkt, extractor=operator.itemgetter("timestamp", "message")) -> str:
         pkt_dict = self.extract_packet(pkt)
         return " ".join(extractor(pkt_dict))  # f"{pkt_dict['timestamp']} {pkt_dict['message']}"
 
-    def extract_packet(self, pkt):
+    def extract_packet(self, pkt) -> dict[str, str]:
         import errno
 
         timestamp = pkt.sniff_time

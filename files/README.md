@@ -26,7 +26,7 @@ option: `--timestamp_format '(.*m\[)((...)\|)'`.
 
 ### Merging log files and packet capture files
 
-These 3 sample files together illustrate using log_merger with interacting processes, and optionally
+These 3 sample files together demonstrate using `log_merger` with interacting processes, and optionally
 merging in packet capture data gathered using Wireshark:
 
 | file                      | description                                                                               |

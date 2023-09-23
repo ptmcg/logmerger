@@ -51,7 +51,7 @@ class InteractiveLogMergeViewerApp(App):
             display_width: int,
             show_line_numbers: bool,
             merged_log_lines_table: lt.Table,
-    ):
+    ) -> None:
         self.log_file_names = log_file_names
         self.merged_log_lines_table = merged_log_lines_table
         self.display_width = display_width
@@ -78,7 +78,7 @@ class InteractiveLogMergeViewerApp(App):
         screen_width_for_files = screen_width - timestamp_allowance - line_number_allowance
         width_per_file = int(screen_width_for_files * 0.9 // len(self.log_file_names))
 
-        def max_line_count(sseq: list[str]):
+        def max_line_count(sseq: list[str]) -> int:
             """
             The number of lines for this row is the maximum number of newlines
             in any value, plus 1.
@@ -120,7 +120,7 @@ class InteractiveLogMergeViewerApp(App):
     # methods to support go to find/next/prev search functions
     #
 
-    def action_find(self):
+    def action_find(self) -> None:
         self.app.push_screen(
             ModalInputDialog(
                 "Find:",
@@ -129,24 +129,24 @@ class InteractiveLogMergeViewerApp(App):
             self.save_search_string_and_move_to_next
         )
 
-    def action_find_next(self):
+    def action_find_next(self) -> None:
         self.move_to_next_search_line()
 
-    def action_find_prev(self):
+    def action_find_prev(self) -> None:
         self.move_to_prev_search_line()
 
     def get_current_cursor_line(self) -> int:
         dt: DataTable = self.query_one(DataTable)
         return dt.cursor_row
 
-    def save_search_string_and_move_to_next(self, search_str):
+    def save_search_string_and_move_to_next(self, search_str) -> None:
         if not search_str:
             return
 
         self.current_search_string = search_str
         self.move_to_next_search_line()
 
-    def _move_to_relative_search_line(self, move_delta: int, limit: int):
+    def _move_to_relative_search_line(self, move_delta: int, limit: int) -> None:
         search_string = self.current_search_string.lower()
 
         cur_line_number = self.get_current_cursor_line() + move_delta
@@ -166,23 +166,23 @@ class InteractiveLogMergeViewerApp(App):
         else:
             self.bell()
 
-    def move_to_next_search_line(self):
+    def move_to_next_search_line(self) -> None:
         self._move_to_relative_search_line(1, len(self.merged_log_lines_table))
 
-    def move_to_prev_search_line(self):
+    def move_to_prev_search_line(self) -> None:
         self._move_to_relative_search_line(-1, -1)
 
     #
     # methods to support go to line function
     #
 
-    def action_goto_line(self):
+    def action_goto_line(self) -> None:
         self.app.push_screen(
             ModalInputDialog("Go to line:", validator=Integer(minimum=1)),
             self.move_cursor_to_line_number
         )
 
-    def move_cursor_to_line_number(self, line_number_str):
+    def move_cursor_to_line_number(self, line_number_str: str) -> None:
         # convert 1-based line number to 0-based
         line_number = int(line_number_str) - 1
 
@@ -193,7 +193,7 @@ class InteractiveLogMergeViewerApp(App):
     # methods to support go to timestamp function
     #
 
-    def action_goto_timestamp(self):
+    def action_goto_timestamp(self) -> None:
         self.app.push_screen(
             ModalInputDialog(
                 "Go to timestamp:",
@@ -203,7 +203,7 @@ class InteractiveLogMergeViewerApp(App):
             self.move_cursor_to_timestamp
         )
 
-    def move_cursor_to_timestamp(self, timestamp_str: str):
+    def move_cursor_to_timestamp(self, timestamp_str: str) -> None:
         self.current_goto_timestamp_string = timestamp_str
 
         # normalize input string to timestamps in merged log lines table
@@ -223,7 +223,7 @@ class InteractiveLogMergeViewerApp(App):
     # methods to support help/about
     #
 
-    def action_help_about(self):
+    def action_help_about(self) -> None:
         from log_merger.about import text
 
         self.app.push_screen(

@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 import itertools
 import re
 import sys
-from typing import TypeVar
+from typing import TypeVar, Never
 
 import littletable as lt
 
@@ -159,7 +159,7 @@ class LogMergerApplication:
 
         self.encoding = self.config.encoding
 
-    def run(self):
+    def run(self) -> None:
         # generate dicts, one per timestamp, with values for each log file for the respective
         # log line from that file at that timestamp, or "" if no log line at that timestamp
         merged_lines = self._merge_log_file_lines()
@@ -245,7 +245,7 @@ class LogMergerApplication:
     def _display_merged_lines_interactively(
             self,
             merged_log_lines: lt.Table,
-    ):
+    ) -> Never:
 
         app = InteractiveLogMergeViewerApp()
         app.config(

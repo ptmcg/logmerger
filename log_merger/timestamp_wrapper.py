@@ -33,7 +33,7 @@ class TimestampedLineTransformer:
         cls.match = re.compile(cls.pattern).match
 
     @staticmethod
-    def _get_first_line_of_file(cls, file_ref):
+    def _get_first_line_of_file(cls, file_ref) -> str:
         if isinstance(file_ref, (str, Path)):
             with open(file_ref) as log_file:
                 first_line = log_file.readline()
