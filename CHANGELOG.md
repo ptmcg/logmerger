@@ -1,5 +1,9 @@
 ## [0.5.0] - In development
 
+### Added
+
+- timestamp formats for common web server logs
+
 
 ## [0.4.0] - 2023-09-22
 

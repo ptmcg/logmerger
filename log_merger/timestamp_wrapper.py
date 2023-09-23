@@ -21,7 +21,7 @@ class TimestampedLineTransformer:
     (timestamp, rest of the line) tuples.
     """
     pattern = ""
-    match_group = 2
+    timestamp_match_group = 2
     sub_repl = ""
     strptime_format = ""
     match = lambda s: False
@@ -104,7 +104,7 @@ class TimestampedLineTransformer:
             class_properties = {
                 "pattern": custom_timestamp_pattern,
                 "timestamp_pattern": subcls.pattern,
-                "match_group": 3 if has_initial_content else 2,
+                "timestamp_match_group": 3 if has_initial_content else 2,
                 "sub_repl": r"\1" if has_initial_content else "",
                 "strptime_format": subcls.strptime_format,
             }
@@ -141,7 +141,7 @@ class TimestampedLineTransformer:
             # create (datetime, str) tuple - clip leading datetime string from
             # the log string, so that it doesn't duplicate when presented
             trimmed_obj = self._re_pattern_sub(self.sub_repl, obj)
-            ret = self.str_to_time(m[self.match_group]), trimmed_obj
+            ret = self.str_to_time(m[self.timestamp_match_group]), trimmed_obj
         else:
             # no leading timestamp, just return None and the original string
             ret = None, obj
@@ -232,6 +232,34 @@ class BDHMS(TimestampedLineTransformer):
         if dt is not None:
             dt = dt.replace(year=date_year)
         return dt, obj
+
+
+class PythonHttpServerLog(TimestampedLineTransformer):
+    # ::1 - - [22/Sep/2023 21:58:40] "GET /log1.txt HTTP/1.1" 200 -
+    timestamp_pattern = r"\d{2}\/\w+\/\d{4} \d{2}:\d{2}:\d{2}"
+    pattern = fr"(.*)(- \[({timestamp_pattern})\]\s)"
+    strptime_format = "%d/%b/%Y %H:%M:%S"
+    timestamp_match_group = 3
+    sub_repl = r"\1"
+
+    def __init__(self):
+        super().__init__(self.pattern, self.strptime_format)
+
+
+class HttpServerAccessLog(TimestampedLineTransformer):
+    # 91.194.60.14 - - [16/Sep/2023:19:05:06 +0000] "GET /python_nutshell_app_a_search HTTP/1.1" 200 1027 "-"
+    #   "http.rb/5.1.1 (Mastodon/4.1.3; +https://mamot.fr/) Bot" "91.194.60.14" response-time=0.002
+    timestamp_pattern = r"\d{2}\/\w+\/\d{4}:\d{2}:\d{2}:\d{2} [+-]\d{4}"
+    pattern = fr"(.*)(- \[({timestamp_pattern})\]\s)"
+    strptime_format = "%d/%b/%Y:%H:%M:%S %z"
+    timestamp_match_group = 3
+    sub_repl = r"\1"
+
+    def __init__(self):
+        super().__init__(
+            self.pattern,
+            lambda s: datetime.strptime(s, self.strptime_format).astimezone().replace(tzinfo=None)
+        )
 
 
 class FloatSecondsSinceEpoch(TimestampedLineTransformer):
