@@ -2,8 +2,13 @@
 
 ### Added
 
+- `--output` to stream to a file (files ending in ".md" are output in Markdown format)
 - timestamp formats for common web server logs
 - one-space indentation for continuation lines in multiline logs
+
+### Changed
+
+- made `--interactive` the default display mode; use `--output -` to display to stdout
 
 
 ## [0.4.0] - 2023-09-22

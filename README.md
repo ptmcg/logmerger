@@ -68,9 +68,9 @@ Using the `-i` interactive option will display the merged log in an interactive 
 `log_merger -h` will show the following help:
 
 ```
-usage: log_merger [-h] [--interactive] [--start START] [--end END]
-                  [--width WIDTH] [--line_numbers] [--csv CSV]
-                  [--encoding ENCODING]
+usage: log_merger [-h] [--interactive] [--output OUTPUT] [--start START] [--end END] [--width WIDTH]
+                  [--line_numbers] [--csv CSV] [--encoding ENCODING]
+                  [--timestamp_format [TIMESTAMP_FORMATS ...]] [--demo]
                   [files ...]
 
 positional arguments:
@@ -78,20 +78,22 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  --interactive, -i     show output using interactive TUI browser
+  --interactive, -i     show merged output using interactive TUI browser (default)
+  --output OUTPUT, -o OUTPUT
+                        save merged output to file ('-' for stdout; files ending in '.md' are saved
+                        using Markdown)
   --start START, -s START
                         start time to select time window for merging logs
   --end END, -e END     end time to select time window for merging logs
   --width WIDTH, -w WIDTH
-                        total screen width to use for interactive mode (defaults to
-                        current screen width)
+                        total screen width to use for interactive mode (defaults to current screen
+                        width)
   --line_numbers, -ln   add line number column
   --csv CSV, -csv CSV   save merged logs to CSV file
   --encoding ENCODING, -enc ENCODING
-                        encoding to use when reading log files (defaults to the
-                        system default encoding)
+                        encoding to use when reading log files (defaults to the system default encoding)
   --timestamp_format [TIMESTAMP_FORMATS ...]
-                        custom timestamp format (regex-derived timestamp template)
+                        custom timestamp format
   --demo                Run interactive demo
   
 Start and end timestamps to clip the given files to a particular time window can be

@@ -45,11 +45,12 @@ The command to run `log_merger` accepts several options, followed by one or more
 
 | Option              | Description                                                                                      |
 |---------------------|--------------------------------------------------------------------------------------------------|
+| --interactive, -i   | display in interactive mode (default)                                                            |
+| --output, -o        | save output to file ('-' for stdout; files ending in `.md` are saved using Markdown)             |
 | --width, -w         | total display width - if greater than the screen width, will display with a horizontal scrollbar |
 | --line_numbers, -ln | display with a leading line number column                                                        |
 | --start, -s         | start time for merging logs                                                                      |
 | --end, -e           | end time for merging logs                                                                        |
-| --interactive, -i   | display in interactive mode                                                                      |
 | --csv               | output merged logs as CSV                                                                        |
 | --timestamp_format  | define one or more custom formats for log file timestamps                                        |
 | --demo              | run log_merger with simulated log file content (in either text or interactive modes)             |

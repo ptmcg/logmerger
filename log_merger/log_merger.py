@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 import itertools
 import re
 import sys
+from pathlib import Path
 from typing import TypeVar, Never
 
 import littletable as lt
@@ -39,12 +40,22 @@ def make_argument_parser():
     Valid units are "s", "m", "h", and "d" for seconds, minutes, hours, or days.
     """
 
+    # When changing these arguments, update relevant sections in
+    # - README.md
+    # - about.py
+    #
     parser = argparse.ArgumentParser(prog="log_merger", epilog=epilog_notes)
     parser.add_argument("files", nargs="*", help="log files to be merged")
     parser.add_argument(
         "--interactive", "-i",
         action="store_true",
-        help="show output using interactive TUI browser"
+        default=True,
+        help="show merged output using interactive TUI browser (default)"
+    )
+    parser.add_argument(
+        "--output", "-o",
+        # type=argparse.FileType('w'),
+        help="save merged output to file ('-' for stdout; files ending in '.md' are saved using Markdown)"
     )
     parser.add_argument('--start', '-s', required=False, help="start time to select time window for merging logs")
     parser.add_argument('--end', '-e', required=False, help="end time to select time window for merging logs")
@@ -154,7 +165,7 @@ class LogMergerApplication:
 
         self.interactive = config.interactive
         self.textual_output = self.interactive
-        self.table_output = not self.interactive
+        self.save_to_file = config.output
         self.save_to_csv = config.csv
 
         self.encoding = self.config.encoding
@@ -171,10 +182,23 @@ class LogMergerApplication:
         if self.save_to_csv:
             merged_lines_table.csv_export(self.save_to_csv)
 
-        elif self.table_output:
-            # present the table - using a rich Table, the columns will auto-size to content and terminal
-            # width
-            merged_lines_table.present()
+        elif self.save_to_file:
+            if self.save_to_file == "-":
+                # present the table to stdout - using a rich Table, the columns will auto-size to content and terminal
+                # width
+                merged_lines_table.present()
+            elif self.save_to_file.endswith(".md"):
+                # present the table to a file, using markdown format
+                col_names = merged_lines_table.info()["fields"]
+                for col in col_names:
+                    merged_lines_table.add_field(col, lambda rec: getattr(rec, col).replace("\n", "<br />"))
+                md_output = merged_lines_table.as_markdown(groupby="timestamp")
+                Path(self.save_to_file).write_text(md_output)
+            else:
+                # present the table to a file
+                box_style = lt.box.MINIMAL
+                with open(self.save_to_file, "w") as present_file:
+                    merged_lines_table.present(file=present_file, box=box_style)
 
         elif self.textual_output:
             self._display_merged_lines_interactively(merged_lines_table)
