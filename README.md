@@ -65,9 +65,9 @@ Use `--output -` to send the merged logs to stdout:
 
 ## Installation
 
-Install `logmerger` from PyPI:
+Install `logmerger` from PyPI (still using old project name `log_merger` for now):
 
-    pip install logmerger
+    pip install log_merger
 
 This will install `logmerger` as a shell/console command, so you can then run it directly without
 invoking `python`.
