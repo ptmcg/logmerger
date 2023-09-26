@@ -9,15 +9,15 @@ from textual.binding import Binding
 from textual.validation import Integer
 from textual.widgets import DataTable, Footer
 
-from log_merger.tui.dialogs import ModalInputDialog, ModalAboutDialog
-from log_merger.tui.validators import TimestampValidator
+from logmerger.tui.dialogs import ModalInputDialog, ModalAboutDialog
+from logmerger.tui.validators import TimestampValidator
 
 
 class InteractiveLogMergeViewerApp(App):
     """
     Class to display merged results using textual TUI.
     """
-    TITLE = "log_merger"
+    TITLE = "logmerger"
 
     BINDINGS = [
         Binding(key="q", action="quit", description="Quit"),
@@ -31,7 +31,7 @@ class InteractiveLogMergeViewerApp(App):
     ]
 
     def __init__(self, *args, **kwargs):
-        from log_merger.log_merger import parse_time_using, VALID_INPUT_TIME_FORMATS
+        from logmerger.logmerger import parse_time_using, VALID_INPUT_TIME_FORMATS
 
         super().__init__(*args, **kwargs)
         self.log_file_names: list[str] = []
@@ -224,7 +224,7 @@ class InteractiveLogMergeViewerApp(App):
     #
 
     def action_help_about(self) -> None:
-        from log_merger.about import text
+        from logmerger.about import text
 
         self.app.push_screen(
             ModalAboutDialog(content=text)

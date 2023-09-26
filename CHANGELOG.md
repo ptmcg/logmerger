@@ -1,4 +1,4 @@
-## [0.5.0] - In development
+## [0.5.0] - 2023-09-26
 
 ### Added
 
@@ -8,8 +8,7 @@
 
 ### Changed
 
-- changed command-line name from `log_merger` to `logmerger`; next release will also change
-  the project name in PyPI
+- changed PyPI project name and command-line name from `log_merger` to `logmerger`
 - made `--interactive` the default display mode; use `--output -` to display to stdout
 
 

@@ -8,8 +8,8 @@ timestamp order.
 In practice, log files often use various formats for their log timestamps. `logmerger` looks for several 
 standard timestamp formats, at the start of each line of the log file:
 
-| Format                       | Description                                                                    |
-|------------------------------|--------------------------------------------------------------------------------|
+| Format                     | Description                                                                    |
+|----------------------------|--------------------------------------------------------------------------------|
 | YYYY-MM-DD HH:MM:SS,SSS    | date and time with milliseconds (, decimal) (defaut Python asctime log format) |
 | YYYY-MM-DD HH:MM:SS.SSS    | date and time with milliseconds (. decimal)                                    |
 | YYYY-MM-DD HH:MM:SS        | date and time                                                                  |
@@ -17,8 +17,8 @@ standard timestamp formats, at the start of each line of the log file:
 | 0000000000000              | milliseconds since epoch                                                       |
 | 0000000000                 | integer seconds since epoch                                                    |
 | Jan DD HH:MM:SS            | month + day + time (timestamp in syslog files); year is inferred from the create date of the log file |
-| DD/Jan/YYYY HH:MM:SS       | day/month/year + time                                                                               |
-| DD/Jan/YYYY:HH:MM:SS ±ZZZZ | day/month/year : time + timezone offset                                                             |
+| DD/Jan/YYYY HH:MM:SS       | day/month/year + time                                                          |
+| DD/Jan/YYYY:HH:MM:SS ±ZZZZ | day/month/year : time + timezone offset (converts to local time)               |
 
 For log files that do not have the timestamp at the start of the line, you can define a custom format using
 the command line option `--timestamp_format`.  See `Custom timestamp formats` below.
@@ -53,7 +53,7 @@ The command to run `logmerger` accepts several options, followed by one or more 
 | --end, -e           | end time for merging logs                                                                        |
 | --csv               | output merged logs as CSV                                                                        |
 | --timestamp_format  | define one or more custom formats for log file timestamps                                        |
-| --demo              | run logmerger with simulated log file content (in either text or interactive modes)             |
+| --demo              | run logmerger with simulated log file content (in either text or interactive modes)              |
 
 
 ## Usage tips
@@ -128,7 +128,7 @@ Here are some example log lines and suggested format templates:
 
 ## About logmerger
 
-logmerger version 0.5.0 (in development)
+logmerger version 0.5.0
 
 by Paul McGuire, 2023
 

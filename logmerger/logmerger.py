@@ -1,5 +1,5 @@
 #
-# log_merger.py
+# logmerger.py
 #
 # Utility for viewing multiple log files in a side-by-side merged format.
 #
@@ -17,11 +17,11 @@ from typing import TypeVar, Never
 
 import littletable as lt
 
-from log_merger.file_reading import FileReader
-from log_merger.interactive_viewing import InteractiveLogMergeViewerApp
-from log_merger.merging import Merger
-from log_merger.multiline_log_handler import MultilineLogCollapser
-from log_merger.timestamp_wrapper import TimestampedLineTransformer
+from logmerger.file_reading import FileReader
+from logmerger.interactive_viewing import InteractiveLogMergeViewerApp
+from logmerger.merging import Merger
+from logmerger.multiline_log_handler import MultilineLogCollapser
+from logmerger.timestamp_wrapper import TimestampedLineTransformer
 
 
 T = TypeVar("T")
@@ -44,7 +44,7 @@ def make_argument_parser():
     # - README.md
     # - about.py
     #
-    parser = argparse.ArgumentParser(prog="log_merger", epilog=epilog_notes)
+    parser = argparse.ArgumentParser(prog="logmerger", epilog=epilog_notes)
     parser.add_argument("files", nargs="*", help="log files to be merged")
     parser.add_argument(
         "--interactive", "-i",

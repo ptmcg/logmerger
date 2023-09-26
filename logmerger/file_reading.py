@@ -60,7 +60,7 @@ class InternalDemoReader(FileReader):
         return fname.endswith(".demo")
 
     def __init__(self, fname: str, encoding: str):
-        import log_merger.demo as demo_files
+        import logmerger.demo as demo_files
 
         super().__init__(fname, encoding)
         self._close_obj = None
@@ -133,7 +133,7 @@ class PcapFileReader(FileReader):
         try:
             import pyshark
         except ImportError:
-            print("cannot merge PCAP contents; install PCAP support using `pip install log_merger[pcap]`")
+            print("cannot merge PCAP contents; install PCAP support using `pip install logmerger[pcap]`")
             exit(1)
 
         super().__init__(fname, encoding)

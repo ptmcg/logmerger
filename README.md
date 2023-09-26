@@ -63,6 +63,16 @@ Use `--output -` to send the merged logs to stdout:
                                                                   missing required field
 ```
 
+## Installation
+
+Install `logmerger` from PyPI:
+
+    pip install logmerger
+
+This will install `logmerger` as a shell/console command, so you can then run it directly without
+invoking `python`.
+
+
 ## Command line arguments
 
 `logmerger -h` will show the following help:
@@ -135,7 +145,7 @@ use different timestamp formats until it finds a matching format for each input 
 | `YYYY-MM-DDTHH:MM:SS`        | date+T+time to seconds                                                                              |
 | `Jan DD HH:MM:SS`            | month/day + time (timestamp in syslog files); year is inferred from the create date of the log file |
 | `DD/Jan/YYYY HH:MM:SS`       | day/month/year + time                                                                               |
-| `DD/Jan/YYYY:HH:MM:SS ±ZZZZ` | day/month/year + time + timezone offset                                                             |
+| `DD/Jan/YYYY:HH:MM:SS ±ZZZZ` | day/month/year + time + timezone offset (converts timestamps to local time)                         |
 
 
 Untimestamped log lines that contain multiple lines (such as a traceback) get combined with the previous timestamped
