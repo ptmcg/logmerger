@@ -2,13 +2,14 @@
 
 ### Added
 
+- installation notes to README
 - `--output` to stream to a file (files ending in ".md" are output in Markdown format)
 - timestamp formats for common web server logs
 - one-space indentation for continuation lines in multiline logs
 
 ### Changed
 
-- changed PyPI project name and command-line name from `log_merger` to `logmerger`
+- changed shell command name from `log_merger` to `logmerger` (project name to be changed also, just not yet)
 - made `--interactive` the default display mode; use `--output -` to display to stdout
 
 
