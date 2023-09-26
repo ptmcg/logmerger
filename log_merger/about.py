@@ -1,11 +1,11 @@
 text = r"""
-# log_merger
+# logmerger
 
-The `log_merger` utility provides a view of one or more log files, merged by timestamps found in those files. It is 
+The `logmerger` utility provides a view of one or more log files, merged by timestamps found in those files. It is 
 helpful when analyzing interactions between separate programs by viewing their individual log files side-by-side, in
 timestamp order.
 
-In practice, log files often use various formats for their log timestamps. `log_merger` looks for several 
+In practice, log files often use various formats for their log timestamps. `logmerger` looks for several 
 standard timestamp formats, at the start of each line of the log file:
 
 | Format                       | Description                                                                    |
@@ -25,7 +25,7 @@ the command line option `--timestamp_format`.  See `Custom timestamp formats` be
 
 ## Interactive functions
 
-The interactive mode of `log_merger` defines several keystroke navigation commands:
+The interactive mode of `logmerger` defines several keystroke navigation commands:
 
 | Key | Function                                                                                                                   |
 |:---:|----------------------------------------------------------------------------------------------------------------------------|
@@ -41,7 +41,7 @@ The interactive mode of `log_merger` defines several keystroke navigation comman
 
 ## Command line options
 
-The command to run `log_merger` accepts several options, followed by one or more file names:
+The command to run `logmerger` accepts several options, followed by one or more file names:
 
 | Option              | Description                                                                                      |
 |---------------------|--------------------------------------------------------------------------------------------------|
@@ -53,21 +53,21 @@ The command to run `log_merger` accepts several options, followed by one or more
 | --end, -e           | end time for merging logs                                                                        |
 | --csv               | output merged logs as CSV                                                                        |
 | --timestamp_format  | define one or more custom formats for log file timestamps                                        |
-| --demo              | run log_merger with simulated log file content (in either text or interactive modes)             |
+| --demo              | run logmerger with simulated log file content (in either text or interactive modes)             |
 
 
 ## Usage tips
 
-### Use `log_merger` with a single log file
+### Use `logmerger` with a single log file
 
-You can use `log_merger` even with just a single log file to make use of `log_merger`'s interactive viewing or
-CSV formatting. `log_merger` normalizes timestamps to a standard `YYYY-MM-DD HH:MM:SS.SSS` format, making logs
+You can use `logmerger` even with just a single log file to make use of `logmerger`'s interactive viewing or
+CSV formatting. `logmerger` normalizes timestamps to a standard `YYYY-MM-DD HH:MM:SS.SSS` format, making logs
 that use seconds-since-epoch timestamps more human-readable.
 
 
 ### Supported file types
 
-`log_merger` accepts text files, and can also read directly from `.gz` gzip'ped files (such as those gzip'ped
+`logmerger` accepts text files, and can also read directly from `.gz` gzip'ped files (such as those gzip'ped
 by logrotate). Packet captures with a `.pcap` file extension, created using `tcpdump` or `Wireshark`, can also be
 merged.
 
@@ -75,14 +75,14 @@ merged.
 ### Multi-line logs
 
 Some logs may contain messages that extend beyond a single line, or are followed by untimestamped lines
-(such as JSON data or an exception with traceback). `log_merger` detects these lines and groups them with the
+(such as JSON data or an exception with traceback). `logmerger` detects these lines and groups them with the
 previous timestamped line.
 
 
 ### Out-of-sequence log lines
 
 For the most part, log lines are written in ascending time order. But on occasion, some log messages may
-get recorded out of time order. `log_merger` uses a rolling window sort to reorder out-of-sequence log lines
+get recorded out of time order. `logmerger` uses a rolling window sort to reorder out-of-sequence log lines
 into proper ascending time order.
 
 
@@ -126,13 +126,13 @@ Here are some example log lines and suggested format templates:
 | [2022-01-01 12:34:56&#124;INFO] log message | (&#92;[)((...)&#92;&#124;)  |
 
 
-## About log_merger
+## About logmerger
 
-log_merger version 0.5.0 (in development)
+logmerger version 0.5.0 (in development)
 
 by Paul McGuire, 2023
 
 MIT License
 
-GitHub: `https://github.com/ptmcg/log_merger`
+GitHub: `https://github.com/ptmcg/logmerger`
 """  # noqa

@@ -1,6 +1,6 @@
-# log_merger
+# logmerger
 
-log_merger is a TUI for viewing a merged display of multiple log files, merged by timestamp.
+`logmerger` is a TUI for viewing a merged display of multiple log files, merged by timestamp.
 
 Given these two log files:
 
@@ -29,9 +29,14 @@ ValueError("shouldn't have done that")
 ```
 This command
 
-    log_merger log1.txt log2.txt
+    logmerger log1.txt log2.txt
 
-Shows the following merged display:
+Shows the following browsable merged display (enabled using the [textual](https://textual.textualize.io) Python library):
+
+![Image](https://github.com/ptmcg/log_merger/blob/main/static/log1_log2_merged_tui_lr.jpg?raw=true)
+
+Use `--output -` to send the merged logs to stdout:
+
 ```
   Timestamp                 Files/Log1.Txt                        Files/Log2.Txt
  ────────────────────────────────────────────────────────────────────────────────────────────────────
@@ -58,20 +63,15 @@ Shows the following merged display:
                                                                   missing required field
 ```
 
-Using the `-i` interactive option will display the merged log in an interactive terminal-based browser
-(enabled using the [textual](https://textual.textualize.io) Python library).
-
-![Image](static/log1_log2_merged_tui_lr.jpg)
-
 ## Command line arguments
 
-`log_merger -h` will show the following help:
+`logmerger -h` will show the following help:
 
 ```
-usage: log_merger [-h] [--interactive] [--output OUTPUT] [--start START] [--end END] [--width WIDTH]
-                  [--line_numbers] [--csv CSV] [--encoding ENCODING]
-                  [--timestamp_format [TIMESTAMP_FORMATS ...]] [--demo]
-                  [files ...]
+usage: logmerger [-h] [--interactive] [--output OUTPUT] [--start START] [--end END] [--width WIDTH]
+                 [--line_numbers] [--csv CSV] [--encoding ENCODING]
+                 [--timestamp_format [TIMESTAMP_FORMATS ...]] [--demo]
+                 [files ...]
 
 positional arguments:
   files                 log files to be merged
@@ -111,7 +111,7 @@ Valid units are "s", "m", "h", and "d".
 ## Supported file types
 
 Log data is usually extracted from text log files, but can also be extracted
-from other log related files
+from other log related files.
 
 | type                                                                               |                            |
 |------------------------------------------------------------------------------------|----------------------------|
@@ -122,7 +122,7 @@ from other log related files
 
 ## Merging
 
-Log files get merged by interleaving log lines from each based on timestamps in each log line. `log_merger` tries to 
+Log files get merged by interleaving log lines from each based on timestamps in each log line. `logmerger` tries to 
 use different timestamp formats until it finds a matching format for each input file. The supported formats are:
 
 | format                       | description                                                                                         |
