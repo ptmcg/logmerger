@@ -1,12 +1,12 @@
 # Demo log files
 
-This directory contains a number of log files for experimenting with `log_merger`.
+This directory contains a number of log files for experimenting with `logmerger`.
 
 ### Merging log files
 
 These files all cover roughly the same time span but with varying timestamp formats, and so can be merged in any
 number and combination to compare results with different timestamp formats. You can pass `log3.txt.gz` directly to
-`log_merger`, and its contents will be unpacked internally.
+`logmerger`, and its contents will be unpacked internally.
 
 | file          | description                                                                                                                  |
 |---------------|------------------------------------------------------------------------------------------------------------------------------|
@@ -26,7 +26,7 @@ option: `--timestamp_format '(.*m\[)((...)\|)'`.
 
 ### Merging log files and packet capture files
 
-These 3 sample files together demonstrate using `log_merger` with interacting processes, and optionally
+These 3 sample files together demonstrate using `logmerger` with interacting processes, and optionally
 merging in packet capture data gathered using Wireshark:
 
 | file                      | description                                                                               |
@@ -35,5 +35,5 @@ merging in packet capture data gathered using Wireshark:
 | `client_log.txt`          | client sending strings to the server                                                      |
 | `mirror_server_8881.pcap` | packet capture recorded during client->server session                                     |
 
-You can run `log_merger` and pass these 3 files directly as file arguments. `log_merger` will unpack the contents of the
+You can run `logmerger` and pass these 3 files directly as file arguments. `logmerger` will unpack the contents of the
 `.pcap` file and merge them in with the plaintext log messages of the other two.

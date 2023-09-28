@@ -33,7 +33,7 @@ This command
 
 Shows the following browsable merged display (enabled using the [textual](https://textual.textualize.io) Python library):
 
-![Image](https://github.com/ptmcg/log_merger/blob/main/static/log1_log2_merged_tui_lr.jpg?raw=true)
+![Image](https://github.com/ptmcg/logmerger/blob/main/static/log1_log2_merged_tui_lr.jpg?raw=true)
 
 Use `--output -` to send the merged logs to stdout:
 
@@ -65,9 +65,9 @@ Use `--output -` to send the merged logs to stdout:
 
 ## Installation
 
-Install `logmerger` from PyPI (still using old project name `log_merger` for now):
+Install `logmerger` from PyPI:
 
-    pip install log_merger
+    pip install logmerger
 
 This will install `logmerger` as a shell/console command, so you can then run it directly without
 invoking `python`.

@@ -128,7 +128,7 @@ Here are some example log lines and suggested format templates:
 
 ## About logmerger
 
-logmerger version 0.5.0
+logmerger version 0.6.0
 
 by Paul McGuire, 2023
 

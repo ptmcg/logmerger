@@ -29,14 +29,14 @@ Disconnected from server
 2023-09-21 08:06:45,750 INFO RCVD b'\xa3\xc2\xac\x82\xe2 :sretcarahc IICSA-non gnidulcni' (37)
 2023-09-21 08:06:46,728 INFO SENT 'to test the operation' (21)
 Traceback (most recent call last):
-  File "C:\Users\ptmcg\dev\log_merger\working\pcap_demo\tcpclient.py", line 31, in <module>
+  File "C:\Users\ptmcg\dev\logmerger\working\pcap_demo\tcpclient.py", line 31, in <module>
     response, address = sock.recvfrom(1024)  # buffer size: 1024
                         ^^^^^^^^^^^^^^^^^^^
 ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
 2023-09-21 08:06:47,881 INFO Connected to server localhost:8881
 2023-09-21 08:06:47,881 INFO SENT 'A few lines of text' (19)
 Traceback (most recent call last):
-  File "C:\Users\ptmcg\dev\log_merger\working\pcap_demo\tcpclient.py", line 31, in <module>
+  File "C:\Users\ptmcg\dev\logmerger\working\pcap_demo\tcpclient.py", line 31, in <module>
     response, address = sock.recvfrom(1024)  # buffer size: 1024
                         ^^^^^^^^^^^^^^^^^^^
 ConnectionResetError: [WinError 10054] An existing connection was forcibly closed by the remote host

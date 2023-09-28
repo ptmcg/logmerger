@@ -1,3 +1,10 @@
+## [0.6.0] - 2023-09-28
+
+### Changed
+
+- the PyPI Project Formerly Known As `log_merger` is now `logmerger`. Install with pip using `pip install logmerger`.
+
+
 ## [0.5.0] - 2023-09-26
 
 ### Added
@@ -69,7 +76,8 @@
 - Interactive browser will use the screen width by default, or accept a command-line argument.
 
 
-[0.5.0]: https://github.com/ptmcg/log_merger/compare/v0.4.0...main
+[0.6.0]: https://github.com/ptmcg/log_merger/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/ptmcg/log_merger/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/ptmcg/log_merger/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/ptmcg/log_merger/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/ptmcg/log_merger/compare/v0.2.0...v0.3.0
