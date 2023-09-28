@@ -1,5 +1,10 @@
 ## [0.7.0] - in development
 
+### Fixed
+
+- Log lines containing rich-style text tags could raise exceptions in several output modes. Now tag introducers
+  in lines are '\' escaped before sending to rich or textual.
+
 
 ## [0.6.0] - 2023-09-28
 

@@ -186,7 +186,16 @@ class LogMergerApplication:
             if self.save_to_file == "-":
                 # present the table to stdout - using a rich Table, the columns will auto-size to content and terminal
                 # width
+
+                # guard against embedded rich-like tags
+                for line in merged_lines_table:
+                    for k, v in vars(line).items():
+                        if k in ("timestamp", "line"):
+                            continue
+                        setattr(line, k, v.replace("[/", r"\[/"))
+
                 merged_lines_table.present()
+
             elif self.save_to_file.endswith(".md"):
                 # present the table to a file, using markdown format
                 col_names = merged_lines_table.info()["fields"]
@@ -196,6 +205,14 @@ class LogMergerApplication:
                 Path(self.save_to_file).write_text(md_output)
             else:
                 # present the table to a file
+
+                # guard against embedded rich-like tags
+                for line in merged_lines_table:
+                    for k, v in vars(line).items():
+                        if k in ("timestamp", "line"):
+                            continue
+                        setattr(line, k, v.replace("[/", r"\[/"))
+
                 box_style = lt.box.MINIMAL
                 with open(self.save_to_file, "w") as present_file:
                     merged_lines_table.present(file=present_file, box=box_style)

@@ -103,12 +103,12 @@ class InteractiveLogMergeViewerApp(App):
                             "\n".join(textwrap.wrap(rvl, width_per_file))
                             for rvl in cell_value.splitlines()
                         )
-                        wrapped_row_values.append("\n".join(cell_lines))
+                        wrapped_row_values.append("\n".join(cell_lines).replace("[/", r"\[/"))
                     else:
-                        wrapped_row_values.append(cell_value)
+                        wrapped_row_values.append(cell_value.replace("[/", r"\[/"))
             else:
                 # no need to wrap any values in this row
-                wrapped_row_values = row_values
+                wrapped_row_values = [rv.replace("[/", r"\[/") for rv in row_values]
 
             display_table.add_row(
                 Text(wrapped_row_values[0], justify="right")
