@@ -1,5 +1,13 @@
 ## [0.7.0] - in development
 
+### [Changelog][0.7.0-changes]
+
+### Added
+
+- Support for CSV input files. `logmerger` looks at the first column of the CSV for the timestamp.
+- Early detection of end-of-time-range, without reading the remainder of the input file.
+- Changelog links in CHANGELOG.md
+
 ### Fixed
 
 - Log lines containing rich-style text tags could raise exceptions in several output modes. Now tag introducers
@@ -8,12 +16,16 @@
 
 ## [0.6.0] - 2023-09-28
 
+### [Changelog][0.6.0-changes]
+
 ### Changed
 
 - the PyPI Project Formerly Known As `log_merger` is now `logmerger`. Install with pip using `pip install logmerger`.
 
 
 ## [0.5.0] - 2023-09-26
+
+### [Changelog][0.5.0-changes]
 
 ### Added
 
@@ -29,6 +41,8 @@
 
 
 ## [0.4.0] - 2023-09-22
+
+### [Changelog][0.4.0-changes]
 
 ### Added
 
@@ -49,6 +63,8 @@
 
 ## [0.3.0] - 2023-09-18
 
+### [Changelog][0.3.0-changes]
+
 ### Added
 
 - `"f"`, `"n"`, `"p"` key bindings - Find/Next/Prev (case-insensitive text search)
@@ -61,6 +77,8 @@
 
 
 ## [0.2.0] - 2023-09-15
+
+### [Changelog][0.2.0-changes]
 
 ### Added
 
@@ -84,10 +102,19 @@
 - Interactive browser will use the screen width by default, or accept a command-line argument.
 
 
-[0.6.0]: https://github.com/ptmcg/log_merger/compare/v0.5.0...v0.6.0
-[0.5.0]: https://github.com/ptmcg/log_merger/compare/v0.4.0...v0.5.0
-[0.4.0]: https://github.com/ptmcg/log_merger/compare/v0.3.1...v0.4.0
-[0.3.1]: https://github.com/ptmcg/log_merger/compare/v0.3.0...v0.3.1
-[0.3.0]: https://github.com/ptmcg/log_merger/compare/v0.2.0...v0.3.0
-[0.2.0]: https://github.com/ptmcg/log_merger/compare/v0.1.0...v0.2.0
+[//]: # ([0.7.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.7.0)
+[0.6.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.6.0
+[0.5.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.5.0
+[0.4.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.4.0
+[0.3.1]: https://github.com/ptmcg/log_merger/releases/tag/v0.3.1
+[0.3.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.3.0
+[0.2.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.2.0
 [0.1.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.1.0
+
+[0.7.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.6.0...main
+[0.6.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.5.0...v0.6.0
+[0.5.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.4.0...v0.5.0
+[0.4.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.3.1...v0.4.0
+[0.3.1-changes]: https://github.com/ptmcg/log_merger/compare/v0.3.0...v0.3.1
+[0.3.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.2.0...v0.3.0
+[0.2.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.1.0...v0.2.0

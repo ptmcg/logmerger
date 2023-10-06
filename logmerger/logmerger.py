@@ -161,7 +161,11 @@ class LogMergerApplication:
         if self.end_time <= self.start_time:
             raise ValueError("invalid start/end times - start must be before end")
 
-        self.time_clip = lambda ts_log: self.start_time <= ts_log[0] <= self.end_time
+        self.time_clip = None
+        if config.end:
+            self.time_clip = self._time_clip_early_exit
+        elif config.start:
+            self.time_clip = self._time_clip_after_start
 
         self.interactive = config.interactive
         self.textual_output = self.interactive
@@ -169,6 +173,20 @@ class LogMergerApplication:
         self.save_to_csv = config.csv
 
         self.encoding = self.config.encoding
+
+    def _time_clip_after_start(self, ts: datetime) -> bool:
+        return ts is None or self.start_time <= ts
+
+    def _time_clip_early_exit(self, ts: datetime) -> bool:
+        if ts is None:
+            return True
+        if ts > self.end_time:
+            raise StopIteration
+        return self.start_time <= ts
+
+    def _raw_time_clip(self, ts_log: tuple[datetime, str]) -> bool:
+        ts, _ = ts_log
+        return ts is None or self.start_time <= ts <= self.end_time
 
     def run(self) -> None:
         # generate dicts, one per timestamp, with values for each log file for the respective
@@ -241,11 +259,8 @@ class LogMergerApplication:
             (
                 label(
                     fname,
-                    filter(self.time_clip, (
-                            MultilineLogCollapser()(
-                                map(xformer, map(str.rstrip, reader))
-                            )
-                        )
+                    MultilineLogCollapser(self.time_clip)(
+                        filter(self._raw_time_clip, map(xformer, map(str.rstrip, reader)))
                     )
                 )
             ) for fname, xformer, reader in zip(self.file_names, transformers, readers)

@@ -67,9 +67,15 @@ that use seconds-since-epoch timestamps more human-readable.
 
 ### Supported file types
 
-`logmerger` accepts text files, and can also read directly from `.gz` gzip'ped files (such as those gzip'ped
-by logrotate). Packet captures with a `.pcap` file extension, created using `tcpdump` or `Wireshark`, can also be
-merged.
+`logmerger` accepts the following file types:
+
+- text log files
+- text log files that have been gzip compressed (such as those created by logrotate)
+  - (filename ending in `.gz`)
+- CSV files (timestamp is read from first data column)
+  - (filename ending in `.csv`)
+- packet capture files, created using tcpdump or WireShark (experimental)
+  - (filename ending in `.pcap`)
 
 
 ### Multi-line logs

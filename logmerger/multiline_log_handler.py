@@ -64,8 +64,9 @@ class MultilineLogCollapser:
 
     to two log entries.
     """
-    def __init__(self):
+    def __init__(self, time_filter: Optional[Callable[[datetime], bool]]):
         self._newlogline_detector = NewLogLineDetector()
+        self._time_filter_fn = time_filter or (lambda x: True)
 
     def __call__(self, log_seq: Iterable[tuple[datetime, str]]) -> Generator[tuple[datetime, str], None, None]:
         for timestamp, lines in WindowedSort(
@@ -73,7 +74,11 @@ class MultilineLogCollapser:
                 seq=((a, list(b)) for a, b in groupby(log_seq, key=self._newlogline_detector)),
                 key=itemgetter(0)
         ):
-            yield timestamp, "\n".join(line[1] for line in lines)
+            try:
+                if self._time_filter_fn(timestamp):
+                    yield timestamp, "\n".join(line[1] for line in lines)
+            except StopIteration:
+                break
 
 
 if __name__ == '__main__':

@@ -127,6 +127,7 @@ from other log related files.
 |------------------------------------------------------------------------------------|----------------------------|
 | text log files                                                                     | any file name ending       |
 | text log files that have been gzip compressed (such as those created by logrotate) | filename ending in `.gz`   |
+| CSV files (timestamp is read from first data column)                               | filename ending in `.csv`  |
 | packet capture files (experimental)                                                | filename ending in `.pcap` |
 
 

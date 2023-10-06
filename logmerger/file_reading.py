@@ -211,3 +211,41 @@ class PcapFileReader(FileReader):
                 "proto": f"{pkt.highest_layer}",
                 "message": f"{pkt.highest_layer} {ip_info.src} -> {ip_info.dst} {content}",
             }
+
+
+class CsvFileReader(FileReader):
+    @classmethod
+    def _can_read(cls, fname: str) -> bool:
+        return fname.endswith(".csv")
+
+    def __init__(self, fname: str, encoding: str):
+        import csv
+
+        super().__init__(fname, encoding)
+        self._close_obj = open(fname, encoding=encoding, newline='')
+        reader = csv.reader(self._close_obj, quoting=csv.QUOTE_MINIMAL)
+
+        # skip headers
+        next(reader)
+
+        def reader_guard(rdr):
+            """
+            wrapper to guard against exceptions while reading from the CSV
+            (such as line too long)
+            """
+            while True:
+                try:
+                    yield from rdr
+                except csv.Error as csv_err:
+                    yield [">>> logmerger/csv.Error:", str(csv_err), r"<<<"]
+
+                # explicit test for end of reading, to break out of forever loop
+                try:
+                    yield next(rdr)
+                except StopIteration:
+                    break
+
+        self._iter = (" ".join(row) for row in reader_guard(reader))
+
+    def _close_reader(self):
+        self._close_obj.close()
