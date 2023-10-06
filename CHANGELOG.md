@@ -5,6 +5,7 @@
 ### Added
 
 - Support for CSV input files. `logmerger` looks at the first column of the CSV for the timestamp.
+- Table displays and updates while loading data.
 - Early detection of end-of-time-range, without reading the remainder of the input file.
 - Changelog links in CHANGELOG.md
 

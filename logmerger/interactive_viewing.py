@@ -1,9 +1,11 @@
+import asyncio
 from functools import partial
 import textwrap
 import types
 
 import littletable as lt
 from rich.text import Text
+from textual import work
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.validation import Integer
@@ -62,6 +64,10 @@ class InteractiveLogMergeViewerApp(App):
         yield Footer()
 
     def on_mount(self) -> None:
+        self.load_data()
+
+    @work
+    async def load_data(self):
         fixed_cols = 2 if self.show_line_numbers else 1
         col_names = self.merged_log_lines_table.info()["fields"]
 
@@ -86,7 +92,10 @@ class InteractiveLogMergeViewerApp(App):
             return max(s.count("\n") for s in sseq) + 1
 
         line_ns: types.SimpleNamespace
-        for line_ns in self.merged_log_lines_table:
+        for i, line_ns in enumerate(self.merged_log_lines_table, start=1):
+            if i % 10 == 0:
+                # give other UI tasks a chance to work
+                await asyncio.sleep(0)
             row_values = list(vars(line_ns).values())
 
             # see if any text wrapping is required for this line
