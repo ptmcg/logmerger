@@ -72,6 +72,10 @@ Install `logmerger` from PyPI:
 This will install `logmerger` as a shell/console command, so you can then run it directly without
 invoking `python`.
 
+To add support for merging pcap files, install using:
+
+    pip install logmerger[pcap]
+
 
 ## Command line arguments
 
