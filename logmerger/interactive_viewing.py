@@ -1,6 +1,7 @@
 import asyncio
 from functools import partial
 import textwrap
+import time
 import types
 
 import littletable as lt
@@ -91,6 +92,8 @@ class InteractiveLogMergeViewerApp(App):
             """
             return max(s.count("\n") for s in sseq) + 1
 
+        start = time.time()
+
         line_ns: types.SimpleNamespace
         for i, line_ns in enumerate(self.merged_log_lines_table, start=1):
             if i % 10 == 0:
@@ -124,6 +127,11 @@ class InteractiveLogMergeViewerApp(App):
                 if self.show_line_numbers else wrapped_row_values[0],
                 *wrapped_row_values[1:],
                 height=max_line_count(wrapped_row_values))
+
+        elapsed = time.time() - start
+        if elapsed > 10:
+            self.bell()
+            self.notify("Log data complete")
 
     #
     # methods to support go to find/next/prev search functions
