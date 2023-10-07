@@ -110,9 +110,9 @@ class InteractiveLogMergeViewerApp(App):
                 # wrap individual cells (except never wrap the timestamp or leading line number)
                 wrapped_row_values = row_values[:fixed_cols]
                 for cell_value in row_values[fixed_cols:]:
-                    if "\n" in cell_value or len(cell_value) > width_per_file:
+                    if len(cell_value) > width_per_file or "\n" in cell_value:
                         cell_lines = (
-                            "\n".join(textwrap.wrap(rvl, width_per_file))
+                            "\n ".join(textwrap.wrap(rvl, width_per_file-1))
                             for rvl in cell_value.splitlines()
                         )
                         wrapped_row_values.append("\n".join(cell_lines).replace("[/", r"\[/"))
