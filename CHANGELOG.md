@@ -8,6 +8,7 @@
 - Table displays and updates while loading data.
 - Early detection of end-of-time-range, without reading the remainder of the input file.
 - Notification when loading a large log file is complete.
+- Bell when pressing `N` or `P` without defining a search string using `F`.
 - Changelog links in CHANGELOG.md.
 
 ### Fixed

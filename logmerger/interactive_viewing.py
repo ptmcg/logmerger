@@ -184,9 +184,15 @@ class InteractiveLogMergeViewerApp(App):
             self.bell()
 
     def move_to_next_search_line(self) -> None:
+        if not self.current_search_string:
+            self.bell()
+            return
         self._move_to_relative_search_line(1, len(self.merged_log_lines_table))
 
     def move_to_prev_search_line(self) -> None:
+        if not self.current_search_string:
+            self.bell()
+            return
         self._move_to_relative_search_line(-1, -1)
 
     #
