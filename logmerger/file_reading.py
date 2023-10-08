@@ -225,8 +225,9 @@ class CsvFileReader(FileReader):
         self._close_obj = open(fname, encoding=encoding, newline='')
         reader = csv.reader(self._close_obj, quoting=csv.QUOTE_MINIMAL)
 
-        # skip headers
-        next(reader)
+        # get headers, remove header for timestamp
+        headers = next(reader)
+        headers.pop(0)
 
         def reader_guard(rdr):
             """
@@ -245,7 +246,10 @@ class CsvFileReader(FileReader):
                 except StopIteration:
                     break
 
-        self._iter = (" ".join(row) for row in reader_guard(reader))
+        self._iter = (
+            f'{ts} {" ".join(f"{hdr}={value}" for hdr, value in zip(headers, values))}'
+            for ts, *values in reader_guard(reader)
+        )
 
     def _close_reader(self):
         self._close_obj.close()
