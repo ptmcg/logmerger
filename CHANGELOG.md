@@ -9,6 +9,7 @@
 - Early detection of end-of-time-range, without reading the remainder of the input file.
 - Notification when loading a large log file is complete.
 - Bell when pressing `N` or `P` without defining a search string using `F`.
+- Timestamps in log files that are marked with "+/-nnnn" or "Z" timezone indicators are converted to local time.
 - Changelog links in CHANGELOG.md.
 
 ### Fixed
