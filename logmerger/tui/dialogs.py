@@ -59,7 +59,7 @@ class ModalInputDialog(ModalScreen[str]):
     def __init__(
             self,
             prompt: str,
-            initial: str | None = None,
+            initial: str = None,
             validator: Validator = None
     ) -> None:
         """Initialise the input dialog.

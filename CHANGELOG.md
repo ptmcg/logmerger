@@ -1,5 +1,11 @@
 ## [0.8.0] - in development
 
+### [Changelog][0.8.0-changes]
+
+### Fixed
+
+- Some Python version incompatibilities in type annotations (Issue #33)
+
 
 ## [0.7.0] - 2023-10-07
 

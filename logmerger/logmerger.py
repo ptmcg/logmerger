@@ -13,7 +13,7 @@ import itertools
 import re
 import sys
 from pathlib import Path
-from typing import TypeVar, Never
+from typing import TypeVar, Union
 
 import littletable as lt
 
@@ -25,6 +25,10 @@ from logmerger.timestamp_wrapper import TimestampedLineTransformer
 
 
 T = TypeVar("T")
+try:
+    from typing import Never
+except ImportError:
+    from typing import NoReturn as Never
 
 
 def make_argument_parser():
@@ -96,7 +100,7 @@ VALID_INPUT_TIME_FORMATS = [
 ]
 
 
-def parse_time_using(ts_str: str, formats: str | list[str]) -> datetime:
+def parse_time_using(ts_str: str, formats: Union[str, list[str]]) -> datetime:
     if not isinstance(formats, (list, tuple)):
         formats = [formats]
     for fmt in formats:
@@ -215,7 +219,7 @@ class LogMergerApplication:
                 merged_lines_table.present()
 
             elif self.save_to_file.endswith(".md"):
-                # present the table to a file, using markdown format
+                # present the table to a file, using Markdown format
                 col_names = merged_lines_table.info()["fields"]
                 for col in col_names:
                     merged_lines_table.add_field(col, lambda rec: getattr(rec, col).replace("\n", "<br />"))
@@ -251,7 +255,7 @@ class LogMergerApplication:
         #   timestamp, so that it doesn't get repeated in the output table)
         # - collapses multiline logs (lines that go beyond just one line, with subsequent lines that
         #   do not start with a timestamp - tracebacks are a common example)
-        # - labels each item the its source filename (so that after pulling an entry for the heap, we
+        # - labels each item with its source filename (so that after pulling an entry for the heap, we
         #   know which file it came from)
         # (for background on why we must use map() instead of a generator expression,
         # see https://chat.stackoverflow.com/transcript/message/56645472#56645472)
@@ -271,12 +275,12 @@ class LogMergerApplication:
         merger = Merger(log_file_line_iters, key_function=lambda log_data: log_data[1][0])
 
         if self.config.line_numbers:
-            initialize_row_dict = lambda n, ts: {
+            initialize_row_dict = lambda n, ts: {  # noqa
                 "line": str(n),
                 "timestamp": ts.strftime("%Y-%m-%d %H:%M:%S.%f")[:23] if ts > datetime.min else ""
             }
         else:
-            initialize_row_dict = lambda n, ts: {
+            initialize_row_dict = lambda n, ts: {  # noqa
                 "timestamp": ts.strftime("%Y-%m-%d %H:%M:%S.%f")[:23] if ts > datetime.min else ""
             }
 

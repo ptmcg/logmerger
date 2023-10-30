@@ -15,7 +15,7 @@ class Merger:
     Uses a heap to pull values from the multiple iterators, and itertools.groupby to combine
     values that are shared across multiple iterators by key value.
     """
-    def __init__(self, seq_list: list[T], key_function: KeyFunction | None = None):
+    def __init__(self, seq_list: list[T], key_function: KeyFunction = None):
         self.seq_list = seq_list
         self.key_function = key_function or (lambda x: x)
 
