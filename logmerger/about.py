@@ -39,12 +39,16 @@ The interactive mode of `logmerger` defines several keystroke navigation command
 |  H  | Display this helpful text                                                                                                  |
 |  Q  | Quit                                                                                                                       |
 
-When using the Jump command, enter an integer number followed by "l", "s", "m", "h", or "d", to indicate whether jumping
-by number of lines, seconds, minutes, hours, or days. Then press N and P to advance or go back by your jump interval. For
-example:
+When using the Jump command, enter an integer number followed by "l", "us", "ms", "s", "m", "h", or "d", to indicate whether jumping
+by number of lines, microseconds, milliseconds, seconds, minutes, hours, or days. Then press N and P to advance or go back by your jump interval.
+For example:
 
     3s - jump forward or backward in 3 second steps
     5l - jump forward or backward in 5 line steps
+
+When jumping by a time interval, if there is no entry at the exact interval difference from
+the current line, advancing will jump to the next timestamp after the computed target time,
+reversing will jump to the next timestamp before the computed target time.
 
 ## Command line options
 

@@ -45,7 +45,7 @@ class Jump(NamedTuple):
 
     @classmethod
     def from_string(cls, s: str):
-        jump_re = r"([1-9]\d*)\s*([lsmhd])"
+        jump_re = r"([1-9]\d*)\s*(l|us|ms|s|m|h|d)"
         parts = re.match(jump_re, s.lower())
         if not parts:
             return None
@@ -55,6 +55,8 @@ class Jump(NamedTuple):
             return cls(int(qty_str), units)
         else:
             units_map = {
+                "us": "microseconds",
+                "ms": "milliseconds",
                 "s": "seconds",
                 "m": "minutes",
                 "h": "hours",
