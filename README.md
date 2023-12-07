@@ -10,9 +10,11 @@ Given these two log files:
 2023-07-14 08:00:04 ERROR  Request processed unsuccessfully
 Something went wrong
 Traceback (last line is latest):
-    blah
-    blah
-ValueError("shouldn't have done that")
+    sample.py: line 32
+        divide(100, 0)
+    sample.py: line 8
+        return a / b
+ZeroDivisionError: division by zero
 2023-07-14 08:00:06 INFO   User authentication succeeded
 2023-07-14 08:00:08 DEBUG  Starting data synchronization
 2023-07-14 08:00:11 INFO   Processing incoming request
@@ -35,6 +37,8 @@ Shows the following browsable merged display (enabled using the [textual](https:
 
 ![Image](https://github.com/ptmcg/logmerger/blob/main/static/log1_log2_merged_tui_lr.jpg?raw=true)
 
+Press 'h' to get help on all key commands in the interactive display.
+
 Use `--output -` to send the merged logs to stdout:
 
 ```
@@ -48,10 +52,11 @@ Use `--output -` to send the merged logs to stdout:
                             unsuccessfully
                              Something went wrong
                              Traceback (last line is latest):
-                                 blah
-                                 blah
-                             ValueError("shouldn't have done
-                            that")
+                                 sample.py: line 32
+                                     divide(100, 0)
+                                 sample.py: line 8
+                                     return a / b
+                             ZeroDivisionError: division by zero                           
   2023-07-14 08:00:06.000   INFO   User authentication            DEBUG  Starting data
                             succeeded                             synchronization
   2023-07-14 08:00:08.000   DEBUG  Starting data                  INFO   Processing incoming request
@@ -82,7 +87,8 @@ To add support for merging pcap files, install using:
 `logmerger -h` will show the following help:
 
 ```
-usage: logmerger [-h] [--interactive] [--output OUTPUT] [--start START] [--end END] [--width WIDTH]
+usage: logmerger [-h] [--interactive] [--inline] [--output OUTPUT]
+                 [--start START] [--end END] [--width WIDTH]
                  [--line_numbers] [--csv CSV] [--encoding ENCODING]
                  [--timestamp_format [TIMESTAMP_FORMATS ...]] [--demo]
                  [files ...]
@@ -93,6 +99,7 @@ positional arguments:
 options:
   -h, --help            show this help message and exit
   --interactive, -i     show merged output using interactive TUI browser (default)
+  --inline              show merged log data as inline merge
   --output OUTPUT, -o OUTPUT
                         save merged output to file ('-' for stdout; files ending in '.md' are saved
                         using Markdown)

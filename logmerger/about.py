@@ -30,14 +30,25 @@ The interactive mode of `logmerger` defines several keystroke navigation command
 | Key | Function                                                                                                                   |
 |:---:|----------------------------------------------------------------------------------------------------------------------------|
 | ^D  | Toggle dark/light mode                                                                                                     |
+|  J  | Jump by line count or time interval                                                                                        |
 |  F  | Prompt for search string and advance to first line containing that string (case-insensitive)                               |
-|  N  | Advance to next instance of the current search string                                                                      |
-|  P  | Move back to previous instance of the current search string                                                                |
+|  N  | Advance (to next instance of the search string or by current jump interval)                                                |
+|  P  | Move back (to previous instance of the search string or by current jump interval)                                          |
 |  L  | Prompt for line number to move cursor to (if line number > total number of merged lines, advances to end)                  |
 |  T  | Prompt for timestamp to move cursor to (if no log message at the exact timestamp, will move to first line after timestamp) |
 |  H  | Display this helpful text                                                                                                  |
 |  Q  | Quit                                                                                                                       |
 
+When using the Jump command, enter an integer number followed by "l", "us", "ms", "s", "m", "h", or "d", to indicate whether jumping
+by number of lines, microseconds, milliseconds, seconds, minutes, hours, or days. Then press N and P to advance or go back by your jump interval.
+For example:
+
+    3s - jump forward or backward in 3 second steps
+    5l - jump forward or backward in 5 line steps
+
+When jumping by a time interval, if there is no entry at the exact interval difference from
+the current line, advancing will jump to the next timestamp after the computed target time,
+reversing will jump to the next timestamp before the computed target time.
 
 ## Command line options
 
@@ -46,6 +57,7 @@ The command to run `logmerger` accepts several options, followed by one or more 
 | Option              | Description                                                                                      |
 |---------------------|--------------------------------------------------------------------------------------------------|
 | --interactive, -i   | display in interactive mode (default)                                                            |
+| --inline            | display interactive merged content into a single inline column (only supported in interactive mode) (default is side-by-side) |
 | --output, -o        | save output to file ('-' for stdout; files ending in `.md` are saved using Markdown)             |
 | --width, -w         | total display width - if greater than the screen width, will display with a horizontal scrollbar |
 | --line_numbers, -ln | display with a leading line number column                                                        |
@@ -134,7 +146,7 @@ Here are some example log lines and suggested format templates:
 
 ## About logmerger
 
-logmerger version 0.7.0
+logmerger version 0.8.0
 
 by Paul McGuire, 2023
 

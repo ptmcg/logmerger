@@ -64,7 +64,7 @@ class MultilineLogCollapser:
 
     to two log entries.
     """
-    def __init__(self, time_filter: Optional[Callable[[datetime], bool]]):
+    def __init__(self, time_filter: Optional[Callable[[datetime], bool]] = None):
         self._newlogline_detector = NewLogLineDetector()
         self._time_filter_fn = time_filter or (lambda x: True)
 

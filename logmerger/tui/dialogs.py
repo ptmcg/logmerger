@@ -59,7 +59,7 @@ class ModalInputDialog(ModalScreen[str]):
     def __init__(
             self,
             prompt: str,
-            initial: str | None = None,
+            initial: str = None,
             validator: Validator = None
     ) -> None:
         """Initialise the input dialog.
@@ -73,7 +73,12 @@ class ModalInputDialog(ModalScreen[str]):
         """The prompt to display for the input."""
         self._initial = initial
         """The initial value to use for the input."""
-        self._validator = validator or Function(function=lambda s: True)
+        self._validator = validator or Function(function=lambda *args: True)
+
+    @classmethod
+    def __init_subclass__(cls, **kwargs):
+        if cls.DEFAULT_CSS == ModalInputDialog.DEFAULT_CSS:
+            cls.DEFAULT_CSS = ModalInputDialog.DEFAULT_CSS.replace("ModalInputDialog", cls.__name__)
 
     def compose(self) -> ComposeResult:
         """Compose the child widgets."""
@@ -174,9 +179,15 @@ class ModalAboutDialog(ModalScreen[type(None)]):
                 yield Button("OK", id="ok", variant="primary")
 
     def on_mount(self) -> None:
-        """Set up the dialog once the DOM is ready."""
+        """Move focus to viewer for immediate user interactivity."""
         self.query_one(MarkdownViewer).focus()
 
     @on(Button.Pressed, "#ok")
     def ok_clicked(self) -> None:
         self.dismiss()
+
+
+class ModalJumpDialog(ModalInputDialog):
+    """
+    A modal dialog for getting a jump interval
+    """

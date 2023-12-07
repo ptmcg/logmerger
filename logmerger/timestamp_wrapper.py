@@ -10,7 +10,7 @@ from typing import Callable, TypeVar, Union
 
 
 T = TypeVar("T")
-TimestampFormatter = Union[str | Callable[[str], datetime]]
+TimestampFormatter = Union[Union[str, Callable[[str], datetime]]]
 
 strip_escape_sequences = partial(re.compile("\x1b" + r"\[\d+(;\d+)*m").sub, "")
 
@@ -35,7 +35,7 @@ class TimestampedLineTransformer:
         cls.match = re.compile(cls.pattern).match
 
     @staticmethod
-    def _get_first_line_of_file(cls, file_ref) -> str:
+    def _get_first_line_of_file(file_ref) -> str:
         if isinstance(file_ref, (str, Path)):
             with open(file_ref) as log_file:
                 first_line = log_file.readline()
@@ -78,7 +78,7 @@ class TimestampedLineTransformer:
         `leading` can be a regex fragment for any leading text that comes before the timestamp.
         The template performs 3 functions:
         - (...) will create a capture group containing the actual timestamp value
-        - ((...)x) will define a capture graup for text that will be removed from the log line
+        - ((...)x) will define a capture group for text that will be removed from the log line
           before adding it to the table (so that timestamps do not get duplicated in the
           timestamp column _and_ in the log text itself
         - (leading) defines a capture group that comes before the timestamp, and which should
@@ -130,12 +130,13 @@ class TimestampedLineTransformer:
         else:
             self.str_to_time = strptime_formatter
 
-        self.file_info: Path = None
-        self.file_stat: os.stat_result = None
+        self.file_info: Path = None  # noqa
+        self.file_stat: os.stat_result = None  # noqa
 
-    def add_file_info(self, file_info: Path) -> None:
+    def add_file_info(self, file_info: Path):
         self.file_info = file_info
         self.file_stat = file_info.stat()
+        return self
 
     def __call__(self, obj: T) -> tuple[datetime | None, T]:
         m = self._re_pattern_match(obj)
@@ -364,7 +365,7 @@ if __name__ == '__main__':
     files = "log1.txt log3.txt syslog1.txt".split()
     file_dir = Path(__file__).parent.parent / "files"
     xformers = [TimestampedLineTransformer.make_transformer_from_file(file_dir / f) for f in files]
-    for fname, xformer in zip(files, xformers):
+    for fname, xform in zip(files, xformers):
         log_lines = (file_dir / fname).read_text().splitlines()
         for ln in log_lines[:3]:
-            print(xformer(ln))
+            print(xform(ln))
