@@ -5,7 +5,7 @@
 ### Added
 
 - Jump forward/backward by number of lines, or by time interval in microseconds, milliseconds, seconds, minutes, hours or days.
-- Support for `--inline` command-line option, to merge logs into a single column instead of side by side.
+- Support for `--inline` command-line option, to merge logs into a single column instead of side by side. (Issue #32)
 
 ### Fixed
 
@@ -120,7 +120,7 @@
 - Interactive browser will use the screen width by default, or accept a command-line argument.
 
 
-[//]: # ([0.8.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.8.0)
+[0.8.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.8.0
 [0.7.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.7.0
 [0.6.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.6.0
 [0.5.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.5.0
