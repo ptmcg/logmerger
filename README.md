@@ -87,7 +87,8 @@ To add support for merging pcap files, install using:
 `logmerger -h` will show the following help:
 
 ```
-usage: logmerger [-h] [--interactive] [--output OUTPUT] [--start START] [--end END] [--width WIDTH]
+usage: logmerger [-h] [--interactive] [--inline] [--output OUTPUT]
+                 [--start START] [--end END] [--width WIDTH]
                  [--line_numbers] [--csv CSV] [--encoding ENCODING]
                  [--timestamp_format [TIMESTAMP_FORMATS ...]] [--demo]
                  [files ...]
