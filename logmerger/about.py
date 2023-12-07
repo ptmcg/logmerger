@@ -30,14 +30,21 @@ The interactive mode of `logmerger` defines several keystroke navigation command
 | Key | Function                                                                                                                   |
 |:---:|----------------------------------------------------------------------------------------------------------------------------|
 | ^D  | Toggle dark/light mode                                                                                                     |
+|  J  | Jump by line count or time interval                                                                                        |
 |  F  | Prompt for search string and advance to first line containing that string (case-insensitive)                               |
-|  N  | Advance to next instance of the current search string                                                                      |
-|  P  | Move back to previous instance of the current search string                                                                |
+|  N  | Advance (to next instance of the search string or by current jump interval)                                                |
+|  P  | Move back (to previous instance of the search string or by current jump interval)                                          |
 |  L  | Prompt for line number to move cursor to (if line number > total number of merged lines, advances to end)                  |
 |  T  | Prompt for timestamp to move cursor to (if no log message at the exact timestamp, will move to first line after timestamp) |
 |  H  | Display this helpful text                                                                                                  |
 |  Q  | Quit                                                                                                                       |
 
+When using the Jump command, enter an integer number followed by "l", "s", "m", "h", or "d", to indicate whether jumping
+by number of lines, seconds, minutes, hours, or days. Then press N and P to advance or go back by your jump interval. For
+example:
+
+    3s - jump forward or backward in 3 second steps
+    5l - jump forward or backward in 5 line steps
 
 ## Command line options
 

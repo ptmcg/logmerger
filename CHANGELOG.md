@@ -2,6 +2,10 @@
 
 ### [Changelog][0.8.0-changes]
 
+### Added
+
+- Jump forward/backward by number of lines, or by time interval in seconds, minutes, hours or days.
+
 ### Fixed
 
 - Some Python version incompatibilities in type annotations (Issue #33)
