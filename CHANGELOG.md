@@ -5,6 +5,7 @@
 ### Added
 
 - Jump forward/backward by number of lines, or by time interval in seconds, minutes, hours or days.
+- Support for `--inline` command-line option, to merge logs into a single column instead of side by side.
 
 ### Fixed
 

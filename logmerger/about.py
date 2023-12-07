@@ -53,6 +53,7 @@ The command to run `logmerger` accepts several options, followed by one or more 
 | Option              | Description                                                                                      |
 |---------------------|--------------------------------------------------------------------------------------------------|
 | --interactive, -i   | display in interactive mode (default)                                                            |
+| --inline            | display interactive merged content into a single inline column (only supported in interactive mode) (default is side-by-side) |
 | --output, -o        | save output to file ('-' for stdout; files ending in `.md` are saved using Markdown)             |
 | --width, -w         | total display width - if greater than the screen width, will display with a horizontal scrollbar |
 | --line_numbers, -ln | display with a leading line number column                                                        |

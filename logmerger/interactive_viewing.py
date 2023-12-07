@@ -1,6 +1,7 @@
 import asyncio
 from datetime import timedelta, datetime
 from functools import partial
+import itertools
 import re
 import textwrap
 import time
@@ -17,6 +18,14 @@ from textual.widgets import DataTable, Footer
 
 from logmerger.tui.dialogs import ModalInputDialog, ModalAboutDialog, ModalJumpDialog
 from logmerger.tui.validators import TimestampValidator
+
+
+def _max_line_count(sseq: list[str]) -> int:
+    """
+    The number of lines for this row is the maximum number of newlines
+    in any value, plus 1.
+    """
+    return max(s.count("\n") for s in sseq) + 1
 
 
 class Jump(NamedTuple):
@@ -81,6 +90,7 @@ class InteractiveLogMergeViewerApp(App):
         self.merged_log_lines_table: lt.Table = None  # noqa
         self.display_width: int = 0
         self.show_line_numbers: bool = False
+        self.show_merged_logs_inline: bool = False
         self.current_search_string: str = ""
         self.current_jump: Jump = None  # noqa
         self.current_goto_timestamp_string: str = ""
@@ -95,18 +105,23 @@ class InteractiveLogMergeViewerApp(App):
             display_width: int,
             show_line_numbers: bool,
             merged_log_lines_table: lt.Table,
+            show_merged_logs_inline: bool,
     ) -> None:
         self.log_file_names = log_file_names
         self.merged_log_lines_table = merged_log_lines_table
         self.display_width = display_width
         self.show_line_numbers = show_line_numbers
+        self.show_merged_logs_inline = show_merged_logs_inline
 
     def compose(self) -> ComposeResult:
         yield DataTable()
         yield Footer()
 
     def on_mount(self) -> None:
-        self.load_data_side_by_side()
+        if self.show_merged_logs_inline:
+            self.load_data_inline()
+        else:
+            self.load_data_side_by_side()
 
     @work
     async def load_data_side_by_side(self):
@@ -125,13 +140,6 @@ class InteractiveLogMergeViewerApp(App):
         line_number_allowance = 8 if self.show_line_numbers else 0
         screen_width_for_files = screen_width - timestamp_allowance - line_number_allowance
         width_per_file = int(screen_width_for_files * 0.9 // len(self.log_file_names))
-
-        def max_line_count(sseq: list[str]) -> int:
-            """
-            The number of lines for this row is the maximum number of newlines
-            in any value, plus 1.
-            """
-            return max(s.count("\n") for s in sseq) + 1
 
         start = time.time()
 
@@ -167,7 +175,80 @@ class InteractiveLogMergeViewerApp(App):
                 Text(wrapped_row_values[0], justify="right")
                 if self.show_line_numbers else wrapped_row_values[0],
                 *wrapped_row_values[1:],
-                height=max_line_count(wrapped_row_values))
+                height=_max_line_count(wrapped_row_values))
+
+        elapsed = time.time() - start
+        if elapsed > 10:
+            self.bell()
+            self.notify("Log data complete")
+
+    @work
+    async def load_data_inline(self):
+        fixed_cols = 2 if self.show_line_numbers else 1
+        file_names = self.merged_log_lines_table.info()["fields"]
+
+        display_table = self.query_one(DataTable)
+        display_table.cursor_type = "row"
+        display_table.zebra_stripes = True
+        display_table.fixed_columns = fixed_cols + 1
+        if self.show_line_numbers:
+            col_names = ['line']
+        else:
+            col_names = []
+        col_names.extend(('timestamp', 'file', 'log'))
+        display_table.add_columns(*col_names)
+
+        # guesstimate how much width to allocate to each file
+        screen_width = self.display_width or self.size.width
+        timestamp_allowance = 25
+        line_number_allowance = 8 if self.show_line_numbers else 0
+        screen_width_for_files = screen_width - timestamp_allowance - line_number_allowance
+        width_for_file_names = min(int(screen_width_for_files), max(len(fn)+1 for fn in file_names))
+        width_for_content = screen_width_for_files - width_for_file_names
+
+        start = time.time()
+
+        line_ns: types.SimpleNamespace
+        for i, line_ns in enumerate(self.merged_log_lines_table, start=1):
+            if i % 10 == 0:
+                # give other UI tasks a chance to work
+                await asyncio.sleep(0)
+
+            line_ns_vars = vars(line_ns)
+            fixed_values = list(line_ns_vars.values())[:fixed_cols]
+            line_data = {k: v for k, v in list(line_ns_vars.items())[fixed_cols:] if v.strip()}
+            line_files = list(line_data)
+            line_content = list(line_data.values())
+            row_values = [*fixed_values, line_files, line_content]
+
+            # wrap individual cells (except never wrap the timestamp or leading line number)
+            wrapped_row_values = row_values[:fixed_cols]
+
+            # get wrapped versions of each file and its content
+            wrapped_file_names = [textwrap.wrap(fname, width_for_file_names-1) for fname in line_files]
+            wrapped_file_content = [
+                (
+                    "\n".join(textwrap.wrap(content_line, width_for_content - 1))
+                    for content_line in content.splitlines())
+                for content in line_content
+            ]
+
+            row_merged_filenames = ""
+            row_merged_filecontent = ""
+
+            for fname, fcontent in zip(wrapped_file_names, wrapped_file_content):
+                for fname_line, fcontent_line in itertools.zip_longest(fname, fcontent, fillvalue=""):
+                    row_merged_filenames += fname_line + "\n"
+                    row_merged_filecontent += fcontent_line + "\n"
+
+            wrapped_row_values.extend((row_merged_filenames, row_merged_filecontent))
+
+            display_table.add_row(
+                Text(wrapped_row_values[0], justify="right")
+                if self.show_line_numbers else wrapped_row_values[0],
+                *wrapped_row_values[1:],
+                height=_max_line_count(wrapped_row_values),
+            )
 
         elapsed = time.time() - start
         if elapsed > 10:

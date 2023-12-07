@@ -54,12 +54,18 @@ def make_argument_parser():
         "--interactive", "-i",
         action="store_true",
         default=True,
-        help="show merged output using interactive TUI browser (default)"
+        help="show merged output using interactive TUI browser (default)",
+    )
+    parser.add_argument(
+        "--inline",
+        action="store_true",
+        default=False,
+        help="show merged log data as inline merge",
     )
     parser.add_argument(
         "--output", "-o",
         # type=argparse.FileType('w'),
-        help="save merged output to file ('-' for stdout; files ending in '.md' are saved using Markdown)"
+        help="save merged output to file ('-' for stdout; files ending in '.md' are saved using Markdown)",
     )
     parser.add_argument('--start', '-s', required=False, help="start time to select time window for merging logs")
     parser.add_argument('--end', '-e', required=False, help="end time to select time window for merging logs")
@@ -313,6 +319,7 @@ class LogMergerApplication:
             display_width=self.total_width,
             show_line_numbers=self.config.line_numbers,
             merged_log_lines_table=merged_log_lines,
+            show_merged_logs_inline=self.config.inline,
         )
         app.run()
 
