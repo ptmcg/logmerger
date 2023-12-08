@@ -1,3 +1,10 @@
+## [0.9.0] - in development
+
+[//]: # (### [Changelog][0.9.0-changes])
+
+### Added
+
+
 ## [0.8.0] - 2023-12-07
 
 ### [Changelog][0.8.0-changes]
@@ -130,6 +137,7 @@
 [0.2.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.2.0
 [0.1.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.1.0
 
+[//]: # ([0.9.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.8.0...main)
 [0.8.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.7.0...v0.8.0
 [0.7.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.6.0...v0.7.0
 [0.6.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.5.0...v0.6.0
