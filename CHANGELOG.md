@@ -4,6 +4,9 @@
 
 ### Added
 
+- Support for `strace` log files; added "strace" custom timestamp format, which also accepts leading process id
+  integer on each line.
+
 
 ## [0.8.0] - 2023-12-07
 

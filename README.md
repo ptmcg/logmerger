@@ -147,17 +147,19 @@ from other log related files.
 Log files get merged by interleaving log lines from each based on timestamps in each log line. `logmerger` tries to 
 use different timestamp formats until it finds a matching format for each input file. The supported formats are:
 
-| format                       | description                                                                                         |
-|------------------------------|-----------------------------------------------------------------------------------------------------|
-| `YYYY-MM-DD HH:MM:SS,SSS`    | date+time to milliseconds, with ',' decimal (default for Python's `asctime` log marker)             |
-| `YYYY-MM-DD HH:MM:SS.SSS`    | date+time to milliseconds, with '.' decimal                                                         |
-| `YYYY-MM-DD HH:MM:SS`        | date+time to seconds                                                                                |
-| `YYYY-MM-DDTHH:MM:SS,SSS`    | date+T+time to milliseconds, with ',' decimal                                                       |
-| `YYYY-MM-DDTHH:MM:SS.SSS`    | date+T+time to milliseconds, with '.' decimal                                                       |
-| `YYYY-MM-DDTHH:MM:SS`        | date+T+time to seconds                                                                              |
-| `Jan DD HH:MM:SS`            | month/day + time (timestamp in syslog files); year is inferred from the create date of the log file |
-| `DD/Jan/YYYY HH:MM:SS`       | day/month/year + time                                                                               |
-| `DD/Jan/YYYY:HH:MM:SS ±ZZZZ` | day/month/year + time + timezone offset (converts timestamps to local time)                         |
+| format                       | description                                                                                           |
+|------------------------------|-------------------------------------------------------------------------------------------------------|
+| `YYYY-MM-DD HH:MM:SS,SSS`    | date+time to milliseconds, with ',' decimal (default for Python's `asctime` log marker)               |
+| `YYYY-MM-DD HH:MM:SS.SSS`    | date+time to milliseconds, with '.' decimal                                                           |
+| `YYYY-MM-DD HH:MM:SS`        | date+time to seconds                                                                                  |
+| `YYYY-MM-DDTHH:MM:SS,SSS`    | date+T+time to milliseconds, with ',' decimal                                                         |
+| `YYYY-MM-DDTHH:MM:SS.SSS`    | date+T+time to milliseconds, with '.' decimal                                                         |
+| `YYYY-MM-DDTHH:MM:SS`        | date+T+time to seconds                                                                                |
+| `Jan DD HH:MM:SS`            | month/day + time (timestamp in syslog files); year is inferred from the create date of the log file   |
+| `DD/Jan/YYYY HH:MM:SS`       | day/month/year + time                                                                                 |
+| `DD/Jan/YYYY:HH:MM:SS ±ZZZZ` | day/month/year + time + timezone offset (converts timestamps to local time)                           |
+| `HH:MM:SS.SSSSSS`            | hour/minute/second (timestamp in strace files); date is inferred from the create date of the log file |
+| `strace`                     | uses HH:MM:SS.SSSSSS format with leading process id integer                                           |
 
 
 Untimestamped log lines that contain multiple lines (such as a traceback) get combined with the previous timestamped

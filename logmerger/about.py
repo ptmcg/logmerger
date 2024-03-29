@@ -8,17 +8,19 @@ timestamp order.
 In practice, log files often use various formats for their log timestamps. `logmerger` looks for several 
 standard timestamp formats, at the start of each line of the log file:
 
-| Format                     | Description                                                                    |
-|----------------------------|--------------------------------------------------------------------------------|
-| YYYY-MM-DD HH:MM:SS,SSS    | date and time with milliseconds (, decimal) (defaut Python asctime log format) |
-| YYYY-MM-DD HH:MM:SS.SSS    | date and time with milliseconds (. decimal)                                    |
-| YYYY-MM-DD HH:MM:SS        | date and time                                                                  |
-| 0000000000.000000          | float seconds since epoch                                                      |
-| 0000000000000              | milliseconds since epoch                                                       |
-| 0000000000                 | integer seconds since epoch                                                    |
+| Format                     | Description                                                                     |
+|----------------------------|---------------------------------------------------------------------------------|
+| YYYY-MM-DD HH:MM:SS,SSS    | date and time with milliseconds (, decimal) (default Python asctime log format) |
+| YYYY-MM-DD HH:MM:SS.SSS    | date and time with milliseconds (. decimal)                                     |
+| YYYY-MM-DD HH:MM:SS        | date and time                                                                   |
+| 0000000000.000000          | float seconds since epoch                                                       |
+| 0000000000000              | milliseconds since epoch                                                        |
+| 0000000000                 | integer seconds since epoch                                                     |
+| HH:MM:SS.SSSSSS            | timestamp with milliseconds (strace format)                                     |
 | Jan DD HH:MM:SS            | month + day + time (timestamp in syslog files); year is inferred from the create date of the log file |
-| DD/Jan/YYYY HH:MM:SS       | day/month/year + time                                                          |
-| DD/Jan/YYYY:HH:MM:SS ±ZZZZ | day/month/year : time + timezone offset (converts to local time)               |
+| DD/Jan/YYYY HH:MM:SS       | day/month/year + time                                                           |
+| DD/Jan/YYYY:HH:MM:SS ±ZZZZ | day/month/year : time + timezone offset (converts to local time)                |
+| strace                     | uses HH:MM:SS.SSSSSS format with leading process id integer                     |
 
 For log files that do not have the timestamp at the start of the line, you can define a custom format using
 the command line option `--timestamp_format`.  See `Custom timestamp formats` below.
@@ -148,7 +150,7 @@ Here are some example log lines and suggested format templates:
 
 logmerger version 0.9.0
 
-by Paul McGuire, 2023
+by Paul McGuire, 2024
 
 MIT License
 
