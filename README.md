@@ -164,3 +164,10 @@ use different timestamp formats until it finds a matching format for each input 
 
 Untimestamped log lines that contain multiple lines (such as a traceback) get combined with the previous timestamped
 line (see in the example above).
+
+
+## Security contact information
+
+To report a security vulnerability, please use the
+[Tidelift security contact](https://tidelift.com/security).
+Tidelift will coordinate the fix and disclosure.
