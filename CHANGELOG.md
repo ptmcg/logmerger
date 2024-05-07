@@ -6,7 +6,9 @@
 
 - Support for `strace` log files; added "strace" custom timestamp format, which also accepts leading process id
   integer on each line.
-
+- `--autoclip` command-line option, to clip merged output to the first and last timestamps found in the
+  first log file.
+- `--show_clock` command-line option, to show a running clock in the header of the interactive merged log display.
 - Added SECURITY.md and security vulnerability reporting guidance in README.md.
 
 

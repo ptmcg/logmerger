@@ -57,10 +57,12 @@ class MultilineLogCollapser:
         2023-07-14 08:00:04 ERROR  Request processed unsuccessfully
         Something went wrong
         Traceback (last line is latest):
-            blah
-            blah
-        ValueError("shouldn't have done that")
-        2023-07-14 08:00:06 INFO   User authentication succeeded
+            sample.py: line 32
+                divide(100, 0)
+            sample.py: line 8
+                return a / b
+        ZeroDivisionError: division by zero
+        2023-07-14 08:00:06 INFO   User authentication failed
 
     to two log entries.
     """

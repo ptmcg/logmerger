@@ -69,6 +69,9 @@ def make_argument_parser():
     )
     parser.add_argument('--start', '-s', required=False, help="start time to select time window for merging logs")
     parser.add_argument('--end', '-e', required=False, help="end time to select time window for merging logs")
+    parser.add_argument("--autoclip", "-ac",
+                        action="store_true",
+                        help="clip merging to time range of logs in first log file")
     parser.add_argument(
         "--width", "-w",
         type=int,
@@ -76,6 +79,7 @@ def make_argument_parser():
         default=0
     )
     parser.add_argument("--line_numbers", "-ln", action="store_true", help="add line number column")
+    parser.add_argument("--show_clock", "-clock", action="store_true", help="show running clock in header")
     parser.add_argument("--csv", "-csv", help="save merged logs to CSV file")
     parser.add_argument(
         "--encoding", "-enc",
@@ -151,6 +155,7 @@ class LogMergerApplication:
 
         self.file_names = config.files
         self.total_width = config.width
+        self.autoclip = config.autoclip
 
         if config.start is None:
             self.start_time = datetime.min
@@ -256,6 +261,21 @@ class LogMergerApplication:
         transformers = [TimestampedLineTransformer.make_transformer_from_sample_line(next(peek_iter))
                         for peek_iter in peek_iters]
 
+        if self.autoclip:
+            clip_peek, rdr0 = itertools.tee(readers[0])
+            readers = [rdr0, *readers[1:]]
+            first_line = next(clip_peek)
+            ts, _ = transformers[0](first_line)
+            self.start_time = self.end_time = ts
+            for ts, _ in (transformers[0](line) for line in clip_peek):
+                if ts is None:
+                    continue
+                if ts > self.end_time:
+                    self.end_time = ts
+                elif ts < self.start_time:
+                    self.start_time = ts
+            self.time_clip = self._time_clip_early_exit
+
         # build iterators over each file that:
         # - transform each line into a (datetime, str) tuple (where the str is everything after the
         #   timestamp, so that it doesn't get repeated in the output table)
@@ -320,6 +340,7 @@ class LogMergerApplication:
             show_line_numbers=self.config.line_numbers,
             merged_log_lines_table=merged_log_lines,
             show_merged_logs_inline=self.config.inline,
+            show_clock=self.config.show_clock,
         )
         app.run()
 
