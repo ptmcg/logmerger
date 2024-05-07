@@ -14,7 +14,7 @@ from textual import work
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.validation import Integer
-from textual.widgets import DataTable, Footer
+from textual.widgets import DataTable, Footer, Header
 
 from logmerger.tui.dialogs import ModalInputDialog, ModalAboutDialog, ModalJumpDialog
 from logmerger.tui.validators import TimestampValidator
@@ -92,6 +92,7 @@ class InteractiveLogMergeViewerApp(App):
         self.merged_log_lines_table: lt.Table = None  # noqa
         self.display_width: int = 0
         self.show_line_numbers: bool = False
+        self.show_clock: bool = False
         self.show_merged_logs_inline: bool = False
         self.current_search_string: str = ""
         self.current_jump: Jump = None  # noqa
@@ -108,14 +109,18 @@ class InteractiveLogMergeViewerApp(App):
             show_line_numbers: bool,
             merged_log_lines_table: lt.Table,
             show_merged_logs_inline: bool,
+            show_clock: bool,
     ) -> None:
         self.log_file_names = log_file_names
         self.merged_log_lines_table = merged_log_lines_table
         self.display_width = display_width
         self.show_line_numbers = show_line_numbers
         self.show_merged_logs_inline = show_merged_logs_inline
+        self.show_clock = show_clock
 
     def compose(self) -> ComposeResult:
+        if self.show_clock:
+            yield Header(show_clock=True)
         yield DataTable()
         yield Footer()
 
