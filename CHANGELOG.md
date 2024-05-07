@@ -10,6 +10,7 @@
   first log file.
 - `--show_clock` command-line option, to show a running clock in the header of the interactive merged log display.
 - Added SECURITY.md and security vulnerability reporting guidance in README.md.
+- Added Python 3.13 support.
 
 
 ## [0.8.0] - 2023-12-07

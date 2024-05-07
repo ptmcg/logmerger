@@ -31,7 +31,7 @@ except ImportError:
     from typing import NoReturn as Never
 
 
-def make_argument_parser():
+def make_argument_parser() -> argparse.ArgumentParser:
     epilog_notes = """
     Start and end timestamps to clip the given files to a particular time window can be 
     given in `YYYY-MM-DD HH:MM:SS.SSS` format, with trailing milliseconds and seconds
@@ -111,6 +111,10 @@ VALID_INPUT_TIME_FORMATS = [
 
 
 def parse_time_using(ts_str: str, formats: Union[str, list[str]]) -> datetime:
+    """
+    Given a timestamp string of unknown format, try parsing it against
+    a format or list of formats.
+    """
     if not isinstance(formats, (list, tuple)):
         formats = [formats]
     for fmt in formats:
@@ -118,21 +122,27 @@ def parse_time_using(ts_str: str, formats: Union[str, list[str]]) -> datetime:
             return datetime.strptime(ts_str, fmt)
         except ValueError:
             pass
+
     raise ValueError(f"no matching format for input string {ts_str!r}")
 
 
 def parse_relative_time(ts_str: str) -> datetime:
+    """
+    Given a string representing a relative timestamp of an integer
+    followed by "s", "m", "h", or "d", return a datetime object that
+    many seconds, minutes, hours, or days in the past.
+    """
     parts = re.match(r"(\d+)([smhd])$", ts_str, flags=re.IGNORECASE)
-    if parts:
-        qty, unit = parts.groups()
-        seconds = int(qty)
-        now = datetime.now()
-        for unit_type, mult in [("s", 1), ("m", 60), ("h", 60), ("d", 24)]:
-            seconds *= mult
-            if unit == unit_type:
-                return now - timedelta(seconds=seconds)
+    if parts is None:
+        raise ValueError(f"invalid relative time string {ts_str!r}")
 
-    raise ValueError(f"invalid relative time string {ts_str!r}")
+    qty, unit = parts.groups()
+    seconds = int(qty)
+    now = datetime.now()
+    for unit_type, mult in [("s", 1), ("m", 60), ("h", 60), ("d", 24)]:
+        seconds *= mult
+        if unit == unit_type:
+            return now - timedelta(seconds=seconds)
 
 
 def label(s: str, seq: Iterable[T]) -> Generator[tuple[str, T], None, None]:
