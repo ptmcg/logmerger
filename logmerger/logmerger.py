@@ -145,13 +145,16 @@ def parse_relative_time(ts_str: str) -> datetime:
             return now - timedelta(seconds=seconds)
 
 
-def label(s: str, seq: Iterable[T]) -> Generator[tuple[str, T], None, None]:
-    """
-    method to make each item of an Iterable into a tuple containing the
-    label (so that as items from different iterators are later combined, we'll know
-    which iterator a particular item came from)
-    """
-    yield from ((s, obj) for obj in seq)
+
+def label(s: str):
+    def _inner(seq: Iterable[T]) -> Generator[tuple[str, T], None, None]:
+        """
+        method to make each item of an Iterable into a tuple containing the
+        label (so that as items from different iterators are later combined, we'll know
+        which iterator a particular item came from)
+        """
+        yield from ((s, obj) for obj in seq)
+    return _inner
 
 
 class LogMergerApplication:
@@ -295,10 +298,12 @@ class LogMergerApplication:
         #   know which file it came from)
         # (for background on why we must use map() instead of a generator expression,
         # see https://chat.stackoverflow.com/transcript/message/56645472#56645472)
+
+        # create a nested iterator for each log file to read, rstrip, transform, clip,
+        # collapse, and label each log line
         log_file_line_iters = [
             (
-                label(
-                    fname,
+                label(fname)(
                     MultilineLogCollapser(self.time_clip)(
                         filter(self._raw_time_clip, map(xformer, map(str.rstrip, reader)))
                     )
