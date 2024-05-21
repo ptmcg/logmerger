@@ -39,13 +39,6 @@ class FileReader(abc.ABC):
     def __iter__(self):
         return self._iter
 
-    def __next__(self):
-        try:
-            return next(self._iter)
-        except StopIteration:
-            self._close_reader()
-            raise
-
 
 class TextFileReader(FileReader):
     @classmethod
