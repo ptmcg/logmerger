@@ -15,7 +15,7 @@ Traceback (last line is latest):
     sample.py: line 8
         return a / b
 ZeroDivisionError: division by zero
-2023-07-14 08:00:06 INFO   User authentication succeeded
+2023-07-14 08:00:06 INFO   User authentication failed
 2023-07-14 08:00:08 DEBUG  Starting data synchronization
 2023-07-14 08:00:11 INFO   Processing incoming request
 ```
@@ -58,7 +58,7 @@ Use `--output -` to send the merged logs to stdout:
                                      return a / b
                              ZeroDivisionError: division by zero                           
   2023-07-14 08:00:06.000   INFO   User authentication            DEBUG  Starting data
-                            succeeded                             synchronization
+                            failed                                synchronization
   2023-07-14 08:00:08.000   DEBUG  Starting data                  INFO   Processing incoming request
                             synchronization
   2023-07-14 08:00:11.000   INFO   Processing incoming request    DEBUG  Performing database backup
