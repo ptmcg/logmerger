@@ -10,6 +10,7 @@ number and combination to compare results with different timestamp formats. You 
 
 | file          | description                                                                                                                  |
 |---------------|------------------------------------------------------------------------------------------------------------------------------|
+| `log0.txt`    | plaintext log file using `2023-07-14 08:00:01` format timestamps; to demonstrate autoclip to time window of first log file   |
 | `log1.txt`    | plaintext log file using `2023-07-14 08:00:01` format timestamps                                                             |
 | `log2.txt`    | plaintext log file using `2023-07-14 08:00:01` format timestamps                                                             |
 | `log3.txt`    | plaintext log file using `2023-07-14 08:00:01,000` format timestamps                                                         |

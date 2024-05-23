@@ -5,9 +5,16 @@ import operator
 import types
 
 
-class FileReader:
+class FileReader(abc.ABC):
+    """
+    Abstract base class for file readers.
+    """
     @classmethod
     def get_reader(cls, name: str, encoding: str) -> FileReader:
+        """
+        Method to iterate over defined subclasses to find the appropriate
+        reader for the given filename.
+        """
         for subcls in cls.__subclasses__():
             if subcls is TextFileReader:
                 continue
@@ -31,13 +38,6 @@ class FileReader:
 
     def __iter__(self):
         return self._iter
-
-    def __next__(self):
-        try:
-            return next(self._iter)
-        except StopIteration:
-            self._close_reader()
-            raise
 
 
 class TextFileReader(FileReader):

@@ -31,7 +31,7 @@ except ImportError:
     from typing import NoReturn as Never
 
 
-def make_argument_parser():
+def make_argument_parser() -> argparse.ArgumentParser:
     epilog_notes = """
     Start and end timestamps to clip the given files to a particular time window can be 
     given in `YYYY-MM-DD HH:MM:SS.SSS` format, with trailing milliseconds and seconds
@@ -69,6 +69,9 @@ def make_argument_parser():
     )
     parser.add_argument('--start', '-s', required=False, help="start time to select time window for merging logs")
     parser.add_argument('--end', '-e', required=False, help="end time to select time window for merging logs")
+    parser.add_argument("--autoclip", "-ac",
+                        action="store_true",
+                        help="clip merging to time range of logs in first log file")
     parser.add_argument(
         "--width", "-w",
         type=int,
@@ -76,6 +79,7 @@ def make_argument_parser():
         default=0
     )
     parser.add_argument("--line_numbers", "-ln", action="store_true", help="add line number column")
+    parser.add_argument("--show_clock", "-clock", action="store_true", help="show running clock in header")
     parser.add_argument("--csv", "-csv", help="save merged logs to CSV file")
     parser.add_argument(
         "--encoding", "-enc",
@@ -107,6 +111,10 @@ VALID_INPUT_TIME_FORMATS = [
 
 
 def parse_time_using(ts_str: str, formats: Union[str, list[str]]) -> datetime:
+    """
+    Given a timestamp string of unknown format, try parsing it against
+    a format or list of formats.
+    """
     if not isinstance(formats, (list, tuple)):
         formats = [formats]
     for fmt in formats:
@@ -114,30 +122,39 @@ def parse_time_using(ts_str: str, formats: Union[str, list[str]]) -> datetime:
             return datetime.strptime(ts_str, fmt)
         except ValueError:
             pass
+
     raise ValueError(f"no matching format for input string {ts_str!r}")
 
 
 def parse_relative_time(ts_str: str) -> datetime:
+    """
+    Given a string representing a relative timestamp of an integer
+    followed by "s", "m", "h", or "d", return a datetime object that
+    many seconds, minutes, hours, or days in the past.
+    """
     parts = re.match(r"(\d+)([smhd])$", ts_str, flags=re.IGNORECASE)
-    if parts:
-        qty, unit = parts.groups()
-        seconds = int(qty)
-        now = datetime.now()
-        for unit_type, mult in [("s", 1), ("m", 60), ("h", 60), ("d", 24)]:
-            seconds *= mult
-            if unit == unit_type:
-                return now - timedelta(seconds=seconds)
+    if parts is None:
+        raise ValueError(f"invalid relative time string {ts_str!r}")
 
-    raise ValueError(f"invalid relative time string {ts_str!r}")
+    qty, unit = parts.groups()
+    seconds = int(qty)
+    now = datetime.now()
+    for unit_type, mult in [("s", 1), ("m", 60), ("h", 60), ("d", 24)]:
+        seconds *= mult
+        if unit == unit_type:
+            return now - timedelta(seconds=seconds)
 
 
-def label(s: str, seq: Iterable[T]) -> Generator[tuple[str, T], None, None]:
-    """
-    method to make each item of an Iterable into a tuple containing the
-    label (so that as items from different iterators are later combined, we'll know
-    which iterator a particular item came from)
-    """
-    yield from ((s, obj) for obj in seq)
+
+def label(s: str):
+    def _inner(seq: Iterable[T]) -> Generator[tuple[str, T], None, None]:
+        """
+        method to make each item of an Iterable into a tuple containing the
+        label (so that as items from different iterators are later combined, we'll know
+        which iterator a particular item came from)
+        """
+        yield from ((s, obj) for obj in seq)
+    return _inner
 
 
 class LogMergerApplication:
@@ -151,6 +168,7 @@ class LogMergerApplication:
 
         self.file_names = config.files
         self.total_width = config.width
+        self.autoclip = config.autoclip
 
         if config.start is None:
             self.start_time = datetime.min
@@ -163,7 +181,7 @@ class LogMergerApplication:
         if config.end is None:
             self.end_time = datetime.max
         else:
-            if config.end.endswith(tuple("smhd")):
+            if config.end.endswith(("s", "m", "h", "d")):
                 self.end_time = parse_relative_time(config.end)
             else:
                 self.end_time = parse_time_using(config.end, VALID_INPUT_TIME_FORMATS)
@@ -256,6 +274,27 @@ class LogMergerApplication:
         transformers = [TimestampedLineTransformer.make_transformer_from_sample_line(next(peek_iter))
                         for peek_iter in peek_iters]
 
+        if self.autoclip:
+            clip_peek, rdr0 = itertools.tee(readers[0])
+            readers = (rdr0, *readers[1:])
+            peek_transformer = transformers[0]
+            for peek_line in clip_peek:
+                first_ts, _ = peek_transformer(peek_line)
+                if first_ts is not None:
+                    break
+            else:
+                raise ValueError(f"no timestamps found in log file {self.file_names[0]!r}")
+
+            self.start_time = self.end_time = first_ts
+            for ts, _ in (peek_transformer(line) for line in clip_peek):
+                if ts is None:
+                    continue
+                if ts > self.end_time:
+                    self.end_time = ts
+                elif ts < self.start_time:
+                    self.start_time = ts
+            self.time_clip = self._time_clip_early_exit
+
         # build iterators over each file that:
         # - transform each line into a (datetime, str) tuple (where the str is everything after the
         #   timestamp, so that it doesn't get repeated in the output table)
@@ -265,15 +304,16 @@ class LogMergerApplication:
         #   know which file it came from)
         # (for background on why we must use map() instead of a generator expression,
         # see https://chat.stackoverflow.com/transcript/message/56645472#56645472)
+
+        # create a nested iterator for each log file to read, rstrip, transform, clip,
+        # collapse, and label each log line
         log_file_line_iters = [
-            (
-                label(
-                    fname,
-                    MultilineLogCollapser(self.time_clip)(
-                        filter(self._raw_time_clip, map(xformer, map(str.rstrip, reader)))
-                    )
+            label(fname)(
+                MultilineLogCollapser(self.time_clip)(
+                    filter(self._raw_time_clip, map(xformer, map(str.rstrip, reader)))
                 )
-            ) for fname, xformer, reader in zip(self.file_names, transformers, readers)
+            )
+            for fname, xformer, reader in zip(self.file_names, transformers, readers)
         ]
 
         # use the Merger class which internally uses a heap to pull values in timestamp order from
@@ -320,6 +360,7 @@ class LogMergerApplication:
             show_line_numbers=self.config.line_numbers,
             merged_log_lines_table=merged_log_lines,
             show_merged_logs_inline=self.config.inline,
+            show_clock=self.config.show_clock,
         )
         app.run()
 

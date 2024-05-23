@@ -88,9 +88,11 @@ To add support for merging pcap files, install using:
 
 ```
 usage: logmerger [-h] [--interactive] [--inline] [--output OUTPUT]
-                 [--start START] [--end END] [--width WIDTH]
-                 [--line_numbers] [--csv CSV] [--encoding ENCODING]
-                 [--timestamp_format [TIMESTAMP_FORMATS ...]] [--demo]
+                 [--start START] [--end END] [--autoclip]
+                 [--width WIDTH] [--line_numbers] [--show_clock]
+                 [--csv CSV] [--encoding ENCODING]
+                 [--timestamp_format [TIMESTAMP_FORMATS ...]]
+                 [--demo]
                  [files ...]
 
 positional arguments:
@@ -106,10 +108,12 @@ options:
   --start START, -s START
                         start time to select time window for merging logs
   --end END, -e END     end time to select time window for merging logs
+  --autoclip, -ac       clip merging to time range of logs in first log file
   --width WIDTH, -w WIDTH
                         total screen width to use for interactive mode (defaults to current screen
                         width)
   --line_numbers, -ln   add line number column
+  --show_clock, -clock  show running clock in header
   --csv CSV, -csv CSV   save merged logs to CSV file
   --encoding ENCODING, -enc ENCODING
                         encoding to use when reading log files (defaults to the system default encoding)
@@ -147,18 +151,27 @@ from other log related files.
 Log files get merged by interleaving log lines from each based on timestamps in each log line. `logmerger` tries to 
 use different timestamp formats until it finds a matching format for each input file. The supported formats are:
 
-| format                       | description                                                                                         |
-|------------------------------|-----------------------------------------------------------------------------------------------------|
-| `YYYY-MM-DD HH:MM:SS,SSS`    | date+time to milliseconds, with ',' decimal (default for Python's `asctime` log marker)             |
-| `YYYY-MM-DD HH:MM:SS.SSS`    | date+time to milliseconds, with '.' decimal                                                         |
-| `YYYY-MM-DD HH:MM:SS`        | date+time to seconds                                                                                |
-| `YYYY-MM-DDTHH:MM:SS,SSS`    | date+T+time to milliseconds, with ',' decimal                                                       |
-| `YYYY-MM-DDTHH:MM:SS.SSS`    | date+T+time to milliseconds, with '.' decimal                                                       |
-| `YYYY-MM-DDTHH:MM:SS`        | date+T+time to seconds                                                                              |
-| `Jan DD HH:MM:SS`            | month/day + time (timestamp in syslog files); year is inferred from the create date of the log file |
-| `DD/Jan/YYYY HH:MM:SS`       | day/month/year + time                                                                               |
-| `DD/Jan/YYYY:HH:MM:SS ±ZZZZ` | day/month/year + time + timezone offset (converts timestamps to local time)                         |
+| format                       | description                                                                                           |
+|------------------------------|-------------------------------------------------------------------------------------------------------|
+| `YYYY-MM-DD HH:MM:SS,SSS`    | date+time to milliseconds, with ',' decimal (default for Python's `asctime` log marker)               |
+| `YYYY-MM-DD HH:MM:SS.SSS`    | date+time to milliseconds, with '.' decimal                                                           |
+| `YYYY-MM-DD HH:MM:SS`        | date+time to seconds                                                                                  |
+| `YYYY-MM-DDTHH:MM:SS,SSS`    | date+T+time to milliseconds, with ',' decimal                                                         |
+| `YYYY-MM-DDTHH:MM:SS.SSS`    | date+T+time to milliseconds, with '.' decimal                                                         |
+| `YYYY-MM-DDTHH:MM:SS`        | date+T+time to seconds                                                                                |
+| `Jan DD HH:MM:SS`            | month/day + time (timestamp in syslog files); year is inferred from the create date of the log file   |
+| `DD/Jan/YYYY HH:MM:SS`       | day/month/year + time                                                                                 |
+| `DD/Jan/YYYY:HH:MM:SS ±ZZZZ` | day/month/year + time + timezone offset (converts timestamps to local time)                           |
+| `HH:MM:SS.SSSSSS`            | hour/minute/second (timestamp in strace files); date is inferred from the create date of the log file |
+| `strace`                     | uses HH:MM:SS.SSSSSS format with leading process id integer                                           |
 
 
 Untimestamped log lines that contain multiple lines (such as a traceback) get combined with the previous timestamped
 line (see in the example above).
+
+
+## Security contact information
+
+To report a security vulnerability, please use the
+[Tidelift security contact](https://tidelift.com/security).
+Tidelift will coordinate the fix and disclosure.

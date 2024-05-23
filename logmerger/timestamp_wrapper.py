@@ -92,6 +92,8 @@ class TimestampedLineTransformer:
             [2022-01-01 12:34:56|INFO] log message    (\[)((...)|)
 
         """
+        if custom_timestamp.lower() == "strace":
+            custom_timestamp = r"(\d+) ((...))"
 
         # template must include "(...)" placeholder somewhere
         if "(...)" not in custom_timestamp:
@@ -159,7 +161,7 @@ class TimestampedLineTransformer:
 
 class YMDHMScommaFTZ(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DD HH:MM:SS,SSS<timezone>"
-    timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}\s?(?:Z|[+-]\d{4})"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3,}\s?(?:Z|[+-]\d{4})"
     pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = datetime.fromisoformat
     has_timezone = True
@@ -170,7 +172,7 @@ class YMDHMScommaFTZ(TimestampedLineTransformer):
 
 class YMDHMScommaF(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DD HH:MM:SS,SSS"
-    timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3}"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3,}"
     pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = datetime.fromisoformat
 
@@ -180,7 +182,7 @@ class YMDHMScommaF(TimestampedLineTransformer):
 
 class YMDHMSdotFZ(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DD HH:MM:SS.SSS"
-    timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}\s?(?:Z|[+-]\d{4})"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3,}\s?(?:Z|[+-]\d{4})"
     pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = datetime.fromisoformat
     has_timezone = True
@@ -191,7 +193,7 @@ class YMDHMSdotFZ(TimestampedLineTransformer):
 
 class YMDHMSdotF(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DD HH:MM:SS.SSS"
-    timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3}"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3,}"
     pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = datetime.fromisoformat
 
@@ -222,7 +224,7 @@ class YMDHMS(TimestampedLineTransformer):
 
 class YMDTHMScommaFZ(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DDTHH:MM:SS,SSS"
-    timestamp_pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3}\s?(?:Z|[+-]\d{4})"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3,}\s?(?:Z|[+-]\d{4})"
     pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = datetime.fromisoformat
     has_timezone = True
@@ -233,7 +235,7 @@ class YMDTHMScommaFZ(TimestampedLineTransformer):
 
 class YMDTHMScommaF(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DDTHH:MM:SS,SSS"
-    timestamp_pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3}"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3,}"
     pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = datetime.fromisoformat
 
@@ -243,7 +245,7 @@ class YMDTHMScommaF(TimestampedLineTransformer):
 
 class YMDTHMSdotFZ(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DDTHH:MM:SS.SSS"
-    timestamp_pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}\s?(?:Z|[+-]\d{4}Z?)"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3,}\s?(?:Z|[+-]\d{4}Z?)"
     pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = datetime.fromisoformat
     has_timezone = True
@@ -254,7 +256,7 @@ class YMDTHMSdotFZ(TimestampedLineTransformer):
 
 class YMDTHMSdotF(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DDTHH:MM:SS.SSS"
-    timestamp_pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3,}"
     pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = datetime.fromisoformat
 
@@ -292,17 +294,40 @@ class BDHMS(TimestampedLineTransformer):
 
     def __init__(self):
         super().__init__(self.pattern, self.strptime_format)
-
-    def __call__(self, obj: T) -> tuple[datetime | None, T]:
         # this format does not have a year so assume the file's create time year
         if self.file_stat is not None and self.file_stat.st_ctime:
-            date_year = datetime.fromtimestamp(self.file_stat.st_ctime).year
+            self.date_year = datetime.fromtimestamp(self.file_stat.st_ctime).year
         else:
-            date_year = datetime.now().year
+            self.date_year = datetime.now().year
 
+    def __call__(self, obj: T) -> tuple[datetime | None, T]:
         dt, obj = super().__call__(obj)
         if dt is not None:
-            dt = dt.replace(year=date_year)
+            dt = dt.replace(year=self.date_year)
+        return dt, obj
+
+
+class HMSdot(TimestampedLineTransformer):
+    # strace files with timestamp "hh:mm:ss.sss"
+    # (note, date is omitted so let's guess from the log file's create date)
+    timestamp_pattern = r"\d{2}:\d{2}:\d{2}\.\d{3,}"
+    pattern = fr"(({timestamp_pattern})\s)"
+    strptime_format = "%H:%M:%S.%f"
+
+    def __init__(self):
+        super().__init__(self.pattern, self.strptime_format)
+
+        # this format does not have a date so assume the file's create date
+        if self.file_stat is not None and self.file_stat.st_ctime:
+            file_date = datetime.fromtimestamp(self.file_stat.st_ctime).date()
+        else:
+            file_date = datetime.now().date()
+        self.date_replace_args = {"year": file_date.year, "month": file_date.month, "day": file_date.day}
+
+    def __call__(self, obj: T) -> tuple[datetime | None, T]:
+        dt, obj = super().__call__(obj)
+        if dt is not None:
+            dt = dt.replace(**self.date_replace_args)
         return dt, obj
 
 

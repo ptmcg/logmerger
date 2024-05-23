@@ -8,17 +8,19 @@ timestamp order.
 In practice, log files often use various formats for their log timestamps. `logmerger` looks for several 
 standard timestamp formats, at the start of each line of the log file:
 
-| Format                     | Description                                                                    |
-|----------------------------|--------------------------------------------------------------------------------|
-| YYYY-MM-DD HH:MM:SS,SSS    | date and time with milliseconds (, decimal) (defaut Python asctime log format) |
-| YYYY-MM-DD HH:MM:SS.SSS    | date and time with milliseconds (. decimal)                                    |
-| YYYY-MM-DD HH:MM:SS        | date and time                                                                  |
-| 0000000000.000000          | float seconds since epoch                                                      |
-| 0000000000000              | milliseconds since epoch                                                       |
-| 0000000000                 | integer seconds since epoch                                                    |
+| Format                     | Description                                                                     |
+|----------------------------|---------------------------------------------------------------------------------|
+| YYYY-MM-DD HH:MM:SS,SSS    | date and time with milliseconds (, decimal) (default Python asctime log format) |
+| YYYY-MM-DD HH:MM:SS.SSS    | date and time with milliseconds (. decimal)                                     |
+| YYYY-MM-DD HH:MM:SS        | date and time                                                                   |
+| 0000000000.000000          | float seconds since epoch                                                       |
+| 0000000000000              | milliseconds since epoch                                                        |
+| 0000000000                 | integer seconds since epoch                                                     |
+| HH:MM:SS.SSSSSS            | timestamp with milliseconds (strace format)                                     |
 | Jan DD HH:MM:SS            | month + day + time (timestamp in syslog files); year is inferred from the create date of the log file |
-| DD/Jan/YYYY HH:MM:SS       | day/month/year + time                                                          |
-| DD/Jan/YYYY:HH:MM:SS ±ZZZZ | day/month/year : time + timezone offset (converts to local time)               |
+| DD/Jan/YYYY HH:MM:SS       | day/month/year + time                                                           |
+| DD/Jan/YYYY:HH:MM:SS ±ZZZZ | day/month/year : time + timezone offset (converts to local time)                |
+| strace                     | uses HH:MM:SS.SSSSSS format with leading process id integer                     |
 
 For log files that do not have the timestamp at the start of the line, you can define a custom format using
 the command line option `--timestamp_format`.  See `Custom timestamp formats` below.
@@ -36,6 +38,7 @@ The interactive mode of `logmerger` defines several keystroke navigation command
 |  P  | Move back (to previous instance of the search string or by current jump interval)                                          |
 |  L  | Prompt for line number to move cursor to (if line number > total number of merged lines, advances to end)                  |
 |  T  | Prompt for timestamp to move cursor to (if no log message at the exact timestamp, will move to first line after timestamp) |
+|  S  | Capture a screenshot of the current visible screen                                                                         |
 |  H  | Display this helpful text                                                                                                  |
 |  Q  | Quit                                                                                                                       |
 
@@ -54,18 +57,20 @@ reversing will jump to the next timestamp before the computed target time.
 
 The command to run `logmerger` accepts several options, followed by one or more file names:
 
-| Option              | Description                                                                                      |
-|---------------------|--------------------------------------------------------------------------------------------------|
-| --interactive, -i   | display in interactive mode (default)                                                            |
-| --inline            | display interactive merged content into a single inline column (only supported in interactive mode) (default is side-by-side) |
-| --output, -o        | save output to file ('-' for stdout; files ending in `.md` are saved using Markdown)             |
-| --width, -w         | total display width - if greater than the screen width, will display with a horizontal scrollbar |
-| --line_numbers, -ln | display with a leading line number column                                                        |
-| --start, -s         | start time for merging logs                                                                      |
-| --end, -e           | end time for merging logs                                                                        |
-| --csv               | output merged logs as CSV                                                                        |
-| --timestamp_format  | define one or more custom formats for log file timestamps                                        |
-| --demo              | run logmerger with simulated log file content (in either text or interactive modes)              |
+| Option               | Description                                                                                      |
+|----------------------|--------------------------------------------------------------------------------------------------|
+| --interactive, -i    | display in interactive mode (default)                                                            |
+| --inline             | display interactive merged content into a single inline column (only supported in interactive mode) (default is side-by-side) |
+| --output, -o         | save output to file ('-' for stdout; files ending in `.md` are saved using Markdown)             |
+| --width, -w          | total display width - if greater than the screen width, will display with a horizontal scrollbar |
+| --line_numbers, -ln  | display with a leading line number column                                                        |
+| --show_clock, -clock | show running clock in header                                                                     |
+| --start, -s          | start time for merging logs                                                                      |
+| --end, -e            | end time for merging logs                                                                        |
+| --autoclip, -ac      | clip start and end times from logs in first log file                                             |
+| --csv                | output merged logs as CSV                                                                        |
+| --timestamp_format   | define one or more custom formats for log file timestamps                                        |
+| --demo               | run logmerger with simulated log file content (in either text or interactive modes)              |
 
 
 ## Usage tips
@@ -88,7 +93,6 @@ that use seconds-since-epoch timestamps more human-readable.
   - (filename ending in `.csv`)
 - packet capture files, created using tcpdump or WireShark (experimental)
   - (filename ending in `.pcap`)
-
 
 ### Multi-line logs
 
@@ -146,9 +150,9 @@ Here are some example log lines and suggested format templates:
 
 ## About logmerger
 
-logmerger version 0.8.0
+logmerger version 0.9.0
 
-by Paul McGuire, 2023
+by Paul McGuire, 2024
 
 MIT License
 

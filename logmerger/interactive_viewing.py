@@ -14,7 +14,7 @@ from textual import work
 from textual.app import App, ComposeResult
 from textual.binding import Binding
 from textual.validation import Integer
-from textual.widgets import DataTable, Footer
+from textual.widgets import DataTable, Footer, Header
 
 from logmerger.tui.dialogs import ModalInputDialog, ModalAboutDialog, ModalJumpDialog
 from logmerger.tui.validators import TimestampValidator
@@ -74,13 +74,14 @@ class InteractiveLogMergeViewerApp(App):
 
     BINDINGS = [
         Binding(key="q", action="quit", description="Quit"),
-        Binding(key="ctrl+d", action="toggle_dark", description="Toggle Dark Mode"),
+        Binding(key="ctrl+d", action="toggle_dark", description="Toggle Dark Mode", show=False),
         Binding(key="j", action="jump", description="Jump"),
         Binding(key="f", action="find", description="Find"),
         Binding(key="n", action="find_next", description="Next"),
         Binding(key="p", action="find_prev", description="Prev"),
         Binding(key="l", action="goto_line", description="Go to line"),
         Binding(key="t", action="goto_timestamp", description="Go to timestamp"),
+        Binding(key="s", action="screenshot", description="Screenshot"),
         Binding(key="h", action="help_about", description="Help/About"),
     ]
 
@@ -92,6 +93,7 @@ class InteractiveLogMergeViewerApp(App):
         self.merged_log_lines_table: lt.Table = None  # noqa
         self.display_width: int = 0
         self.show_line_numbers: bool = False
+        self.show_clock: bool = False
         self.show_merged_logs_inline: bool = False
         self.current_search_string: str = ""
         self.current_jump: Jump = None  # noqa
@@ -108,14 +110,18 @@ class InteractiveLogMergeViewerApp(App):
             show_line_numbers: bool,
             merged_log_lines_table: lt.Table,
             show_merged_logs_inline: bool,
+            show_clock: bool,
     ) -> None:
         self.log_file_names = log_file_names
         self.merged_log_lines_table = merged_log_lines_table
         self.display_width = display_width
         self.show_line_numbers = show_line_numbers
         self.show_merged_logs_inline = show_merged_logs_inline
+        self.show_clock = show_clock
 
     def compose(self) -> ComposeResult:
+        if self.show_clock:
+            yield Header(show_clock=True)
         yield DataTable()
         yield Footer()
 
@@ -182,7 +188,7 @@ class InteractiveLogMergeViewerApp(App):
         elapsed = time.time() - start
         if elapsed > 10:
             self.bell()
-            self.notify("Log data complete")
+            self.notify("Log data loading complete")
 
     @work
     async def load_data_inline(self):
@@ -255,7 +261,7 @@ class InteractiveLogMergeViewerApp(App):
         elapsed = time.time() - start
         if elapsed > 10:
             self.bell()
-            self.notify("Log data complete")
+            self.notify("Log data loading complete")
 
     #
     # methods to support go to find/next/prev search functions
@@ -444,6 +450,17 @@ class InteractiveLogMergeViewerApp(App):
             ),
             self.save_jump_and_jump
         )
+
+    #
+    # methods to support screenshotting
+    #
+
+    def action_screenshot(self) -> None:
+        now = datetime.now()
+        filename = self.app.save_screenshot(
+            f"logmerger_{now:%Y%m%d_%H%M%S}_screenshot.svg"
+        )
+        self.notify(f"Screenshot saved to {filename}")
 
     #
     # methods to support help/about

@@ -1,3 +1,19 @@
+## [0.9.0] - 2024-05-24
+
+### [Changelog][0.9.0-changes]
+
+### Added
+
+- Added `"s"` key binding to capture a screenshot of the current screen.
+- Support for `strace` log files; added "strace" custom timestamp format, which also accepts leading process id
+  integer on each line.
+- `--autoclip` command-line option, to clip merged output to the first and last timestamps found in the
+  first log file.
+- `--show_clock` command-line option, to show a running clock in the header of the interactive merged log display.
+- Added SECURITY.md and security vulnerability reporting guidance in README.md.
+- Added Python 3.13 support.
+
+
 ## [0.8.0] - 2023-12-07
 
 ### [Changelog][0.8.0-changes]
@@ -120,6 +136,7 @@
 - Interactive browser will use the screen width by default, or accept a command-line argument.
 
 
+[0.9.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.9.0
 [0.8.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.8.0
 [0.7.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.7.0
 [0.6.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.6.0
@@ -130,6 +147,7 @@
 [0.2.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.2.0
 [0.1.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.1.0
 
+[0.9.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.8.0...v0.9.0
 [0.8.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.7.0...v0.8.0
 [0.7.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.6.0...v0.7.0
 [0.6.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.5.0...v0.6.0
