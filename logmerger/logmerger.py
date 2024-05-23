@@ -181,7 +181,7 @@ class LogMergerApplication:
         if config.end is None:
             self.end_time = datetime.max
         else:
-            if config.end.endswith(tuple("smhd")):
+            if config.end.endswith(("s", "m", "h", "d")):
                 self.end_time = parse_relative_time(config.end)
             else:
                 self.end_time = parse_time_using(config.end, VALID_INPUT_TIME_FORMATS)
@@ -276,11 +276,17 @@ class LogMergerApplication:
 
         if self.autoclip:
             clip_peek, rdr0 = itertools.tee(readers[0])
-            readers = [rdr0, *readers[1:]]
-            first_line = next(clip_peek)
-            ts, _ = transformers[0](first_line)
-            self.start_time = self.end_time = ts
-            for ts, _ in (transformers[0](line) for line in clip_peek):
+            readers = (rdr0, *readers[1:])
+            peek_transformer = transformers[0]
+            for peek_line in clip_peek:
+                first_ts, _ = peek_transformer(peek_line)
+                if first_ts is not None:
+                    break
+            else:
+                raise ValueError(f"no timestamps found in log file {self.file_names[0]!r}")
+
+            self.start_time = self.end_time = first_ts
+            for ts, _ in (peek_transformer(line) for line in clip_peek):
                 if ts is None:
                     continue
                 if ts > self.end_time:
@@ -302,13 +308,12 @@ class LogMergerApplication:
         # create a nested iterator for each log file to read, rstrip, transform, clip,
         # collapse, and label each log line
         log_file_line_iters = [
-            (
-                label(fname)(
-                    MultilineLogCollapser(self.time_clip)(
-                        filter(self._raw_time_clip, map(xformer, map(str.rstrip, reader)))
-                    )
+            label(fname)(
+                MultilineLogCollapser(self.time_clip)(
+                    filter(self._raw_time_clip, map(xformer, map(str.rstrip, reader)))
                 )
-            ) for fname, xformer, reader in zip(self.file_names, transformers, readers)
+            )
+            for fname, xformer, reader in zip(self.file_names, transformers, readers)
         ]
 
         # use the Merger class which internally uses a heap to pull values in timestamp order from

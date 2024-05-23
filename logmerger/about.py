@@ -38,6 +38,7 @@ The interactive mode of `logmerger` defines several keystroke navigation command
 |  P  | Move back (to previous instance of the search string or by current jump interval)                                          |
 |  L  | Prompt for line number to move cursor to (if line number > total number of merged lines, advances to end)                  |
 |  T  | Prompt for timestamp to move cursor to (if no log message at the exact timestamp, will move to first line after timestamp) |
+|  S  | Capture a screenshot of the current visible screen                                                                         |
 |  H  | Display this helpful text                                                                                                  |
 |  Q  | Quit                                                                                                                       |
 

@@ -74,13 +74,14 @@ class InteractiveLogMergeViewerApp(App):
 
     BINDINGS = [
         Binding(key="q", action="quit", description="Quit"),
-        Binding(key="ctrl+d", action="toggle_dark", description="Toggle Dark Mode"),
+        Binding(key="ctrl+d", action="toggle_dark", description="Toggle Dark Mode", show=False),
         Binding(key="j", action="jump", description="Jump"),
         Binding(key="f", action="find", description="Find"),
         Binding(key="n", action="find_next", description="Next"),
         Binding(key="p", action="find_prev", description="Prev"),
         Binding(key="l", action="goto_line", description="Go to line"),
         Binding(key="t", action="goto_timestamp", description="Go to timestamp"),
+        Binding(key="s", action="screenshot", description="Screenshot"),
         Binding(key="h", action="help_about", description="Help/About"),
     ]
 
@@ -187,7 +188,7 @@ class InteractiveLogMergeViewerApp(App):
         elapsed = time.time() - start
         if elapsed > 10:
             self.bell()
-            self.notify("Log data complete")
+            self.notify("Log data loading complete")
 
     @work
     async def load_data_inline(self):
@@ -260,7 +261,7 @@ class InteractiveLogMergeViewerApp(App):
         elapsed = time.time() - start
         if elapsed > 10:
             self.bell()
-            self.notify("Log data complete")
+            self.notify("Log data loading complete")
 
     #
     # methods to support go to find/next/prev search functions
@@ -449,6 +450,17 @@ class InteractiveLogMergeViewerApp(App):
             ),
             self.save_jump_and_jump
         )
+
+    #
+    # methods to support screenshotting
+    #
+
+    def action_screenshot(self) -> None:
+        now = datetime.now()
+        filename = self.app.save_screenshot(
+            f"logmerger_{now:%Y%m%d_%H%M%S}_screenshot.svg"
+        )
+        self.notify(f"Screenshot saved to {filename}")
 
     #
     # methods to support help/about
