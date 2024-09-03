@@ -150,7 +150,7 @@ Here are some example log lines and suggested format templates:
 
 ## About logmerger
 
-logmerger version 0.9.0
+logmerger version 0.10.0
 
 by Paul McGuire, 2024
 
