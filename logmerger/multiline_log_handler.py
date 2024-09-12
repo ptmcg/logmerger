@@ -1,4 +1,6 @@
 from collections.abc import Generator, Callable, Iterable
+from functools import reduce
+from operator import add
 from itertools import groupby, islice
 from datetime import datetime
 from typing import Any, Optional
@@ -11,8 +13,19 @@ class WindowedSort:
         self.key_function = key
 
         self.seq_iter = iter(seq)
-        self.lookahead_buffer = list(islice(self.seq_iter, window))
-        self.lookahead_buffer.sort(key=self.key_function)
+
+        # get first 'window' items, and resolve/merge out-of-order entries
+        temp = list(islice(self.seq_iter, window))
+        temp.sort(key=self.key_function)
+
+        # populate lookahead_buffer, grouping entries in temp by the key_function
+        self.lookahead_buffer = []
+        for key, lines in groupby(temp, key=self.key_function):
+            values_to_merge = (ll[1] for ll in lines)
+            self.lookahead_buffer.append((key, reduce(add, values_to_merge)))
+
+        # if the lookahead_buffer is smaller than the window, then we have already
+        # read all the inbound lines - set seq_consumed flag accordingly
         self.seq_consumed = len(self.lookahead_buffer) < window
 
     def __iter__(self):
@@ -20,15 +33,37 @@ class WindowedSort:
 
     def __next__(self):
         if not self.seq_consumed:
+            # read another line from the input
             try:
-                self.lookahead_buffer.append(next(self.seq_iter))
-                self.lookahead_buffer.sort(key=self.key_function)
+                new_line = next(self.seq_iter)
+                if self.key_function(new_line) < self.key_function(self.lookahead_buffer[-1]):
+                    # look for any matching entry
+                    matching_entry = next(
+                        (
+                            entry for entry in self.lookahead_buffer
+                            if self.key_function(entry) == self.key_function(new_line)
+                        ),
+                        None
+                    )
+                    if matching_entry:
+                        matching_ts, matching_log_list = matching_entry
+                        new_log_ts, new_log_items = new_line
+                        matching_log_list.extend(new_log_items)
+                    else:
+                        self.lookahead_buffer.append(new_line)
+                        self.lookahead_buffer.sort(key=self.key_function)
+                else:
+                    self.lookahead_buffer.append(new_line)
             except StopIteration:
                 self.seq_consumed = True
 
+        # lookahead_buffer is a LIFO queue, return the left-most element
         if self.lookahead_buffer:
             return self.lookahead_buffer.pop(0)
         else:
+            # no more data - clear memory for old lookahead_buffer list
+            # and signal the end of data by raising StopIteration
+            self.lookahead_buffer = []
             raise StopIteration()
 
 
@@ -72,7 +107,7 @@ class MultilineLogCollapser:
 
     def __call__(self, log_seq: Iterable[tuple[datetime, str]]) -> Generator[tuple[datetime, str], None, None]:
         for timestamp, lines in WindowedSort(
-                window=60,
+                window=40,
                 seq=((a, list(b)) for a, b in groupby(log_seq, key=self._newlogline_detector)),
                 key=itemgetter(0)
         ):

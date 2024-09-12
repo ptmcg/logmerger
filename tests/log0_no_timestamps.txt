@@ -1,0 +1,2 @@
+DEBUG  Start trace
+DEBUG  End trace

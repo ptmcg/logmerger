@@ -1,5 +1,11 @@
 ## [0.10.0] - in development
 
+### Fixed
+
+- Fixed bug when reordering out-of-order log lines that duplicated a previously-merged
+  timestamp.
+- Faster loading of data, by reducing instances where sorting is required in the readahead window.
+
 
 ## [0.9.0] - 2024-05-24
 
