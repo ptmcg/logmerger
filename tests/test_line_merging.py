@@ -1,7 +1,19 @@
+from pprint import pprint
 import pytest
 
 from .util import contains_list
 from .logmerger_testing import LogMergerTestApp
+
+
+def _run_merging_test(log_files, expected_lines, **kwargs):
+    if not log_files:
+        return
+    print(log_files)
+    log_merger = LogMergerTestApp(log_files, **kwargs)
+    merged_lines = log_merger()
+    pprint(merged_lines, width=200)
+    pprint(expected_lines, width=200)
+    assert contains_list(merged_lines, expected_lines)
 
 
 @pytest.mark.parametrize(
@@ -26,14 +38,7 @@ from .logmerger_testing import LogMergerTestApp
     ]
 )
 def test_merging(log_files, expected_lines):
-    from pprint import pprint
-
-    print(log_files)
-    log_merger = LogMergerTestApp(log_files)
-    merged_lines = log_merger()
-    pprint(merged_lines, width=200)
-    pprint(expected_lines, width=200)
-    assert contains_list(merged_lines, expected_lines)
+    _run_merging_test(log_files, expected_lines)
 
 
 @pytest.mark.parametrize(
@@ -135,16 +140,7 @@ def test_merging(log_files, expected_lines):
     ]
 )
 def test_line_ooo_and_dedup(log_file: str, expected_lines):
-    from pprint import pprint
-
-    if not log_file:
-        return
-    print(log_file)
-    log_merger = LogMergerTestApp(log_file)
-    merged_lines = log_merger()
-    pprint(merged_lines, width=200)
-    pprint(expected_lines, width=200)
-    assert contains_list(merged_lines, expected_lines)
+    _run_merging_test(log_file, expected_lines)
 
 
 @pytest.mark.parametrize(
@@ -175,13 +171,4 @@ def test_line_ooo_and_dedup(log_file: str, expected_lines):
     ]
 )
 def test_drop_non_timestamped_lines(log_file, expected_lines):
-    from pprint import pprint
-
-    if not log_file:
-        return
-    print(log_file)
-    log_merger = LogMergerTestApp(log_file, ignore_non_timestamped=True)
-    merged_lines = log_merger()
-    pprint(merged_lines, width=200)
-    pprint(expected_lines, width=200)
-    assert contains_list(merged_lines, expected_lines)
+    _run_merging_test(log_file, expected_lines, ignore_non_timestamped=True)
