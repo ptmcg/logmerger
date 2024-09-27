@@ -67,31 +67,53 @@ def make_argument_parser() -> argparse.ArgumentParser:
         # type=argparse.FileType('w'),
         help="save merged output to file ('-' for stdout; files ending in '.md' are saved using Markdown)",
     )
-    parser.add_argument('--start', '-s', required=False, help="start time to select time window for merging logs")
-    parser.add_argument('--end', '-e', required=False, help="end time to select time window for merging logs")
-    parser.add_argument("--autoclip", "-ac",
-                        action="store_true",
-                        help="clip merging to time range of logs in first log file")
+    parser.add_argument(
+        '--start',
+        '-s',
+        required=False,
+        help="start time to select time window for merging logs",
+    )
+    parser.add_argument(
+        '--end',
+        '-e',
+        required=False,
+        help="end time to select time window for merging logs",
+    )
+    parser.add_argument(
+        "--autoclip", "-ac",
+        action="store_true",
+        help="clip merging to time range of logs in first log file",
+    )
+    parser.add_argument(
+        "--ignore_non_timestamped",
+        action="store_true",
+        help="ignore log lines that do not have a timestamp"
+    )
     parser.add_argument(
         "--width", "-w",
         type=int,
         help="total screen width to use for interactive mode (defaults to current screen width)",
-        default=0
+        default=0,
     )
-    parser.add_argument("--line_numbers", "-ln", action="store_true", help="add line number column")
-    parser.add_argument("--show_clock", "-clock", action="store_true", help="show running clock in header")
+    parser.add_argument(
+        "--line_numbers", "-ln", action="store_true", help="add line number column"
+    )
+    parser.add_argument(
+        "--show_clock", "-clock", action="store_true", help="show running clock in header"
+    )
     parser.add_argument("--csv", "-csv", help="save merged logs to CSV file")
     parser.add_argument(
         "--encoding", "-enc",
         type=str,
         default=sys.getfilesystemencoding(),
         help="encoding to use when reading log files (defaults to the system default encoding)")
-    parser.add_argument("--timestamp_format",
-                        dest="timestamp_formats",
-                        nargs="*",
-                        action="append",
-                        help="custom timestamp format")
-
+    parser.add_argument(
+        "--timestamp_format",
+        dest="timestamp_formats",
+        nargs="*",
+        action="append",
+        help="custom timestamp format"
+    )
     parser.add_argument("--demo", action="store_true", help="Run interactive demo")
 
     return parser
@@ -169,6 +191,7 @@ class LogMergerApplication:
         self.file_names = config.files
         self.total_width = config.width
         self.autoclip = config.autoclip
+        self.append_non_timestamped_lines = not config.ignore_non_timestamped
 
         if config.start is None:
             self.start_time = datetime.min
@@ -310,7 +333,7 @@ class LogMergerApplication:
         # collapse, and label each log line
         log_file_line_iters = [
             label(fname)(
-                MultilineLogCollapser(self.time_clip)(
+                MultilineLogCollapser(self.time_clip, include_non_timestamped_lines=self.append_non_timestamped_lines)(
                     filter(self._raw_time_clip, map(xformer, map(str.rstrip, reader)))
                 )
             )

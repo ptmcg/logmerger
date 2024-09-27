@@ -101,9 +101,15 @@ class MultilineLogCollapser:
 
     to two log entries.
     """
-    def __init__(self, time_filter: Optional[Callable[[datetime], bool]] = None):
+    def __init__(
+            self,
+            time_filter: Optional[Callable[[datetime], bool]] = None,
+            *,
+            include_non_timestamped_lines: bool = True
+    ):
         self._newlogline_detector = NewLogLineDetector()
         self._time_filter_fn = time_filter or (lambda x: True)
+        self.include_non_timestamped_lines = include_non_timestamped_lines
 
     def __call__(self, log_seq: Iterable[tuple[datetime, str]]) -> Generator[tuple[datetime, str], None, None]:
         for timestamp, lines in WindowedSort(
@@ -113,7 +119,12 @@ class MultilineLogCollapser:
         ):
             try:
                 if self._time_filter_fn(timestamp):
-                    yield timestamp, "\n".join(line[1] for line in lines)
+                    if not self.include_non_timestamped_lines:
+                        lines = (line for line in lines if line[0] is not None)
+                    log_body = (
+                        "\n".join(line[1] for line in lines)
+                    )
+                    yield timestamp, log_body
             except StopIteration:
                 break
 

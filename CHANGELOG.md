@@ -1,12 +1,18 @@
 ## [0.10.0] - in development
 
+### Added
+
+- Added `--ignore_non_timestamped` command-line option, to discard any log lines that do not
+  have a timestamp. (Issue #42)
+
 ### Fixed
 
 - Fixed bug when reordering out-of-order log lines that duplicated a previously-merged
   timestamp.
 - Faster loading of data, by reducing instances where sorting is required in the readahead window.
 - Fixed hanging bug when piping output to a text file.
-- Piping output to a text file now uses -width setting if provided.
+- Piping output to a file now uses -width setting if provided.
+
 
 ## [0.9.0] - 2024-05-24
 

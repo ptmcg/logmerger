@@ -89,7 +89,8 @@ To add support for merging pcap files, install using:
 ```
 usage: logmerger [-h] [--interactive] [--inline] [--output OUTPUT]
                  [--start START] [--end END] [--autoclip]
-                 [--width WIDTH] [--line_numbers] [--show_clock]
+                 [--ignore_non_timestamped] [--width WIDTH]
+                 [--line_numbers] [--show_clock]
                  [--csv CSV] [--encoding ENCODING]
                  [--timestamp_format [TIMESTAMP_FORMATS ...]]
                  [--demo]
@@ -109,6 +110,8 @@ options:
                         start time to select time window for merging logs
   --end END, -e END     end time to select time window for merging logs
   --autoclip, -ac       clip merging to time range of logs in first log file
+  --ignore_non_timestamped
+                        ignore log lines that do not have a timestamp
   --width WIDTH, -w WIDTH
                         total screen width to use for interactive mode (defaults to current screen
                         width)

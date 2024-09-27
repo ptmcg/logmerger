@@ -145,3 +145,43 @@ def test_line_ooo_and_dedup(log_file: str, expected_lines):
     pprint(merged_lines, width=200)
     pprint(expected_lines, width=200)
     assert contains_list(merged_lines, expected_lines)
+
+
+@pytest.mark.parametrize(
+    "log_file,expected_lines",
+    [
+        (
+            "tests/log1_10_log_lines_with_multiline.txt",
+            [
+                '2023-07-14 08:00:11.000 | INFO   Processing incoming request',
+                '                        | INFO   Processing incoming request (a little more...)',
+                '                        | INFO   Processing incoming request (a little more...) (OOO)',
+            ]
+        ),
+        (
+            "tests/log1_ooo_duplicate_timestamp.txt",
+            [
+                '2023-07-14 08:00:11.000 | INFO   Processing incoming request',
+                '                        | INFO   Processing incoming request (a little more...)',
+            ]
+        ),
+        (
+            "tests/log1_ooo_duplicate_timestamp.txt",
+            [
+                '2023-07-14 08:02:33.000 | INFO   Request received from IP: 192.168.0.1',
+                '                        | DEBUG  Performing database backup',
+            ]
+        ),
+    ]
+)
+def test_drop_non_timestamped_lines(log_file, expected_lines):
+    from pprint import pprint
+
+    if not log_file:
+        return
+    print(log_file)
+    log_merger = LogMergerTestApp(log_file, ignore_non_timestamped=True)
+    merged_lines = log_merger()
+    pprint(merged_lines, width=200)
+    pprint(expected_lines, width=200)
+    assert contains_list(merged_lines, expected_lines)

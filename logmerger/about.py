@@ -57,20 +57,21 @@ reversing will jump to the next timestamp before the computed target time.
 
 The command to run `logmerger` accepts several options, followed by one or more file names:
 
-| Option               | Description                                                                                      |
-|----------------------|--------------------------------------------------------------------------------------------------|
-| --interactive, -i    | display in interactive mode (default)                                                            |
-| --inline             | display interactive merged content into a single inline column (only supported in interactive mode) (default is side-by-side) |
-| --output, -o         | save output to file ('-' for stdout; files ending in `.md` are saved using Markdown)             |
-| --width, -w          | total display width - if greater than the screen width, will display with a horizontal scrollbar |
-| --line_numbers, -ln  | display with a leading line number column                                                        |
-| --show_clock, -clock | show running clock in header                                                                     |
-| --start, -s          | start time for merging logs                                                                      |
-| --end, -e            | end time for merging logs                                                                        |
-| --autoclip, -ac      | clip start and end times from logs in first log file                                             |
-| --csv                | output merged logs as CSV                                                                        |
-| --timestamp_format   | define one or more custom formats for log file timestamps                                        |
-| --demo               | run logmerger with simulated log file content (in either text or interactive modes)              |
+| Option                   | Description                                                                                      |
+|--------------------------|--------------------------------------------------------------------------------------------------|
+| --interactive, -i        | display in interactive mode (default)                                                            |
+| --inline                 | display interactive merged content into a single inline column (only supported in interactive mode) (default is side-by-side) |
+| --output, -o             | save output to file ('-' for stdout; files ending in `.md` are saved using Markdown)             |
+| --width, -w              | total display width - if greater than the screen width, will display with a horizontal scrollbar |
+| --line_numbers, -ln      | display with a leading line number column                                                        |
+| --show_clock, -clock     | show running clock in header                                                                     |
+| --start, -s              | start time for merging logs                                                                      |
+| --end, -e                | end time for merging logs                                                                        |
+| --autoclip, -ac          | clip start and end times from logs in first log file                                             |
+| --ignore_non_timestamped | ignore log lines that do not have a timestamp                                                    |
+| --csv                    | output merged logs as CSV                                                                        |
+| --timestamp_format       | define one or more custom formats for log file timestamps                                        |
+| --demo                   | run logmerger with simulated log file content (in either text or interactive modes)              |
 
 
 ## Usage tips
