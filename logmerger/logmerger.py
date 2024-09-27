@@ -263,8 +263,7 @@ class LogMergerApplication:
                             continue
                         setattr(line, k, v.replace("[/", r"\[/"))
 
-                box_style = lt.box.MINIMAL
-                merged_lines_table.present(box=box_style, width=self.total_width)
+                merged_lines_table.present(width=self.total_width)
 
             elif self.save_to_file.endswith(".md"):
                 # present the table to a file, using Markdown format
