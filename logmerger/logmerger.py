@@ -240,7 +240,8 @@ class LogMergerApplication:
                             continue
                         setattr(line, k, v.replace("[/", r"\[/"))
 
-                merged_lines_table.present()
+                box_style = lt.box.MINIMAL
+                merged_lines_table.present(box=box_style, width=self.total_width)
 
             elif self.save_to_file.endswith(".md"):
                 # present the table to a file, using Markdown format
@@ -261,7 +262,7 @@ class LogMergerApplication:
 
                 box_style = lt.box.MINIMAL
                 with open(self.save_to_file, "w") as present_file:
-                    merged_lines_table.present(file=present_file, box=box_style)
+                    merged_lines_table.present(file=present_file, box=box_style, width=self.total_width)
 
         elif self.textual_output:
             self._display_merged_lines_interactively(merged_lines_table)
@@ -379,6 +380,12 @@ def main():
             parser.print_usage()
             print("One or more log files required")
             exit(1)
+
+    # if output being piped to a file, clear interactive mode
+    if not sys.stdout.isatty():
+        args_ns.interactive = False
+        if not args_ns.output:
+            args_ns.output = "-"
 
     app = LogMergerApplication(args_ns)
     app.run()
