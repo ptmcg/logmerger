@@ -7,6 +7,7 @@
 
 ### Fixed
 
+- Fixed timestamp parsing that broke in Python versions pre-3.11. (Issue #43)
 - Fixed bug when reordering out-of-order log lines that duplicated a previously-merged
   timestamp.
 - Faster loading of data, by reducing instances where sorting is required in the readahead window.
