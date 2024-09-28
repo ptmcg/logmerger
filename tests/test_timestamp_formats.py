@@ -1,4 +1,3 @@
-from pprint import pprint
 import pytest
 
 from datetime import datetime, timezone, timedelta
@@ -14,8 +13,9 @@ def _test_timestamp_format_parsing(string_date, expected_datetime):
 
     parsed_datetime, _ = transformer(string_date)
     parsed_datetime = parsed_datetime.astimezone(timezone.utc)
-    pprint(parsed_datetime, width=200)
-    pprint(expected_datetime, width=200)
+    print(repr(string_date))
+    print("Parsed time  :", parsed_datetime)
+    print("Expected time:", expected_datetime)
     assert parsed_datetime == expected_datetime
 
 
