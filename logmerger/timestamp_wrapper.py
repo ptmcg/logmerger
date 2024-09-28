@@ -205,7 +205,7 @@ class YMDHMSZ(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DD HH:MM:SS"
     timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\s?(?:Z|[+-]\d{4})"
     pattern = fr"(({timestamp_pattern})\s)"
-    strptime_format = datetime.fromisoformat
+    strptime_format = lambda _, s: datetime.strptime(s, "%Y-%m-%d %H:%M:%S%z")
     has_timezone = True
 
     def __init__(self):

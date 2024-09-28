@@ -7,10 +7,13 @@ local_time = datetime.now().astimezone()
 local_tz = local_time.tzinfo
 
 
-def _test_timestamp_format_parsing(string_date: str, expected_datetime: datetime):
+def _test_timestamp_format_parsing(string_date: str, expected_transformer_class_name: str, expected_datetime: datetime) -> None:
     transformer = TimestampedLineTransformer.make_transformer_from_sample_line(
         string_date
     )
+
+    # assert that we got the expected transformer
+    assert type(transformer).__name__ == expected_transformer_class_name
 
     try:
         parsed_datetime, _ = transformer(string_date)
@@ -62,12 +65,12 @@ def _test_timestamp_format_parsing(string_date: str, expected_datetime: datetime
         ),
         (
             "YMDHMSZ",
-            "2023-07-14T08:00:01Z Log",
+            "2023-07-14 08:00:01Z Log",
             datetime(2023, 7, 14, 8, 0, 1, tzinfo=timezone.utc),
         ),
         (
             "YMDHMSZ",
-            "2023-07-14T08:00:01+0200 Log",
+            "2023-07-14 08:00:01+0200 Log",
             datetime(2023, 7, 14, 8, 0, 1, tzinfo=timezone(timedelta(hours=2))),
         ),
         (
@@ -154,4 +157,4 @@ def _test_timestamp_format_parsing(string_date: str, expected_datetime: datetime
     ],
 )
 def test_timestamp_format_parsing(tz_class: str, string_date: str, expected_datetime: datetime):
-    _test_timestamp_format_parsing(string_date, expected_datetime)
+    _test_timestamp_format_parsing(string_date, tz_class, expected_datetime)
