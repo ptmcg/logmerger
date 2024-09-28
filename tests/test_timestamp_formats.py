@@ -1,9 +1,22 @@
+from pprint import pprint
 import pytest
+
 from datetime import datetime, timezone, timedelta
 from logmerger.timestamp_wrapper import TimestampedLineTransformer
 
 local_time = datetime.now().astimezone()
 local_tz = local_time.tzinfo
+
+def _test_timestamp_format_parsing(string_date, expected_datetime):
+    transformer = TimestampedLineTransformer.make_transformer_from_sample_line(
+        string_date
+    )
+
+    parsed_datetime, _ = transformer(string_date)
+    parsed_datetime = parsed_datetime.astimezone(timezone.utc)
+    pprint(parsed_datetime, width=200)
+    pprint(expected_datetime, width=200)
+    assert parsed_datetime == expected_datetime
 
 
 @pytest.mark.parametrize(
@@ -50,13 +63,5 @@ local_tz = local_time.tzinfo
         ),
     ],
 )
-def test_make_transformer_from_sample_line(string_date, expected_datetime):
-    transformer = TimestampedLineTransformer.make_transformer_from_sample_line(
-        string_date
-    )
-
-    parsed_datetime, _ = transformer(string_date)
-
-    parsed_datetime = parsed_datetime.astimezone(timezone.utc)
-
-    assert parsed_datetime == expected_datetime
+def test_timestamp_format_parsing(string_date, expected_datetime):
+    _test_timestamp_format_parsing(string_date, expected_datetime)
