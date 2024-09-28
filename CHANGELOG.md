@@ -4,6 +4,7 @@
 
 - Added `--ignore_non_timestamped` command-line option, to discard any log lines that do not
   have a timestamp. (Issue #42)
+- Added support for Apache Log timestamp format `[Fri Dec 01 00:00:25.933177 2023]`. (Issue #36)
 
 ### Fixed
 

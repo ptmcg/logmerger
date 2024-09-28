@@ -386,6 +386,34 @@ class SecondsSinceEpoch(TimestampedLineTransformer):
         super().__init__(self.pattern, lambda s: datetime.fromtimestamp(int(s)))
 
 
+class ApacheLogFormat(TimestampedLineTransformer):
+    # log files with timestamp "[Fri Dec 01 00:00:25.933177 2023]"
+    timestamp_pattern = (
+        r"\[(\w{3}) (?P<monthname>\w{3}) (?P<day>\d{2})"
+        r" (?P<hour>\d{2}):(?P<minute>\d{2}):(?P<second>\d{2})\.(?P<usecond>\d{0,6})"
+        r" (?P<year>\d{4})]"
+    )
+    pattern = fr"(({timestamp_pattern})\s)"
+    compiled_ts_pattern = re.compile(timestamp_pattern)
+
+    @staticmethod
+    def convert_to_datetime(s) -> datetime:
+        mm = ApacheLogFormat.compiled_ts_pattern.match(s)
+
+        # Convert the month abbreviation to a number
+        month_number = datetime.strptime(mm["monthname"], "%b").month
+
+        # Construct a datetime object
+        return datetime.strptime(
+            f"{mm['year']}-{month_number}-{mm['day']}"
+            f" {mm['hour']}:{mm['minute']}:{mm['second']}.{mm['usecond']}",
+            "%Y-%m-%d %H:%M:%S.%f"
+        )
+
+    def __init__(self):
+        super().__init__(self.pattern, self.convert_to_datetime)
+
+
 if __name__ == '__main__':
     files = "log1.txt log3.txt syslog1.txt".split()
     file_dir = Path(__file__).parent.parent / "files"

@@ -22,7 +22,9 @@ def _test_timestamp_format_parsing(string_date: str, expected_transformer_class_
             f"failed to parse {string_date!r} with transformer {type(transformer).__name__}"
         ) from ve
 
-    parsed_datetime = parsed_datetime.astimezone(timezone.utc)
+    # convert naive datetimes to UTC for test comparison
+    if parsed_datetime.tzinfo is None:
+        parsed_datetime = parsed_datetime.replace(tzinfo=local_tz).astimezone(timezone.utc)
     print(repr(string_date))
     print(type(transformer).__name__)
     print("Parsed time  :", parsed_datetime)
@@ -153,6 +155,11 @@ def _test_timestamp_format_parsing(string_date: str, expected_transformer_class_
             "SecondsSinceEpoch",
             "1694561169 Log",
             datetime.fromtimestamp(1694561169, tz=timezone.utc),
+        ),
+        (
+            "ApacheLogFormat",
+            "[Fri Dec 01 00:00:25.933177 2023] Log",
+            datetime(2023, 12, 1, 0, 0, 25, 933177, tzinfo=local_tz),
         ),
     ],
 )
