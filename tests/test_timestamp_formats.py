@@ -6,7 +6,8 @@ from logmerger.timestamp_wrapper import TimestampedLineTransformer
 local_time = datetime.now().astimezone()
 local_tz = local_time.tzinfo
 
-def _test_timestamp_format_parsing(string_date, expected_datetime):
+
+def _test_timestamp_format_parsing(string_date: str, expected_datetime: datetime):
     transformer = TimestampedLineTransformer.make_transformer_from_sample_line(
         string_date
     )
@@ -63,5 +64,5 @@ def _test_timestamp_format_parsing(string_date, expected_datetime):
         ),
     ],
 )
-def test_timestamp_format_parsing(string_date, expected_datetime):
+def test_timestamp_format_parsing(string_date: str, expected_datetime: datetime):
     _test_timestamp_format_parsing(string_date, expected_datetime)
