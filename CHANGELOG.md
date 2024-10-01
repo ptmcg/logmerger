@@ -1,10 +1,13 @@
-## [0.10.0] - in development
+## [0.10.0] - 2024-09-30
+
+### [Changelog][0.10.0-changes]
 
 ### Added
 
 - Added `--ignore_non_timestamped` command-line option, to discard any log lines that do not
   have a timestamp. (Issue #42)
 - Added support for Apache Log timestamp format `[Fri Dec 01 00:00:25.933177 2023]`. (Issue #36)
+- CI automated unit tests across all supported Python versions (3.9-3.13).
 
 ### Fixed
 
@@ -154,6 +157,7 @@
 - Interactive browser will use the screen width by default, or accept a command-line argument.
 
 
+[0.10.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.10.0
 [0.9.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.9.0
 [0.8.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.8.0
 [0.7.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.7.0
@@ -165,6 +169,7 @@
 [0.2.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.2.0
 [0.1.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.1.0
 
+[0.10.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.9.0...v0.10.0
 [0.9.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.8.0...v0.9.0
 [0.8.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.7.0...v0.8.0
 [0.7.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.6.0...v0.7.0
