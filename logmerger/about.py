@@ -1,4 +1,7 @@
-text = r"""
+VERSION = "0.11.0"
+RELEASE_YEAR = "2024"
+
+text = fr"""
 # logmerger
 
 The `logmerger` utility provides a view of one or more log files, merged by timestamps found in those files. It is 
@@ -152,9 +155,9 @@ Here are some example log lines and suggested format templates:
 
 ## About logmerger
 
-logmerger version 0.10.0
+logmerger version {VERSION}
 
-by Paul McGuire, 2024
+by Paul McGuire, {RELEASE_YEAR}
 
 MIT License
 
