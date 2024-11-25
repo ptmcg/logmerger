@@ -1,4 +1,4 @@
-VERSION = "0.11.0"
+VERSION = "0.10.1"
 RELEASE_YEAR = "2024"
 
 text = fr"""

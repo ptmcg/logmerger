@@ -1,4 +1,13 @@
-## [0.11.0] - in development
+## [0.10.1] - in development
+
+### Added
+
+- New release of the textual package added support for Ctrl-p to select from
+  a list of color palettes.
+
+### Fixed
+
+- Fixed bug when canceling from Jump, Go to line, and Go to timestamp dialogs.
 
 
 ## [0.10.0] - 2024-09-30

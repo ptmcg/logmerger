@@ -364,6 +364,9 @@ class InteractiveLogMergeViewerApp(App):
         dt_widget.move_cursor(row=line_number, animate=False)
 
     def move_cursor_to_line_number_1_based(self, line_number_str: str) -> None:
+        if not line_number_str:
+            return
+
         # convert 1-based line number to 0-based
         line_number = int(line_number_str) - 1
         self.move_cursor_to_line_number(line_number)
@@ -383,6 +386,9 @@ class InteractiveLogMergeViewerApp(App):
         )
 
     def move_cursor_to_timestamp(self, timestamp_str: str) -> None:
+        if not timestamp_str:
+            return
+
         self.current_goto_timestamp_string = timestamp_str
 
         # normalize input string to timestamps in merged log lines table
@@ -433,6 +439,9 @@ class InteractiveLogMergeViewerApp(App):
                 self.app.bell()
 
     def save_jump_and_jump(self, s: str):
+        if not s:
+            return
+
         new_jump = Jump.from_string(s)
         if new_jump is None:
             self.app.bell()
