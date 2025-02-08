@@ -3,6 +3,9 @@ from __future__ import annotations
 import abc
 import operator
 import types
+from typing import Any
+
+from logmerger.timestamp_wrapper import TimestampedLineTransformer
 
 
 class FileReader(abc.ABC):
@@ -250,6 +253,47 @@ class CsvFileReader(FileReader):
             f'{ts} {" ".join(f"{hdr}={value}" for hdr, value in zip(headers, values))}'
             for ts, *values in reader_guard(reader)
         )
+
+    def _close_reader(self):
+        self._close_obj.close()
+
+
+class JsonLFileReader(FileReader):
+    @classmethod
+    def _can_read(cls, fname: str) -> bool:
+        return fname.endswith(".jsonl")
+
+    def __init__(self, fname: str, encoding: str):
+        super().__init__(fname, encoding)
+        self._close_obj = open(fname, encoding=encoding, newline='')
+
+        self._iter = self.iter_file()
+
+    @staticmethod
+    def _find_dt_col(d: dict[str, Any], previous_key: str | None):
+        if previous_key is not None:
+            value = d.get(previous_key)
+            if value is not None:
+                return previous_key, value
+        for key, val in d.items():
+            try:
+                tt = TimestampedLineTransformer.make_transformer_from_sample_line(val + " ")
+                print(tt)
+            except ValueError:
+                continue
+            return key, val
+        raise ValueError("Could not find timestamp in the line")
+
+
+    def iter_file(self):
+        import json
+        time_key = None
+        for row in self._close_obj:
+            d: dict = json.loads(row)
+            time_key, timestamp_entry = self._find_dt_col(d, time_key)
+            s = "\n".join([f"{key}: {value}" for key, value in d.items() if key != time_key])
+
+            yield f"{timestamp_entry} {s}"
 
     def _close_reader(self):
         self._close_obj.close()
