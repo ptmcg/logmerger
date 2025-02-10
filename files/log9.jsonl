@@ -1,0 +1,12 @@
+{"level": "WARN", "LOG_TIME": "2023-07-14 08:00:01", "message":"Connection lost due to timeout"}
+{"level": "CRITICAL", "LOG_TIME": "2023-07-14 08:00:04", "message": "Request processed unsuccessfully", "stacktrace": "Something went wrong\nTraceback (last line is latest):\n    sample.py: line 32\n        divide(100, 0)\n    sample.py: line 8\n        return a / b\nZeroDivisionError: division by zero"}
+{"level": "INFO", "LOG_TIME": "2023-07-14 08:00:06", "message": "User authentication failed"}
+{"level": "DEBUG", "LOG_TIME": "2023-07-14 08:00:08", "message": "Starting data synchronization"}
+{"level": "INFO", "LOG_TIME": "2023-07-14 08:00:11", "message": "Processing incoming request"}
+{"level": "INFO", "LOG_TIME": "2023-07-14 08:00:11", "message": "Processing incoming request (a little more...)"}
+{"level": "DEBUG", "LOG_TIME": "2023-07-14 08:00:14", "message": "Performing database backup"}
+{"level": "WARN", "LOG_TIME": "2023-07-14 08:00:16", "message": "Invalid input received: missing required field"}
+{"level": "ERROR", "LOG_TIME": "2023-07-14 08:00:19", "message": "Failed to connect to remote server"}
+{"level": "INFO", "LOG_TIME": "2023-07-14 08:00:22", "message": "Sending email notification"}
+{"level": "WARN", "LOG_TIME": "2023-07-14 08:00:25", "message": "Slow response time detected"}
+{"level": "INFO", "LOG_TIME": "2023-07-14 08:00:27", "message": "Data synchronization completed"}
