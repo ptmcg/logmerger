@@ -272,7 +272,7 @@ class JsonLFileReader(FileReader):
     @staticmethod
     def _find_dt_col(d: dict[str, Any], previous_key: str | None)-> tuple[str, Any]:
         if previous_key is not None:
-            value = d.get(previous_key)
+            value = d.get(previous_key, "")
             return previous_key, value
         for key, val in d.items():
             try:
