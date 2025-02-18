@@ -273,8 +273,7 @@ class JsonLFileReader(FileReader):
     def _find_dt_col(d: dict[str, Any], previous_key: str | None)-> tuple[str, Any]:
         if previous_key is not None:
             value = d.get(previous_key)
-            if value is not None:
-                return previous_key, value
+            return previous_key, value
         for key, val in d.items():
             try:
                 tt = TimestampedLineTransformer.make_transformer_from_sample_line(str(val) + " ")
