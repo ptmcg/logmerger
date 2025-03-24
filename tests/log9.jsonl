@@ -1,0 +1,4 @@
+{"level": "WARN", "LOG_TIME": "2023-07-14 08:00:01", "message":"Connection lost due to timeout"}
+{"level": "CRITICAL", "LOG_TIME": "2023-07-14 08:00:04", "message": "Request processed unsuccessfully", "stacktrace": "Something went wrong\nTraceback (last line is latest):\n    sample.py: line 32\n        divide(100, 0)\n    sample.py: line 8\n        return a / b\nZeroDivisionError: division by zero"}
+{"level": "INFO", "LOG_TIME": "2023-07-14 08:00:06", "message": "User authentication failed"}
+{"level": "INFO", "message": "User authentication failed (again)"}
