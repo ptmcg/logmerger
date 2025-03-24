@@ -4,6 +4,7 @@
 
 - New release of the textual package added support for Ctrl-p to select from
   a list of color palettes.
+- Added support for .jsonl files, containing JSON object per-line.
 
 ### Fixed
 

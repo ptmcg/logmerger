@@ -133,6 +133,26 @@ def test_merging(log_files, expected_lines):
             ]
         ),
         (
+            "tests/log9.jsonl",
+            [
+                '2023-07-14 08:00:01.000 | level: WARN',
+                '                        | message: Connection lost due to timeout',
+                '2023-07-14 08:00:04.000 | level: CRITICAL',
+                '                        | message: Request processed unsuccessfully',
+                '                        | stacktrace: Something went wrong',
+                '                        | Traceback (last line is latest):',
+                '                        |     sample.py: line 32',
+                '                        |         divide(100, 0)',
+                '                        |     sample.py: line 8',
+                '                        |         return a / b',
+                '                        | ZeroDivisionError: division by zero',
+                '2023-07-14 08:00:06.000 | level: INFO',
+                '                        | message: User authentication failed',
+                '                        |   level: INFO',
+                '                        | message: User authentication failed (again)',
+            ]
+        ),
+        (
             "",
             [
             ]

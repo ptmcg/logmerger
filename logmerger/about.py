@@ -1,5 +1,5 @@
 VERSION = "0.10.1"
-RELEASE_YEAR = "2024"
+RELEASE_YEAR = "2025"
 
 text = fr"""
 # logmerger
@@ -96,6 +96,9 @@ that use seconds-since-epoch timestamps more human-readable.
   - (filename ending in `.gz`)
 - CSV files (timestamp is read from first data column)
   - (filename ending in `.csv`)
+- JSONL files - files containing a JSON object per-line (timestamp is read from first data column)
+  - (filename ending in `.jsonl`)\
+  - if `orjson` package is installed, uses that for JSON parsing instead of the the stdlib json module.
 - packet capture files, created using tcpdump or WireShark (experimental)
   - (filename ending in `.pcap`)
 
