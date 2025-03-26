@@ -258,7 +258,7 @@ class CsvFileReader(FileReader):
         self._close_obj.close()
 
 
-class JsonLFileReader(FileReader):
+class JsonlFileReader(FileReader):
     @classmethod
     def _can_read(cls, fname: str) -> bool:
         return fname.endswith(".jsonl")
@@ -270,7 +270,7 @@ class JsonLFileReader(FileReader):
         self._iter = self.iter_file()
 
     @staticmethod
-    def _find_dt_col(d: dict[str, Any], previous_key: str | None)-> tuple[str, Any]:
+    def _find_dt_col(d: dict[str, Any], previous_key: str | None) -> tuple[str, Any]:
         if previous_key is not None:
             value = d.get(previous_key, "")
             return previous_key, value
@@ -284,10 +284,15 @@ class JsonLFileReader(FileReader):
 
 
     def iter_file(self):
-        import json
+        try:
+            import orjson as json
+        except ImportError:
+            import json
+
+        json_loads = json.loads
         time_key = None
         for row in self._close_obj:
-            d: dict = json.loads(row)
+            d: dict = json_loads(row)
             time_key, timestamp_entry = self._find_dt_col(d, time_key)
             s = "\n".join([f"{key}: {value}" for key, value in d.items() if key != time_key])
 
