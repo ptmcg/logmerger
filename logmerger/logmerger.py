@@ -294,8 +294,18 @@ class LogMergerApplication:
         # scan input files to determine timestamp format, and create appropriate transformer for each
         readers = [FileReader.get_reader(fname, self.encoding) for fname in self.file_names]
         peek_iters, readers = zip(*[itertools.tee(rdr) for rdr in readers])
-        transformers = [TimestampedLineTransformer.make_transformer_from_sample_line(next(peek_iter))
-                        for peek_iter in peek_iters]
+
+        transformers = []
+        for peek_iter in peek_iters:
+            try:
+                transformers.append(
+                    TimestampedLineTransformer.make_transformer_from_sample_line(
+                        next(peek_iter)
+                    )
+                )
+            except StopIteration:
+                # this was an empty file, put do-nothing transformer in its place
+                transformers.append(lambda *args: None)
 
         if self.autoclip:
             clip_peek, rdr0 = itertools.tee(readers[0])

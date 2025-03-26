@@ -5,6 +5,7 @@
 - Added support for `.jsonl` files, containing JSON object per-line. If `orjson`
   package is installed, it will be used for JSON parsing, else the stdlib `json`
   package will be used.
+- Better handling of empty log files.
 - New release of the `textual` package added support for `Ctrl-p` to select from
   a list of color palettes.
 - Added support for Python 3.14.
