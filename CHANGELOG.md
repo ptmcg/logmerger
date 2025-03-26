@@ -1,10 +1,13 @@
-## [0.10.1] - in development
+## [0.11.0] - in development
 
 ### Added
 
-- New release of the textual package added support for Ctrl-p to select from
+- Added support for `.jsonl` files, containing JSON object per-line. If `orjson`
+  package is installed, it will be used for JSON parsing, else the stdlib `json`
+  package will be used.
+- New release of the `textual` package added support for `Ctrl-p` to select from
   a list of color palettes.
-- Added support for .jsonl files, containing JSON object per-line.
+- Added support for Python 3.14.
 
 ### Fixed
 

@@ -1,0 +1,59 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "logmerger"
+version = "0.11.0"
+description = "A command-line utility to display multiple log files, merged by log timestamp"
+readme = { file = "README.md", content-type = "text/markdown" }
+requires-python = ">=3.9"
+authors = [
+  { name = "Paul McGuire", email = "ptmcg.pm@gmail.com" }
+]
+maintainers = [
+  { name = "Paul McGuire", email = "ptmcg.pm@gmail.com" }
+]
+license = { text = "MIT" }
+keywords = ["logs", "merge", "timestamp", "command-line", "textual"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Information Technology",
+  "Intended Audience :: System Administrators",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: System :: Systems Administration",
+  "Topic :: Utilities",
+  "Typing :: Typed"
+]
+dependencies = [
+  "littletable>=3.0.1",
+  "rich",
+  "typing-extensions>=4.12.0; python_version >= '3.13'",
+  "textual"
+]
+
+[project.optional-dependencies]
+pcap = ["pyshark"]
+
+[project.urls]
+Source = "https://github.com/ptmcg/logmerger"
+
+[project.scripts]
+logmerger = "logmerger.logmerger:main"
+
+
+[tool.setuptools]
+package-dir = { "" = "logmerger" }
+
+[tool.setuptools.packages.find]
+where = ["logmerger"]
