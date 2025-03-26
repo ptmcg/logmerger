@@ -11,6 +11,7 @@ class WindowedSort:
     def __init__(self, window: int, seq: Iterable, *, key: Optional[Callable] = None):
         self.seq = seq
         self.key_function = key
+        self.last_line_key = None
 
         self.seq_iter = iter(seq)
 
@@ -23,6 +24,7 @@ class WindowedSort:
         for key, lines in groupby(temp, key=self.key_function):
             values_to_merge = (ll[1] for ll in lines)
             self.lookahead_buffer.append((key, reduce(add, values_to_merge)))
+            self.last_line_key = key
 
         # if the lookahead_buffer is smaller than the window, then we have already
         # read all the inbound lines - set seq_consumed flag accordingly
@@ -36,12 +38,15 @@ class WindowedSort:
             # read another line from the input
             try:
                 new_line = next(self.seq_iter)
-                if self.key_function(new_line) < self.key_function(self.lookahead_buffer[-1]):
+                new_line_key = self.key_function(new_line)
+                if self.last_line_key is None:
+                    self.last_line_key = new_line_key
+                if new_line_key <= self.last_line_key:
                     # look for any matching entry
                     matching_entry = next(
                         (
                             entry for entry in self.lookahead_buffer
-                            if self.key_function(entry) == self.key_function(new_line)
+                            if self.key_function(entry) == new_line_key
                         ),
                         None
                     )
@@ -54,6 +59,7 @@ class WindowedSort:
                         self.lookahead_buffer.sort(key=self.key_function)
                 else:
                     self.lookahead_buffer.append(new_line)
+                    self.last_line_key = new_line_key
             except StopIteration:
                 self.seq_consumed = True
 
