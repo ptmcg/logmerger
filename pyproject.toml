@@ -14,7 +14,6 @@ authors = [
 maintainers = [
   { name = "Paul McGuire", email = "ptmcg.pm@gmail.com" }
 ]
-license = { text = "MIT" }
 keywords = ["logs", "merge", "timestamp", "command-line", "textual"]
 classifiers = [
   "Development Status :: 4 - Beta",
