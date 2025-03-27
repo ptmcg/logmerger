@@ -1,5 +1,7 @@
 ## [0.11.0] - 2025-03-26
 
+### [Changelog][0.11.0-changes]
+
 ### Added
 
 - Added support for `.jsonl` files, containing JSON object per-line. If `orjson`
