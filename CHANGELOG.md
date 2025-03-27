@@ -1,4 +1,4 @@
-## [0.11.0] - in development
+## [0.11.0] - 2025-03-26
 
 ### Added
 
@@ -174,6 +174,7 @@
 - Interactive browser will use the screen width by default, or accept a command-line argument.
 
 
+[0.11.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.11.0
 [0.10.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.10.0
 [0.9.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.9.0
 [0.8.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.8.0
@@ -186,6 +187,7 @@
 [0.2.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.2.0
 [0.1.0]: https://github.com/ptmcg/log_merger/releases/tag/v0.1.0
 
+[0.11.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.10.0...v0.11.0
 [0.10.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.9.0...v0.10.0
 [0.9.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.8.0...v0.9.0
 [0.8.0-changes]: https://github.com/ptmcg/log_merger/compare/v0.7.0...v0.8.0
