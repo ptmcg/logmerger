@@ -5,7 +5,7 @@ import itertools
 import re
 import textwrap
 import time
-from typing import NamedTuple
+from typing import NamedTuple, Optional
 import types
 
 import littletable as lt
@@ -81,7 +81,7 @@ class InteractiveLogMergeViewerApp(App):
         Binding(key="p", action="find_prev", description="Prev"),
         Binding(key="l", action="goto_line", description="Go to line"),
         Binding(key="t", action="goto_timestamp", description="Go to timestamp"),
-        Binding(key="s", action="screenshot", description="Screenshot"),
+        Binding(key="s", action="take_screenshot", description="Screenshot"),
         Binding(key="h", action="help_about", description="Help/About"),
     ]
 
@@ -296,7 +296,7 @@ class InteractiveLogMergeViewerApp(App):
         dt: DataTable = self.query_one(DataTable)
         return dt.cursor_row
 
-    def get_current_cursor_timestamp(self) -> datetime:
+    def get_current_cursor_timestamp(self) -> Optional[datetime]:
         dt: DataTable = self.query_one(DataTable)
         current_rec = self.merged_log_lines_table[dt.cursor_row]
         timestamp_str = current_rec.timestamp
@@ -464,7 +464,7 @@ class InteractiveLogMergeViewerApp(App):
     # methods to support screenshotting
     #
 
-    def action_screenshot(self) -> None:
+    def action_take_screenshot(self) -> None:
         now = datetime.now()
         filename = self.app.save_screenshot(
             f"logmerger_{now:%Y%m%d_%H%M%S}_screenshot.svg"
