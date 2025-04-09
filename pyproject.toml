@@ -8,6 +8,7 @@ version = "0.11.0"
 description = "A command-line utility to display multiple log files, merged by log timestamp"
 readme = { file = "README.md", content-type = "text/markdown" }
 requires-python = ">=3.9"
+license = "MIT"
 authors = [
   { name = "Paul McGuire", email = "ptmcg.pm@gmail.com" }
 ]
