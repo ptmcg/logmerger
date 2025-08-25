@@ -51,9 +51,12 @@ Source = "https://github.com/ptmcg/logmerger"
 [project.scripts]
 logmerger = "logmerger.logmerger:main"
 
-
 [tool.setuptools]
-package-dir = { "" = "logmerger" }
+package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
-where = ["logmerger"]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+
