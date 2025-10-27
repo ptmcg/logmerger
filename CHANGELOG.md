@@ -1,3 +1,11 @@
+## [Unreleased]
+
+### Changed
+
+- logmerger 0.12 drops support for Python 3.9, as it makes use of features
+  added in Python 3.10
+
+
 ## [0.12.0] - 2025-09-06
 
 ### Fixed
