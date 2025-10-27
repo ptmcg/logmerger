@@ -5,6 +5,7 @@ from itertools import groupby, islice
 from datetime import datetime
 from typing import Any, Optional
 from operator import itemgetter
+import bisect
 
 
 class WindowedSort:
@@ -42,22 +43,19 @@ class WindowedSort:
                 if self.last_line_key is None:
                     self.last_line_key = new_line_key
                 if new_line_key <= self.last_line_key:
-                    # look for any matching entry
-                    matching_entry = next(
-                        (
-                            entry for entry in self.lookahead_buffer
-                            if self.key_function(entry) == new_line_key
-                        ),
-                        None
-                    )
-                    if matching_entry:
-                        matching_ts, matching_log_list = matching_entry
-                        new_log_ts, new_log_items = new_line
+                    # use bisect to locate matching entry or insertion point in sorted lookahead_buffer
+                    # find leftmost index where key == new_line_key could appear
+                    idx = bisect.bisect_left(self.lookahead_buffer, new_line_key, key=self.key_function)
+                    # check if a match exists at idx
+                    if idx < len(self.lookahead_buffer) and self.key_function(self.lookahead_buffer[idx]) == new_line_key:
+                        matching_ts, matching_log_list = self.lookahead_buffer[idx]
+                        _, new_log_items = new_line
                         matching_log_list.extend(new_log_items)
                     else:
-                        self.lookahead_buffer.append(new_line)
-                        self.lookahead_buffer.sort(key=self.key_function)
+                        # insert at the correct position to keep buffer sorted
+                        self.lookahead_buffer.insert(idx, new_line)
                 else:
+                    # append at end (monotonic increase), buffer remains sorted
                     self.lookahead_buffer.append(new_line)
                     self.last_line_key = new_line_key
             except StopIteration:

@@ -5,6 +5,9 @@
 - logmerger 0.12 drops support for Python 3.9, as it makes use of features
   added in Python 3.10
 
+- Changed linear search for inserting out-of-order log lines to use
+  binary search using the `bisect` module.
+
 
 ## [0.12.0] - 2025-09-06
 
