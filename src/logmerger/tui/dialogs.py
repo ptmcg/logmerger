@@ -4,7 +4,7 @@ from textual.binding import Binding
 from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
 from textual.validation import Function, Validator
-from textual.widgets import Button, Input, Label, MarkdownViewer
+from textual.widgets import Button, Input, Label, MarkdownViewer, Static, ProgressBar
 
 
 class ModalInputDialog(ModalScreen[str]):
@@ -191,3 +191,45 @@ class ModalJumpDialog(ModalInputDialog):
     """
     A modal dialog for getting a jump interval
     """
+
+class ProgressWidget(Static):
+    """A non-modal progress bar widget that appears in the lower right corner."""
+
+    DEFAULT_CSS = """
+    ProgressWidget {
+        width: 50;
+        height: auto;
+        background: $panel;
+        border: solid $primary;
+        padding: 0 1;
+        layer: overlay;
+        dock: bottom;
+        margin: 0 1 1 0;
+    }
+
+    ProgressWidget .progress-label {
+        text-align: center;
+        padding: 0;
+    }
+
+    ProgressWidget ProgressBar {
+        margin: 0;
+    }
+    """
+
+    def __init__(self, title: str, total: float = 100):
+        super().__init__()
+        self.dialog_title = title
+        self.total = total
+
+    def compose(self) -> ComposeResult:
+        yield Static(self.dialog_title, classes="progress-label")
+        yield ProgressBar(total=self.total, show_eta=True)
+
+    def update_progress(self, progress: float, message: str = None):
+        """Update the progress bar and optionally the message."""
+        progress_bar = self.query_one(ProgressBar)
+        progress_bar.update(progress=progress)
+        if message:
+            label = self.query_one(Static)
+            label.update(message)

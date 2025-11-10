@@ -16,7 +16,7 @@ from textual.binding import Binding
 from textual.validation import Integer
 from textual.widgets import DataTable, Footer, Header
 
-from logmerger.tui.dialogs import ModalInputDialog, ModalAboutDialog, ModalJumpDialog
+from logmerger.tui.dialogs import ModalInputDialog, ModalAboutDialog, ModalJumpDialog, ProgressWidget
 from logmerger.tui.validators import TimestampValidator
 
 
@@ -101,6 +101,7 @@ class InteractiveLogMergeViewerApp(App):
         self.timestamp_validator = TimestampValidator(
             timestamp_parser=partial(parse_time_using, formats=VALID_INPUT_TIME_FORMATS),
         )
+        self.quiet = kwargs.get("quiet", False)
 
     def config(
             self,
@@ -135,6 +136,7 @@ class InteractiveLogMergeViewerApp(App):
     async def load_data_side_by_side(self):
         fixed_cols = 2 if self.show_line_numbers else 1
         col_names = self.merged_log_lines_table.info()["fields"]
+        file_cols = len(col_names) - fixed_cols
 
         display_table = self.query_one(DataTable)
         display_table.cursor_type = "row"
@@ -151,47 +153,85 @@ class InteractiveLogMergeViewerApp(App):
 
         start = time.time()
 
-        line_ns: types.SimpleNamespace
-        for i, line_ns in enumerate(self.merged_log_lines_table, start=1):
-            if i % 10 == 0:
-                # give other UI tasks a chance to work
-                await asyncio.sleep(0)
-            row_values = list(vars(line_ns).values())
+        # Show progress dialog if loading many lines
+        progress_widget = None
+        total_lines = len(self.merged_log_lines_table)
+        if total_lines > 5000:
+            progress_widget = ProgressWidget("Loading logs...", total=total_lines)
 
-            # see if any text wrapping is required for this line
-            # - check each cell to see if any line in the cell exceeds width_per_file
-            # - if not, just add this row to the display_table
-            if any(len(rv_line) > width_per_file
-                   for rv in row_values
-                   for rv_line in rv.splitlines()):
-                # wrap individual cells (except never wrap the timestamp or leading line number)
-                wrapped_row_values = row_values[:fixed_cols]
-                for cell_value in row_values[fixed_cols:]:
-                    if len(cell_value) > width_per_file or "\n" in cell_value:
-                        cell_lines = (
-                            "\n ".join(textwrap.wrap(rvl, width_per_file-1))
-                            for rvl in cell_value.splitlines()
+        try:
+            if progress_widget:
+                await self.mount(progress_widget)
+
+            line_ns: types.SimpleNamespace
+            last_progress_update = 0
+            progress_update_interval = 2
+            wrapped_row_values: list[str]
+            for i, line_ns in enumerate(self.merged_log_lines_table, start=0):
+                if i % 50 == 0:
+                    # give other UI tasks a chance to work
+                    await asyncio.sleep(0)
+
+                    # Update progress
+                    if progress_widget and (now := time.time()) > last_progress_update + progress_update_interval:
+                        progress_widget.update_progress(
+                            i,
+                            f"Loading logs... {i:,}/{total_lines:,} lines\n(up to {line_ns.timestamp})"
                         )
-                        wrapped_row_values.append("\n".join(cell_lines).replace("[/", r"\[/"))
-                    else:
-                        wrapped_row_values.append(cell_value.replace("[/", r"\[/"))
-            else:
-                # no need to wrap any values in this row
-                wrapped_row_values = [rv.replace("[/", r"\[/") for rv in row_values]
+                        last_progress_update = now
 
-            display_table.add_row(
-                Text(wrapped_row_values[0], justify="right")
-                if self.show_line_numbers else wrapped_row_values[0],
-                *wrapped_row_values[1:],
-                height=_max_line_count(wrapped_row_values))
+                row_values = line_ns.__dict__.values()
+
+                # see if any text wrapping is required for this line
+                # - check each cell to see if any line in the cell exceeds width_per_file
+                # - if not, just add this row to the display_table
+                if any(len(rv_line) > width_per_file
+                       for rv in row_values
+                       for rv_line in rv.splitlines()):
+
+                    # wrap individual cells (except never wrap the timestamp or leading line number)
+                    rv_iter = iter(row_values)
+                    wrapped_row_values = [
+                        *itertools.islice(rv_iter, fixed_cols),
+                        *itertools.repeat('', file_cols)
+                    ]
+                    for file_col, cell_value in enumerate(rv_iter, start=fixed_cols):
+                        if len(cell_value) > width_per_file or "\n" in cell_value:
+                            cell_lines = [
+                                "\n ".join(textwrap.wrap(rvl, width_per_file-1))
+                                for rvl in cell_value.splitlines()
+                            ]
+                            wrapped_row_values[file_col] = ("\n".join(cell_lines).replace("[/", r"\[/"))
+                        else:
+                            wrapped_row_values[file_col] = (cell_value.replace("[/", r"\[/"))
+
+                else:
+                    # no need to wrap any values in this row
+                    wrapped_row_values = [rv.replace("[/", r"\[/") for rv in row_values]
+
+                if self.show_line_numbers:
+                    # first column is a line number, make sure it stays right justified
+                    wrapped_row_values[0] = Text(wrapped_row_values[0], justify="right")
+
+                display_table.add_row(
+                    *wrapped_row_values,
+                    height=_max_line_count(wrapped_row_values[fixed_cols:]),
+                )
+
+        finally:
+            # Close progress dialog
+            if progress_widget:
+                await progress_widget.remove()
 
         elapsed = time.time() - start
         if elapsed > 10:
-            self.bell()
-            self.notify("Log data loading complete")
+            if not self.quiet:
+                self.bell()
+            self.notify(f"Log data loading complete ({elapsed:.1f} seconds)")
 
     @work
     async def load_data_inline(self):
+        #TODO - replicate loading progress changes
         fixed_cols = 2 if self.show_line_numbers else 1
         file_names = self.merged_log_lines_table.info()["fields"]
 

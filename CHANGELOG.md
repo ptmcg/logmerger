@@ -1,5 +1,9 @@
 ## [Unreleased]
 
+### Added
+
+- Added progress indicator when loading large data files.
+
 ### Changed
 
 - logmerger 0.12 drops support for Python 3.9, as it makes use of features
