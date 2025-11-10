@@ -1,4 +1,4 @@
-"""Installs logmerger and prints help text with Python 3.9 - 3.12
+"""Installs logmerger and prints help text with Python 3.10 - 3.14
 
 Use this file with the `nox` tool to run logmerger with all specified versions
 of Python. For more information, see: https://nox.thea.codes/en/stable/
@@ -8,7 +8,7 @@ to match CLI options, so the test is more than a simple "smoke test" like it is 
 """
 import nox
 
-@nox.session(python=["3.9", "3.10", "3.11", "3.12", "3.13"])
+@nox.session(python=["3.10", "3.11", "3.12", "3.13", "3.14"])
 def smoke_test(session):
     session.install(".")
     session.run("logmerger", "-h")
