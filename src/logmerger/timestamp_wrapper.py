@@ -161,7 +161,7 @@ class TimestampedLineTransformer:
 
 class YMDHMScommaFZ(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DD HH:MM:SS,SSS<timezone>"
-    timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3,}\s?(?:Z|[+-]\d{4})"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{1,6}\s?(?:Z|[+-]\d{4})"
     pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = lambda _, s: datetime.strptime(s, "%Y-%m-%d %H:%M:%S,%f%z")
     has_timezone = True
@@ -172,7 +172,7 @@ class YMDHMScommaFZ(TimestampedLineTransformer):
 
 class YMDHMScommaF(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DD HH:MM:SS,SSS"
-    timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{3,}"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2},\d{1,6}"
     pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = lambda _, s: datetime.strptime(s, "%Y-%m-%d %H:%M:%S,%f")
 
@@ -182,7 +182,7 @@ class YMDHMScommaF(TimestampedLineTransformer):
 
 class YMDHMSdotFZ(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DD HH:MM:SS.SSS"
-    timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3,}\s?(?:Z|[+-]\d{4})"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{1,6}\s?(?:Z|[+-]\d{4})"
     pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = lambda _, s: datetime.strptime(s, "%Y-%m-%d %H:%M:%S.%f%z")
     has_timezone = True
@@ -193,7 +193,7 @@ class YMDHMSdotFZ(TimestampedLineTransformer):
 
 class YMDHMSdotF(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DD HH:MM:SS.SSS"
-    timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{3,}"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\.\d{1,6}"
     pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = lambda _, s: datetime.strptime(s, "%Y-%m-%d %H:%M:%S.%f")
 
@@ -224,7 +224,7 @@ class YMDHMS(TimestampedLineTransformer):
 
 class YMDTHMScommaFZ(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DDTHH:MM:SS,SSS"
-    timestamp_pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3,}\s?(?:Z|[+-]\d{4})"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{1,6}\s?(?:Z|[+-]\d{4})"
     pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = lambda _, s: datetime.strptime(s, "%Y-%m-%dT%H:%M:%S,%f%z")
     has_timezone = True
@@ -235,7 +235,7 @@ class YMDTHMScommaFZ(TimestampedLineTransformer):
 
 class YMDTHMScommaF(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DDTHH:MM:SS,SSS"
-    timestamp_pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{3,}"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2},\d{1,6}"
     pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = lambda _, s: datetime.strptime(s, "%Y-%m-%dT%H:%M:%S,%f")
 
@@ -245,7 +245,7 @@ class YMDTHMScommaF(TimestampedLineTransformer):
 
 class YMDTHMSdotFZ(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DDTHH:MM:SS.SSS"
-    timestamp_pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3,}\s?(?:Z|[+-]\d{4}Z?)"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,6}\s?(?:Z|[+-]\d{4}Z?)"
     pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = lambda _, s: datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f%z")
     has_timezone = True
@@ -256,7 +256,7 @@ class YMDTHMSdotFZ(TimestampedLineTransformer):
 
 class YMDTHMSdotF(TimestampedLineTransformer):
     # log files with timestamp "YYYY-MM-DDTHH:MM:SS.SSS"
-    timestamp_pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3,}"
+    timestamp_pattern = r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{1,6}"
     pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = lambda _, s: datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f")
 
@@ -310,7 +310,7 @@ class BDHMS(TimestampedLineTransformer):
 class HMSdot(TimestampedLineTransformer):
     # strace files with timestamp "hh:mm:ss.sss"
     # (note, date is omitted so let's guess from the log file's create date)
-    timestamp_pattern = r"\d{2}:\d{2}:\d{2}\.\d{3,}"
+    timestamp_pattern = r"\d{2}:\d{2}:\d{2}\.\d{1,6}"
     pattern = fr"(({timestamp_pattern})\s)"
     strptime_format = "%H:%M:%S.%f"
 

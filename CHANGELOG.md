@@ -12,6 +12,9 @@
 - Changed linear search for inserting out-of-order log lines to use
   binary search using the `bisect` module.
 
+- Timestamp parsers that matched on milliseconds with 3 decimal places only
+  now match on timestamps with 1-6 decimal places.
+
 
 ## [0.12.0] - 2025-09-06
 

@@ -22,14 +22,38 @@ def _test_timestamp_format_parsing(string_date: str, expected_transformer_class_
             f"failed to parse {string_date!r} with transformer {type(transformer).__name__}"
         ) from ve
 
-    # convert naive datetimes to UTC for test comparison
-    if parsed_datetime.tzinfo is None:
-        parsed_datetime = parsed_datetime.replace(tzinfo=local_tz).astimezone(timezone.utc)
+    # Normalize both parsed and expected datetimes to UTC to avoid DST/local offset issues
+    def _to_utc(dt: datetime) -> datetime:
+        # Convert any datetime to UTC, interpreting naive datetimes as local time
+        # at that date (respecting DST at that time).
+        import time
+        if dt.tzinfo is None:
+            # Interpret naive datetime as local time for that date using mktime (DST-aware)
+            epoch_local = time.mktime(dt.timetuple()) + dt.microsecond / 1_000_000
+            return datetime.fromtimestamp(epoch_local, tz=timezone.utc)
+        # Special case: if tzinfo looks like the local fixed-offset timezone (Windows),
+        # treat it as local wall time at that date and compute UTC via mktime.
+        try:
+            is_fixed_tz = isinstance(dt.tzinfo, type(timezone.utc))
+            same_named_local = is_fixed_tz and (dt.tzinfo.tzname(None) == local_tz.tzname(None))
+        except Exception:
+            same_named_local = False
+        if same_named_local:
+            dt_naive = dt.replace(tzinfo=None)
+            epoch_local = time.mktime(dt_naive.timetuple()) + dt_naive.microsecond / 1_000_000
+            return datetime.fromtimestamp(epoch_local, tz=timezone.utc)
+        return dt.astimezone(timezone.utc)
+
+    parsed_datetime_utc = _to_utc(parsed_datetime)
+    expected_datetime_utc = _to_utc(expected_datetime)
+
     print(repr(string_date))
     print(type(transformer).__name__)
-    print("Parsed time  :", parsed_datetime)
-    print("Expected time:", expected_datetime)
-    assert parsed_datetime == expected_datetime, f"failed to convert {string_date!r} with transformer {type(transformer).__name__}"
+    print("Raw parsed   :", parsed_datetime, "tzinfo=", parsed_datetime.tzinfo)
+    print("Raw expected :", expected_datetime, "tzinfo=", expected_datetime.tzinfo)
+    print("Parsed time  :", parsed_datetime_utc)
+    print("Expected time:", expected_datetime_utc)
+    assert parsed_datetime_utc == expected_datetime_utc, f"failed to convert {string_date!r} with transformer {type(transformer).__name__}"
 
 
 @pytest.mark.parametrize(
@@ -164,4 +188,111 @@ def _test_timestamp_format_parsing(string_date: str, expected_transformer_class_
     ],
 )
 def test_timestamp_format_parsing(tz_class: str, string_date: str, expected_datetime: datetime):
+    _test_timestamp_format_parsing(string_date, tz_class, expected_datetime)
+
+
+# Additional tests: ISO-8601 fractional seconds with 1–6 digits (comma/dot, space/T, tz/naive)
+
+def _build_fractional_cases():
+    cases = []
+    base_dt = (2023, 7, 14, 8, 0, 1)
+    # lengths 1..6
+    fracs = ["1", "12", "123", "1234", "12345", "123456"]
+
+    def micros(s: str) -> int:
+        # pad right to 6 to convert fractional seconds to microseconds
+        return int(s.ljust(6, "0"))
+
+    # Space-separated with comma
+    for f in fracs:
+        # Z
+        cases.append((
+            "YMDHMScommaFZ",
+            f"{base_dt[0]:04d}-{base_dt[1]:02d}-{base_dt[2]:02d} {base_dt[3]:02d}:{base_dt[4]:02d}:{base_dt[5]:02d},{f}Z Log",
+            datetime(*base_dt, micros(f), tzinfo=timezone.utc),
+        ))
+        # +0200
+        cases.append((
+            "YMDHMScommaFZ",
+            f"{base_dt[0]:04d}-{base_dt[1]:02d}-{base_dt[2]:02d} {base_dt[3]:02d}:{base_dt[4]:02d}:{base_dt[5]:02d},{f}+0200 Log",
+            datetime(*base_dt, micros(f), tzinfo=timezone(timedelta(hours=2))),
+        ))
+        # naive
+        cases.append((
+            "YMDHMScommaF",
+            f"{base_dt[0]:04d}-{base_dt[1]:02d}-{base_dt[2]:02d} {base_dt[3]:02d}:{base_dt[4]:02d}:{base_dt[5]:02d},{f} Log",
+            datetime(*base_dt, micros(f), tzinfo=local_tz),
+        ))
+
+    # Space-separated with dot
+    for f in fracs:
+        # Z
+        cases.append((
+            "YMDHMSdotFZ",
+            f"{base_dt[0]:04d}-{base_dt[1]:02d}-{base_dt[2]:02d} {base_dt[3]:02d}:{base_dt[4]:02d}:{base_dt[5]:02d}.{f}Z Log",
+            datetime(*base_dt, micros(f), tzinfo=timezone.utc),
+        ))
+        # +0200
+        cases.append((
+            "YMDHMSdotFZ",
+            f"{base_dt[0]:04d}-{base_dt[1]:02d}-{base_dt[2]:02d} {base_dt[3]:02d}:{base_dt[4]:02d}:{base_dt[5]:02d}.{f}+0200 Log",
+            datetime(*base_dt, micros(f), tzinfo=timezone(timedelta(hours=2))),
+        ))
+        # naive
+        cases.append((
+            "YMDHMSdotF",
+            f"{base_dt[0]:04d}-{base_dt[1]:02d}-{base_dt[2]:02d} {base_dt[3]:02d}:{base_dt[4]:02d}:{base_dt[5]:02d}.{f} Log",
+            datetime(*base_dt, micros(f), tzinfo=local_tz),
+        ))
+
+    # T-separated with comma
+    for f in fracs:
+        # Z
+        cases.append((
+            "YMDTHMScommaFZ",
+            f"{base_dt[0]:04d}-{base_dt[1]:02d}-{base_dt[2]:02d}T{base_dt[3]:02d}:{base_dt[4]:02d}:{base_dt[5]:02d},{f}Z Log",
+            datetime(*base_dt, micros(f), tzinfo=timezone.utc),
+        ))
+        # +0200
+        cases.append((
+            "YMDTHMScommaFZ",
+            f"{base_dt[0]:04d}-{base_dt[1]:02d}-{base_dt[2]:02d}T{base_dt[3]:02d}:{base_dt[4]:02d}:{base_dt[5]:02d},{f}+0200 Log",
+            datetime(*base_dt, micros(f), tzinfo=timezone(timedelta(hours=2))),
+        ))
+        # naive
+        cases.append((
+            "YMDTHMScommaF",
+            f"{base_dt[0]:04d}-{base_dt[1]:02d}-{base_dt[2]:02d}T{base_dt[3]:02d}:{base_dt[4]:02d}:{base_dt[5]:02d},{f} Log",
+            datetime(*base_dt, micros(f), tzinfo=local_tz),
+        ))
+
+    # T-separated with dot
+    for f in fracs:
+        # Z
+        cases.append((
+            "YMDTHMSdotFZ",
+            f"{base_dt[0]:04d}-{base_dt[1]:02d}-{base_dt[2]:02d}T{base_dt[3]:02d}:{base_dt[4]:02d}:{base_dt[5]:02d}.{f}Z Log",
+            datetime(*base_dt, micros(f), tzinfo=timezone.utc),
+        ))
+        # +0200
+        cases.append((
+            "YMDTHMSdotFZ",
+            f"{base_dt[0]:04d}-{base_dt[1]:02d}-{base_dt[2]:02d}T{base_dt[3]:02d}:{base_dt[4]:02d}:{base_dt[5]:02d}.{f}+0200 Log",
+            datetime(*base_dt, micros(f), tzinfo=timezone(timedelta(hours=2))),
+        ))
+        # naive
+        cases.append((
+            "YMDTHMSdotF",
+            f"{base_dt[0]:04d}-{base_dt[1]:02d}-{base_dt[2]:02d}T{base_dt[3]:02d}:{base_dt[4]:02d}:{base_dt[5]:02d}.{f} Log",
+            datetime(*base_dt, micros(f), tzinfo=local_tz),
+        ))
+
+    return cases
+
+
+_fractional_param_cases = _build_fractional_cases()
+
+
+@pytest.mark.parametrize("tz_class, string_date, expected_datetime", _fractional_param_cases)
+def test_timestamp_format_parsing_fractional(tz_class: str, string_date: str, expected_datetime: datetime):
     _test_timestamp_format_parsing(string_date, tz_class, expected_datetime)

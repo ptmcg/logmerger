@@ -170,6 +170,8 @@ use different timestamp formats until it finds a matching format for each input 
 | `strace`                          | uses HH:MM:SS.SSSSSS format with leading process id integer                                           |
 | `[Mon Jan DD HH:MM:SS.SSSS YYYY]` | Apache log format                                                                                     |
 
+`YYYY-MM-DD HH:MM:SS.SSS`-style timestamps can be given with fractional seconds from 1 to 6 digits, but will
+be truncated to milliseconds.
 
 Untimestamped log lines that contain multiple lines (such as a traceback) get combined with the previous timestamped
 line (see in the example above).

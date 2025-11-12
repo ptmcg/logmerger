@@ -26,6 +26,9 @@ standard timestamp formats, at the start of each line of the log file:
 | strace                          | uses HH:MM:SS.SSSSSS format with leading process id integer                     |
 | [Mon Jan DD HH:MM:SS.SSSS YYYY] | Apache log format                                                               |
 
+`YYYY-MM-DD HH:MM:SS.SSS`-style timestamps can be given with any precision of fractional seconds from 1 to 6 digits, but will be\
+truncated to milliseconds.
+
 For log files that do not have the timestamp at the start of the line, you can define a custom format using
 the command line option `--timestamp_format`.  See `Custom timestamp formats` below.
 
