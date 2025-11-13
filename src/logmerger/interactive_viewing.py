@@ -18,6 +18,7 @@ from textual.widgets import DataTable, Footer, Header
 
 from logmerger.tui.dialogs import ModalInputDialog, ModalAboutDialog, ModalJumpDialog, ProgressWidget
 from logmerger.tui.validators import TimestampValidator
+from logmerger.memstats import GLOBAL_MEM_STATS as _GLOBAL_MEM_STATS
 
 
 def _max_line_count(sseq: list[str]) -> int:
@@ -134,6 +135,8 @@ class InteractiveLogMergeViewerApp(App):
 
     @work
     async def load_data_side_by_side(self):
+        # Begin memory instrumentation for this method only
+        _GLOBAL_MEM_STATS.ensure_started()
         fixed_cols = 2 if self.show_line_numbers else 1
         col_names = self.merged_log_lines_table.info()["fields"]
         file_cols = len(col_names) - fixed_cols
@@ -211,11 +214,15 @@ class InteractiveLogMergeViewerApp(App):
             for i, line_ns in enumerate(self.merged_log_lines_table, start=1):
                 rows_buffer.append(make_row(line_ns))
                 if len(rows_buffer) >= BATCH:
+                    # sample memory for the display phase (building row buffers contributes to display)
+                    _GLOBAL_MEM_STATS.sample_display()
                     with self.app.batch_update():
                         for row, height in rows_buffer:
                             display_table.add_row(*row, height=height)
                             last_timestamp = row[timestamp_column]
                     rows_buffer.clear()
+                    # sample memory after rows added to DataTable (display phase)
+                    _GLOBAL_MEM_STATS.sample_display()
                     # periodic yield
                     await asyncio.sleep(0)
                     # periodic progress update
@@ -228,9 +235,14 @@ class InteractiveLogMergeViewerApp(App):
 
             # flush remainder
             if rows_buffer:
+                # sample memory for the display phase before flushing remainder
+                _GLOBAL_MEM_STATS.sample_display()
                 with self.app.batch_update():
                     for row, height in rows_buffer:
                         display_table.add_row(*row, height=height)
+                # sample memory and capture a snapshot for the display phase after flushing remainder
+                _GLOBAL_MEM_STATS.sample_display()
+                _GLOBAL_MEM_STATS.snap_display()
         finally:
             # Close progress dialog
             if progress_widget:

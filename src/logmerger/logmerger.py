@@ -22,6 +22,7 @@ from logmerger.interactive_viewing import InteractiveLogMergeViewerApp
 from logmerger.merging import Merger
 from logmerger.multiline_log_handler import MultilineLogCollapser
 from logmerger.timestamp_wrapper import TimestampedLineTransformer
+from logmerger.memstats import GLOBAL_MEM_STATS
 
 
 T = TypeVar("T")
@@ -246,7 +247,13 @@ class LogMergerApplication:
 
         # build a littletable Table for easy tabular output, and insert the dicts of merged lines
         merged_lines_table = lt.Table()
+        # --- Memory instrumentation: Phase 1 (merge) strictly covers insert_many ---
+        # Start tracemalloc (idempotent) and record peak for the merge phase.
+        GLOBAL_MEM_STATS.ensure_started()
         merged_lines_table.insert_many(merged_lines)
+        # Sample peak after insert_many (captures the peak during merge) and take optional snapshot.
+        GLOBAL_MEM_STATS.sample_merge()
+        GLOBAL_MEM_STATS.snap_merge()
 
         if self.save_to_csv:
             merged_lines_table.csv_export(self.save_to_csv)
@@ -369,7 +376,7 @@ class LogMergerApplication:
             # initialize the entry for this timestamp with empty strings for each given file
             line_dict = {
                 **initialize_row_dict(line_number, timestamp),
-                **{}.fromkeys(self.file_names, ""),
+                **dict.fromkeys(self.file_names, ""),
             }
 
             # copy from the group each file's respective logging for this timestamp, and

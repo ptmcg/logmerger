@@ -1,9 +1,9 @@
 import random
 from datetime import datetime, timedelta
 
-TARGET_SIZE_MEGABYTES = 2
+TARGET_SIZE_MEGABYTES = 10
 TARGET_SIZE = TARGET_SIZE_MEGABYTES * 1024 * 1024
-FILE_NAME = "log11.txt"
+FILE_NAME = "log14.txt"
 
 # Log messages pool
 LOG_MESSAGES = [
@@ -49,7 +49,7 @@ def generate_log_line(timestamp):
 def calculate_lines_needed():
     """Calculate approximate number of lines needed for 500MB."""
     # Average line length from log2.txt is approximately 70-80 bytes
-    avg_line_length = 75
+    avg_line_length = 60
     # target_size = 500 * 1024 * 1024  # 500MB in bytes
     return TARGET_SIZE // avg_line_length
 
