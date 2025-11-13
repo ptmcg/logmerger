@@ -19,6 +19,16 @@ from textual.widgets import DataTable, Footer, Header
 from logmerger.tui.dialogs import ModalInputDialog, ModalAboutDialog, ModalJumpDialog, ProgressWidget
 from logmerger.tui.validators import TimestampValidator
 
+try:
+    from itertools import batched
+except ImportError:
+    def batched(seq, n):
+        for i in range(0, len(seq), n):
+            yield itertools.islice(seq, i, i + n)
+
+
+_ROW_LOAD_BATCH_SIZE = 1000
+
 
 def _max_line_count(sseq: list[str]) -> int:
     """
@@ -26,6 +36,10 @@ def _max_line_count(sseq: list[str]) -> int:
     in any value, plus 1.
     """
     return max(s.count("\n") for s in sseq) + 1
+
+
+def _rich_escape(s:str) -> str:
+    return s.replace("[/", r"\[/")
 
 
 class Jump(NamedTuple):
@@ -175,20 +189,20 @@ class InteractiveLogMergeViewerApp(App):
                             "\n ".join(textwrap.wrap(rvl, width_per_file - 1))
                             for rvl in raw_cell_lines
                         ]
-                        wrapped_row_values[file_col] = ("\n".join(cell_lines).replace("[/", r"\[/"))
+                        wrapped_row_values[file_col] = _rich_escape("\n".join(cell_lines))
                     else:
-                        wrapped_row_values[file_col] = (cell_value.replace("[/", r"\[/"))
+                        wrapped_row_values[file_col] = _rich_escape(cell_value)
 
             else:
                 # no need to wrap any values in this row
-                wrapped_row_values = [rv.replace("[/", r"\[/") for rv in row_values]
+                wrapped_row_values = [_rich_escape(rv) for rv in row_values]
 
             if self.show_line_numbers:
                 # first column is a line number, make sure it stays right justified
                 wrapped_row_values[0] = Text(wrapped_row_values[0], justify="right")
 
-            row_height = _max_line_count(wrapped_row_values[fixed_cols:])
-            return wrapped_row_values, row_height
+            num_row_lines = _max_line_count(wrapped_row_values[fixed_cols:])
+            return wrapped_row_values, num_row_lines
 
 
         start = time.time()
@@ -203,34 +217,26 @@ class InteractiveLogMergeViewerApp(App):
             if progress_widget:
                 await self.mount(progress_widget)
 
-            progress_update_interval = 2
-            BATCH = 1000
-            rows_buffer = []
             last_progress_update = 0.0
+            progress_update_interval = 2
             last_timestamp = None
-            for i, line_ns in enumerate(self.merged_log_lines_table, start=1):
-                rows_buffer.append(make_row(line_ns))
-                if len(rows_buffer) >= BATCH:
-                    with self.app.batch_update():
-                        for row, height in rows_buffer:
-                            display_table.add_row(*row, height=height)
-                            last_timestamp = row[timestamp_column]
-                    rows_buffer.clear()
-                    # periodic yield
-                    await asyncio.sleep(0)
-                    # periodic progress update
-                    if progress_widget and (now := time.time()) > last_progress_update + progress_update_interval:
-                        progress_widget.update_progress(
-                            i,
-                            f"Loading logs... {i:,}/{total_lines:,} lines\n(up to {last_timestamp})"
-                        )
-                        last_progress_update = now
-
-            # flush remainder
-            if rows_buffer:
+            for batch in batched(enumerate(self.merged_log_lines_table, start=1), _ROW_LOAD_BATCH_SIZE):
                 with self.app.batch_update():
-                    for row, height in rows_buffer:
+                    for i, line_ns in batch:
+                        row, height = make_row(line_ns)
                         display_table.add_row(*row, height=height)
+                        last_timestamp = row[timestamp_column]
+
+                # periodic yield
+                await asyncio.sleep(0)
+
+                # periodic progress update
+                if progress_widget and (now := time.time()) > last_progress_update + progress_update_interval:
+                    progress_widget.update_progress(
+                        i,
+                        f"Loading logs... {i:,}/{total_lines:,} lines\n(up to {last_timestamp})"
+                    )
+                    last_progress_update = now
         finally:
             # Close progress dialog
             if progress_widget:
@@ -263,28 +269,31 @@ class InteractiveLogMergeViewerApp(App):
         screen_width = self.display_width or self.size.width
         timestamp_allowance = 25
         line_number_allowance = 8 if self.show_line_numbers else 0
+        timestamp_column = 1 if self.show_line_numbers else 0
         screen_width_for_files = screen_width - timestamp_allowance - line_number_allowance
         width_for_file_names = min(int(screen_width_for_files), max(len(fn)+1 for fn in file_names))
         width_for_content = screen_width_for_files - width_for_file_names
 
-        start = time.time()
-
-        def make_row(line_data: types.SimpleNamespace) -> tuple[list[str], int]:
-            line_ns_vars = vars(line_ns)
+        def make_row(line_data_arg: types.SimpleNamespace) -> tuple[list[str], int]:
+            line_ns_vars = vars(line_data_arg)
             fixed_values = list(line_ns_vars.values())[:fixed_cols]
             line_data = {k: v for k, v in list(line_ns_vars.items())[fixed_cols:] if v.strip()}
             line_files = list(line_data)
             line_content = list(line_data.values())
             row_values = [*fixed_values, line_files, line_content]
 
+            # get wrapped versions of each file and its content
+            wrapped_file_names = [
+                textwrap.wrap(fname, width_for_file_names - 1)
+                for fname in line_files
+            ]
+
             # wrap individual cells (except never wrap the timestamp or leading line number)
             wrapped_row_values = row_values[:fixed_cols]
 
-            # get wrapped versions of each file and its content
-            wrapped_file_names = [textwrap.wrap(fname, width_for_file_names-1) for fname in line_files]
             wrapped_file_content = [
                 (
-                    "\n".join(textwrap.wrap(content_line, width_for_content - 1))
+                    _rich_escape("\n".join(textwrap.wrap(content_line, width_for_content - 1)))
                     for content_line in content.splitlines())
                 for content in line_content
             ]
@@ -301,30 +310,48 @@ class InteractiveLogMergeViewerApp(App):
             row_merged_filecontent = "\n".join(content_lines_out)
 
             wrapped_row_values.extend((row_merged_filenames, row_merged_filecontent))
+            if self.show_line_numbers:
+                wrapped_row_values[0] = Text(wrapped_row_values[0], justify="right")
 
-            return [Text(wrapped_row_values[0], justify="right")
-                if self.show_line_numbers else wrapped_row_values[0],
-                *wrapped_row_values[1:]], _max_line_count(wrapped_row_values[fixed_cols:])
+            num_row_lines = _max_line_count(wrapped_row_values[fixed_cols:])
+            return wrapped_row_values, num_row_lines,
 
-        BATCH = 1000
-        rows_buffer = []
+        start = time.time()
 
-        line_ns: types.SimpleNamespace
-        for i, line_ns in enumerate(self.merged_log_lines_table, start=1):
-            rows_buffer.append(make_row(line_ns))
-            if len(rows_buffer) >= BATCH:
+        # Show progress dialog if loading many lines
+        progress_widget = None
+        total_lines = len(self.merged_log_lines_table)
+        if total_lines > 5000:
+            progress_widget = ProgressWidget("Loading logs...", total=total_lines)
+
+        try:
+            if progress_widget:
+                await self.mount(progress_widget)
+
+            last_progress_update = 0.0
+            progress_update_interval = 2
+            last_timestamp = None
+            line_ns: types.SimpleNamespace
+            for batch in batched(enumerate(self.merged_log_lines_table, start=1), _ROW_LOAD_BATCH_SIZE):
                 with self.app.batch_update():
-                    for row, height in rows_buffer:
+                    for i, line_ns in batch:
+                        row, height = make_row(line_ns)
                         display_table.add_row(*row, height=height)
-                rows_buffer.clear()
+                        last_timestamp = row[timestamp_column]
+
                 # periodic yield
                 await asyncio.sleep(0)
 
-        if rows_buffer:
-            with self.app.batch_update():
-                for row, height in rows_buffer:
-                    display_table.add_row(*row, height=height)
-            rows_buffer.clear()
+                if progress_widget and (now := time.time()) > last_progress_update + progress_update_interval:
+                    progress_widget.update_progress(
+                        i,
+                        f"Loading logs... {i:,}/{total_lines:,} lines\n(up to {last_timestamp})"
+                    )
+                    last_progress_update = now
+
+        finally:
+            if progress_widget:
+                await progress_widget.remove()
 
         elapsed = time.time() - start
         if elapsed > 10:
