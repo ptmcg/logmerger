@@ -148,8 +148,48 @@ class InteractiveLogMergeViewerApp(App):
         screen_width = self.display_width or self.size.width
         timestamp_allowance = 25
         line_number_allowance = 8 if self.show_line_numbers else 0
+        timestamp_column = 1 if self.show_line_numbers else 0
         screen_width_for_files = screen_width - timestamp_allowance - line_number_allowance
         width_per_file = int(screen_width_for_files * 0.9 // len(self.log_file_names))
+
+        def make_row(line_data: types.SimpleNamespace) -> tuple[list[str], int]:
+            row_values = line_data.__dict__.values()
+
+            # see if any text wrapping is required for this line
+            # - check each cell to see if any line in the cell exceeds width_per_file
+            # - if not, just add this row to the display_table
+            if any(len(rv_line) > width_per_file
+                   for rv in row_values
+                   for rv_line in rv.splitlines()):
+
+                # wrap individual cells (except never wrap the timestamp or leading line number)
+                rv_iter = iter(row_values)
+                wrapped_row_values = [
+                    *itertools.islice(rv_iter, fixed_cols),
+                    *itertools.repeat('', file_cols)
+                ]
+                for file_col, cell_value in enumerate(rv_iter, start=fixed_cols):
+                    if len(cell_value) > width_per_file or "\n" in cell_value:
+                        raw_cell_lines = cell_value.splitlines()
+                        cell_lines = [
+                            "\n ".join(textwrap.wrap(rvl, width_per_file - 1))
+                            for rvl in raw_cell_lines
+                        ]
+                        wrapped_row_values[file_col] = ("\n".join(cell_lines).replace("[/", r"\[/"))
+                    else:
+                        wrapped_row_values[file_col] = (cell_value.replace("[/", r"\[/"))
+
+            else:
+                # no need to wrap any values in this row
+                wrapped_row_values = [rv.replace("[/", r"\[/") for rv in row_values]
+
+            if self.show_line_numbers:
+                # first column is a line number, make sure it stays right justified
+                wrapped_row_values[0] = Text(wrapped_row_values[0], justify="right")
+
+            row_height = _max_line_count(wrapped_row_values[fixed_cols:])
+            return wrapped_row_values, row_height
+
 
         start = time.time()
 
@@ -163,61 +203,34 @@ class InteractiveLogMergeViewerApp(App):
             if progress_widget:
                 await self.mount(progress_widget)
 
-            line_ns: types.SimpleNamespace
-            last_progress_update = 0
             progress_update_interval = 2
-            wrapped_row_values: list[str]
-            for i, line_ns in enumerate(self.merged_log_lines_table, start=0):
-                if i % 50 == 0:
-                    # give other UI tasks a chance to work
+            BATCH = 1000
+            rows_buffer = []
+            last_progress_update = 0.0
+            last_timestamp = None
+            for i, line_ns in enumerate(self.merged_log_lines_table):
+                rows_buffer.append(make_row(line_ns))
+                if len(rows_buffer) >= BATCH:
+                    with self.app.batch_update():
+                        for row, height in rows_buffer:
+                            display_table.add_row(*row, height=height)
+                            last_timestamp = row[timestamp_column]
+                    rows_buffer.clear()
+                    # periodic yield
                     await asyncio.sleep(0)
-
-                    # Update progress
+                    # periodic progress update
                     if progress_widget and (now := time.time()) > last_progress_update + progress_update_interval:
                         progress_widget.update_progress(
                             i,
-                            f"Loading logs... {i:,}/{total_lines:,} lines\n(up to {line_ns.timestamp})"
+                            f"Loading logs... {i:,}/{total_lines:,} lines\n(up to {last_timestamp})"
                         )
                         last_progress_update = now
 
-                row_values = line_ns.__dict__.values()
-
-                # see if any text wrapping is required for this line
-                # - check each cell to see if any line in the cell exceeds width_per_file
-                # - if not, just add this row to the display_table
-                if any(len(rv_line) > width_per_file
-                       for rv in row_values
-                       for rv_line in rv.splitlines()):
-
-                    # wrap individual cells (except never wrap the timestamp or leading line number)
-                    rv_iter = iter(row_values)
-                    wrapped_row_values = [
-                        *itertools.islice(rv_iter, fixed_cols),
-                        *itertools.repeat('', file_cols)
-                    ]
-                    for file_col, cell_value in enumerate(rv_iter, start=fixed_cols):
-                        if len(cell_value) > width_per_file or "\n" in cell_value:
-                            cell_lines = [
-                                "\n ".join(textwrap.wrap(rvl, width_per_file-1))
-                                for rvl in cell_value.splitlines()
-                            ]
-                            wrapped_row_values[file_col] = ("\n".join(cell_lines).replace("[/", r"\[/"))
-                        else:
-                            wrapped_row_values[file_col] = (cell_value.replace("[/", r"\[/"))
-
-                else:
-                    # no need to wrap any values in this row
-                    wrapped_row_values = [rv.replace("[/", r"\[/") for rv in row_values]
-
-                if self.show_line_numbers:
-                    # first column is a line number, make sure it stays right justified
-                    wrapped_row_values[0] = Text(wrapped_row_values[0], justify="right")
-
-                display_table.add_row(
-                    *wrapped_row_values,
-                    height=_max_line_count(wrapped_row_values[fixed_cols:]),
-                )
-
+            # flush remainder
+            if rows_buffer:
+                with self.app.batch_update():
+                    for row, height in rows_buffer:
+                        display_table.add_row(*row, height=height)
         finally:
             # Close progress dialog
             if progress_widget:
@@ -256,12 +269,7 @@ class InteractiveLogMergeViewerApp(App):
 
         start = time.time()
 
-        line_ns: types.SimpleNamespace
-        for i, line_ns in enumerate(self.merged_log_lines_table, start=1):
-            if i % 10 == 0:
-                # give other UI tasks a chance to work
-                await asyncio.sleep(0)
-
+        def make_row(line_data: types.SimpleNamespace) -> tuple[list[str], int]:
             line_ns_vars = vars(line_ns)
             fixed_values = list(line_ns_vars.values())[:fixed_cols]
             line_data = {k: v for k, v in list(line_ns_vars.items())[fixed_cols:] if v.strip()}
@@ -281,22 +289,42 @@ class InteractiveLogMergeViewerApp(App):
                 for content in line_content
             ]
 
-            row_merged_filenames = ""
-            row_merged_filecontent = ""
-
+            # build merged columns using join (faster than repeated concatenation)
+            fname_lines_out = []
+            content_lines_out = []
             for fname, fcontent in zip(wrapped_file_names, wrapped_file_content):
                 for fname_line, fcontent_line in itertools.zip_longest(fname, fcontent, fillvalue=""):
-                    row_merged_filenames += fname_line + "\n"
-                    row_merged_filecontent += fcontent_line + "\n"
+                    fname_lines_out.append(fname_line)
+                    content_lines_out.append(fcontent_line)
+
+            row_merged_filenames = "\n".join(fname_lines_out)
+            row_merged_filecontent = "\n".join(content_lines_out)
 
             wrapped_row_values.extend((row_merged_filenames, row_merged_filecontent))
 
-            display_table.add_row(
-                Text(wrapped_row_values[0], justify="right")
+            return [Text(wrapped_row_values[0], justify="right")
                 if self.show_line_numbers else wrapped_row_values[0],
-                *wrapped_row_values[1:],
-                height=_max_line_count(wrapped_row_values),
-            )
+                *wrapped_row_values[1:]], _max_line_count(wrapped_row_values[fixed_cols:])
+
+        BATCH = 1000
+        rows_buffer = []
+
+        line_ns: types.SimpleNamespace
+        for i, line_ns in enumerate(self.merged_log_lines_table, start=1):
+            rows_buffer.append(make_row(line_ns))
+            if len(rows_buffer) >= BATCH:
+                with self.app.batch_update():
+                    for row, height in rows_buffer:
+                        display_table.add_row(*row, height=height)
+                rows_buffer.clear()
+                # periodic yield
+                await asyncio.sleep(0)
+
+        if rows_buffer:
+            with self.app.batch_update():
+                for row, height in rows_buffer:
+                    display_table.add_row(*row, height=height)
+            rows_buffer.clear()
 
         elapsed = time.time() - start
         if elapsed > 10:

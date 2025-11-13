@@ -2,12 +2,15 @@
 
 ### Added
 
-- Added progress indicator when loading large data files.
+- Added progress indicator when displaying data for large data files.
 
 ### Changed
 
-- logmerger 0.12 drops support for Python 3.9, as it makes use of features
+- logmerger 0.13 drops support for Python 3.9, as it makes use of features
   added in Python 3.10
+
+- Used batched terminal updates for displaying table data, greatly 
+  improving performance when displaying large data sets.
 
 - Changed linear search for inserting out-of-order log lines to use
   binary search using the `bisect` module.
@@ -17,6 +20,8 @@
 
 
 ## [0.12.0] - 2025-09-06
+
+### [Changelog][0.12.0-changes]
 
 ### Fixed
 
