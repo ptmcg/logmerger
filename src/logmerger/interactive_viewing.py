@@ -208,7 +208,7 @@ class InteractiveLogMergeViewerApp(App):
             rows_buffer = []
             last_progress_update = 0.0
             last_timestamp = None
-            for i, line_ns in enumerate(self.merged_log_lines_table):
+            for i, line_ns in enumerate(self.merged_log_lines_table, start=1):
                 rows_buffer.append(make_row(line_ns))
                 if len(rows_buffer) >= BATCH:
                     with self.app.batch_update():
