@@ -1,9 +1,12 @@
 import random
 from datetime import datetime, timedelta
+from pathlib import Path
+import argparse
 
-TARGET_SIZE_MEGABYTES = 2
-TARGET_SIZE = TARGET_SIZE_MEGABYTES * 1024 * 1024
-FILE_NAME = "log11.txt"
+# Defaults (can be overridden via CLI)
+DEFAULT_TARGET_SIZE_MEGABYTES = 50
+DEFAULT_FILE_NAME = "log16.txt"
+DEFAULT_OUTPUT_DIR = "."
 
 # Log messages pool
 LOG_MESSAGES = [
@@ -46,12 +49,14 @@ def generate_log_line(timestamp):
     return f"{timestamp:%Y-%m-%d %H:%M:%S} {level:<6} {message}\n"
 
 
-def calculate_lines_needed():
-    """Calculate approximate number of lines needed for 500MB."""
-    # Average line length from log2.txt is approximately 70-80 bytes
-    avg_line_length = 75
-    # target_size = 500 * 1024 * 1024  # 500MB in bytes
-    return TARGET_SIZE // avg_line_length
+def calculate_lines_needed(target_size_bytes: int) -> int:
+    """Calculate approximate number of lines needed for target size in bytes."""
+    # Compute average line length
+    avg_line_length = int(
+        sum(len(msg) for _, msg in LOG_MESSAGES) / len(LOG_MESSAGES)
+    )
+    fixed_field_length = len("2025-01-01 00:00:00 DEBUG ")
+    return target_size_bytes // (fixed_field_length + avg_line_length)
 
 
 def generate_log_file(filename, start_time, num_lines):
@@ -82,18 +87,55 @@ def generate_log_file(filename, start_time, num_lines):
     print(f"  Completed: {num_lines:,} lines")
 
 
-def main():
-    start_time = datetime(2025, 1, 1, 0, 0, 0)
-    num_lines = calculate_lines_needed()
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(
+        description="Generate a synthetic log file of approximately the specified size."
+    )
+    parser.add_argument(
+        "--size-mb",
+        type=int,
+        default=DEFAULT_TARGET_SIZE_MEGABYTES,
+        help=f"Approximate size of the generated file in megabytes (default: {DEFAULT_TARGET_SIZE_MEGABYTES}).",
+    )
+    parser.add_argument(
+        "--file-name",
+        type=str,
+        default=DEFAULT_FILE_NAME,
+        help=f"Name of the output log file (default: {DEFAULT_FILE_NAME}).",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=str,
+        default=DEFAULT_OUTPUT_DIR,
+        help="Directory where the file will be written (default: current directory).",
+    )
+    return parser.parse_args()
 
-    print(f"Target: ~{TARGET_SIZE_MEGABYTES}MB per file (~{num_lines:,} lines)")
+
+def main():
+    args = parse_args()
+
+    if args.size_mb <= 0:
+        raise SystemExit("--size-mb must be a positive integer")
+
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    output_path = output_dir / args.file_name
+
+    target_size_bytes = args.size_mb * 1024 * 1024
+
+    start_time = datetime(2025, 1, 1, 0, 0, 0)
+    num_lines = calculate_lines_needed(target_size_bytes)
+
+    print(f"Target: ~{args.size_mb}MB per file (~{num_lines:,} lines)")
     print()
 
-    # Generate first log file and collect its timestamps
+    # Generate the log file
     generate_log_file(
-        FILE_NAME,
+        str(output_path),
         start_time,
-        num_lines
+        num_lines,
     )
 
     print()
