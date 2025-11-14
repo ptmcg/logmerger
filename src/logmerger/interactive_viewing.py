@@ -449,7 +449,7 @@ class InteractiveLogMergeViewerApp(App):
 
     def action_goto_line(self) -> None:
         self.app.push_screen(
-            ModalInputDialog("Go to line:", validator=Integer(minimum=1)),
+            ModalInputDialog("Go to line:", validator=Integer(minimum=0)),
             self.move_cursor_to_line_number_1_based
         )
 
@@ -467,7 +467,9 @@ class InteractiveLogMergeViewerApp(App):
             return
 
         # convert 1-based line number to 0-based
-        line_number = int(line_number_str) - 1
+        # - if line number_str is "0", move to line 1 anyway
+        # - subtract 1 to convert to 0-based line number
+        line_number = (int(line_number_str) or 1) - 1
         self.move_cursor_to_line_number(line_number)
 
     #

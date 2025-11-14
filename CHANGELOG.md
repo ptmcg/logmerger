@@ -4,6 +4,8 @@
 
 - Added progress indicator when displaying data for large data files.
 
+- The "go to line" function now accepts 0 or 1 to go to the first line.
+
 ### Changed
 
 - logmerger 0.13 drops support for Python 3.9, as it makes use of features
@@ -11,6 +13,10 @@
 
 - Used batched terminal updates for displaying table data, greatly 
   improving performance when displaying large data sets.
+
+- Second performance improvement when displaying line numbers using the 
+  `--line_numbers` option, by pre-padding the values with spaces instead
+  of using textual's automatic column resizing.
 
 - Changed linear search for inserting out-of-order log lines to use
   binary search using the `bisect` module.
