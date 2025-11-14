@@ -9,7 +9,6 @@ from typing import NamedTuple, Optional
 import types
 
 import littletable as lt
-from rich.text import Text
 from textual import work
 from textual.app import App, ComposeResult
 from textual.binding import Binding
@@ -198,8 +197,10 @@ class InteractiveLogMergeViewerApp(App):
                 wrapped_row_values = [_rich_escape(rv) for rv in row_values]
 
             if self.show_line_numbers:
-                # first column is a line number, make sure it stays right justified
-                wrapped_row_values[0] = Text(wrapped_row_values[0], justify="right")
+                # right pad first column containing line numbers
+                max_line_num = len(self.merged_log_lines_table)
+                line_num_col_width = max(4, len(str(max_line_num)))
+                wrapped_row_values[0] = f"{wrapped_row_values[0]:>{line_num_col_width}}"
 
             num_row_lines = _max_line_count(wrapped_row_values[fixed_cols:])
             return wrapped_row_values, num_row_lines
@@ -311,7 +312,10 @@ class InteractiveLogMergeViewerApp(App):
 
             wrapped_row_values.extend((row_merged_filenames, row_merged_filecontent))
             if self.show_line_numbers:
-                wrapped_row_values[0] = Text(wrapped_row_values[0], justify="right")
+                # right pad first column containing line numbers
+                max_line_num = len(self.merged_log_lines_table)
+                line_num_col_width = max(4, len(str(max_line_num)))
+                wrapped_row_values[0] = f"{wrapped_row_values[0]:>{line_num_col_width}}"
 
             num_row_lines = _max_line_count(wrapped_row_values[fixed_cols:])
             return wrapped_row_values, num_row_lines,
