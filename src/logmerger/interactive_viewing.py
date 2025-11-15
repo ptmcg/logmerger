@@ -26,6 +26,7 @@ except ImportError:
             yield itertools.islice(seq, i, i + n)
 
 
+_LINE_COUNT_REQUIRING_PROGRESS_BAR = 10_000
 _ROW_LOAD_BATCH_SIZE = 1000
 
 
@@ -211,7 +212,7 @@ class InteractiveLogMergeViewerApp(App):
         # Show progress dialog if loading many lines
         progress_widget = None
         total_lines = len(self.merged_log_lines_table)
-        if total_lines > 5000:
+        if total_lines > _LINE_COUNT_REQUIRING_PROGRESS_BAR:
             progress_widget = ProgressWidget("Loading logs...", total=total_lines)
 
         try:
@@ -235,7 +236,7 @@ class InteractiveLogMergeViewerApp(App):
                 if progress_widget and (now := time.time()) > last_progress_update + progress_update_interval:
                     progress_widget.update_progress(
                         i,
-                        f"Loading logs... {i:,}/{total_lines:,} lines\n(up to {last_timestamp})"
+                        f"Loading logs... {i:,}/{total_lines:,} lines\n(current up to {last_timestamp})"
                     )
                     last_progress_update = now
         finally:
@@ -325,7 +326,7 @@ class InteractiveLogMergeViewerApp(App):
         # Show progress dialog if loading many lines
         progress_widget = None
         total_lines = len(self.merged_log_lines_table)
-        if total_lines > 5000:
+        if total_lines > _LINE_COUNT_REQUIRING_PROGRESS_BAR:
             progress_widget = ProgressWidget("Loading logs...", total=total_lines)
 
         try:
@@ -349,7 +350,7 @@ class InteractiveLogMergeViewerApp(App):
                 if progress_widget and (now := time.time()) > last_progress_update + progress_update_interval:
                     progress_widget.update_progress(
                         i,
-                        f"Loading logs... {i:,}/{total_lines:,} lines\n(up to {last_timestamp})"
+                        f"Loading logs... {i:,}/{total_lines:,} lines\n(current up to {last_timestamp})"
                     )
                     last_progress_update = now
 
