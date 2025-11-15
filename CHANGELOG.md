@@ -1,5 +1,10 @@
 ## [Unreleased]
 
+
+## [0.13.0] - 2025-11-15
+
+### [Changelog][0.13.0-changes]
+
 ### Added
 
 - Added progress indicator when displaying data for large data files.
