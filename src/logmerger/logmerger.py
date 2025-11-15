@@ -49,7 +49,11 @@ def make_argument_parser() -> argparse.ArgumentParser:
     # - about.py
     #
     parser = argparse.ArgumentParser(prog="logmerger", epilog=epilog_notes)
-    parser.add_argument("files", nargs="*", help="log files to be merged")
+    parser.add_argument(
+        "files",
+        nargs="*",
+        help="log files to be merged (.txt, .log, .csv, .jsonl, .log.gz, .zip, .pcap)"
+    )
     parser.add_argument(
         "--interactive", "-i",
         action="store_true",
