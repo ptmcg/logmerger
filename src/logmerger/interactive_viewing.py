@@ -1,4 +1,5 @@
 import asyncio
+import operator
 from datetime import timedelta, datetime
 from functools import partial
 import itertools
@@ -96,6 +97,7 @@ class InteractiveLogMergeViewerApp(App):
         Binding(key="l", action="goto_line", description="Go to line"),
         Binding(key="t", action="goto_timestamp", description="Go to timestamp"),
         Binding(key="s", action="take_screenshot", description="Screenshot"),
+        Binding(key="i", action="show_info", description="Info"),
         Binding(key="h", action="help_about", description="Help/About"),
     ]
 
@@ -572,6 +574,37 @@ class InteractiveLogMergeViewerApp(App):
             f"logmerger_{now:%Y%m%d_%H%M%S}_screenshot.svg"
         )
         self.notify(f"Screenshot saved to {filename}")
+
+
+    #
+    # methods to support info
+    #
+    async def _compose_info_text(self) -> str:
+        lines: list[str] = []
+
+        lines.append("Merging data from these files:")
+
+        lines.append("| File | Log entries | Time range |")
+        lines.append("|------|------------:|------------|")
+        for file_name in self.log_file_names:
+            file_times = [row for row in self.merged_log_lines_table if getattr(row, file_name, "")]
+            start_time = file_times[0].timestamp
+            end_time = file_times[-1].timestamp
+            lines.append(f"| {file_name} | {len(file_times):,} | {start_time} {end_time} |")
+
+            await asyncio.sleep(0)
+
+        start_time = self.merged_log_lines_table[0].timestamp
+        end_time = self.merged_log_lines_table[-1].timestamp
+        lines.append(f"| Overall (merged) | {len(self.merged_log_lines_table):,} | {start_time} {end_time} |")
+        return "\n".join(lines)
+
+    async def action_show_info(self) -> None:
+
+        info_text = await self._compose_info_text()
+        await self.app.push_screen(
+            ModalAboutDialog(content=info_text)
+        )
 
     #
     # methods to support help/about

@@ -4,6 +4,8 @@
 
 - Added progress indicator when displaying data for large data files.
 
+- Added "I" key binding to display information about the input log files.
+
 - The "go to line" function now accepts 0 or 1 to go to the first line.
 
 ### Changed
